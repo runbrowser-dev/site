@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RunBrowser — browser infrastructure for developers</title>
+<meta name="description" content="Hosted Chromium for Playwright, Puppeteer, and AI agents. Drop-in compatible. Coming soon.">
+<meta property="og:title" content="RunBrowser — browser infrastructure for developers">
+<meta property="og:description" content="Hosted Chromium for Playwright, Puppeteer, and AI agents. Drop-in compatible. Coming soon.">
+<meta property="og:url" content="https://runbrowser.dev">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' fill='%2300d26a' font-family='ui-monospace,monospace' font-size='28' font-weight='700'%3E%E2%96%B6%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #e8e8e8;
+    --muted: #888;
+    --accent: #00d26a;
+    --border: #1f1f1f;
+    --code-bg: #111;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+  }
+  header { margin-bottom: 56px; }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.2px;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .logo .mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: #000;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  h1 {
+    font-size: 32px;
+    line-height: 1.25;
+    margin: 0 0 20px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede {
+    font-size: 18px;
+    color: var(--muted);
+    margin: 0 0 40px;
+    max-width: 560px;
+  }
+  section { margin-bottom: 48px; }
+  h2 {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin: 0 0 16px;
+    font-weight: 500;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 0 0 16px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  pre .c { color: var(--muted); }
+  pre .a { color: var(--accent); }
+  ul.feats {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  ul.feats li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  ul.feats li:last-child { border-bottom: none; }
+  ul.feats .marker {
+    color: var(--accent);
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    flex-shrink: 0;
+    width: 20px;
+  }
+  ul.feats .label {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  ul.feats .desc {
+    color: var(--muted);
+    font-size: 14px;
+    margin-left: 8px;
+  }
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 120ms;
+  }
+  a:hover { border-bottom-color: var(--accent); }
+  .cta {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--fg);
+    font-size: 15px;
+    width: fit-content;
+    transition: border-color 120ms, background 120ms;
+  }
+  .btn:hover {
+    border-color: var(--accent);
+    background: #161616;
+  }
+  .btn.primary {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+  .btn.primary:hover {
+    background: #00b85e;
+    border-color: #00b85e;
+  }
+  footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--fg); border-bottom-color: var(--fg); }
+  @media (max-width: 480px) {
+    main { padding: 40px 20px 64px; }
+    h1 { font-size: 26px; }
+    .lede { font-size: 16px; }
+    pre { font-size: 12.5px; padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="logo" href="/" aria-label="RunBrowser">
+      <span class="mark">▶</span>
+      <span>runbrowser</span>
+    </a>
+  </header>
+
+  <section>
+    <h1>Browser infrastructure for <span class="accent">developers</span> and <span class="accent">agents</span>.</h1>
+    <p class="lede">
+      Hosted Chromium you connect to over WebSocket. Drop-in for Playwright and Puppeteer. Stable sessions for AI agents. Built without the surprise bills.
+    </p>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+<pre><span class="c">// Same code, different endpoint.</span>
+<span class="c">// No fleet to run. No Chrome to babysit.</span>
+
+import { chromium } from <span class="a">'playwright'</span>
+
+const browser = await chromium.connectOverCDP(
+  <span class="a">'wss://api.runbrowser.dev?token=YOUR_TOKEN'</span>
+)
+const page = await browser.newPage()
+await page.goto(<span class="a">'https://example.com'</span>)
+await page.screenshot({ path: <span class="a">'out.png'</span> })
+await browser.close()</pre>
+  </section>
+
+  <section>
+    <h2>What's coming</h2>
+    <ul class="feats">
+      <li><span class="marker">01</span><span><span class="label">Drop-in for Playwright &amp; Puppeteer.</span><span class="desc">One-line endpoint change.</span></span></li>
+      <li><span class="marker">02</span><span><span class="label">Stable sessions for agents.</span><span class="desc">Reconnect across LangGraph nodes.</span></span></li>
+      <li><span class="marker">03</span><span><span class="label">Structured /extract endpoint.</span><span class="desc">URL + schema in, JSON out.</span></span></li>
+      <li><span class="marker">04</span><span><span class="label">Live session viewer.</span><span class="desc">Watch your agent debug itself.</span></span></li>
+      <li><span class="marker">05</span><span><span class="label">MCP server.</span><span class="desc">Native Claude Desktop / Cursor / OpenCode.</span></span></li>
+      <li><span class="marker">06</span><span><span class="label">Per-minute billing.</span><span class="desc">No unit math. No surprise hung-session bills.</span></span></li>
+      <li><span class="marker">07</span><span><span class="label">Open Chromium image.</span><span class="desc">MIT-licensed. Self-host if you ever want to.</span></span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Today, while we build the hosted service</h2>
+    <p style="color: var(--muted); margin: 0 0 20px;">
+      We've open-sourced the Chromium image we run, with all the gotchas documented (DNS-rebind workarounds, /dev/shm sizing, font packs, init reaping, the rest). MIT-licensed. Use it commercially.
+    </p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">
+        github.com/runbrowser-dev/runbrowser →
+      </a>
+      <a class="btn primary" href="mailto:hi@runbrowser.dev?subject=Early%20access%20-%20runbrowser">
+        Email for early access →
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <span>Built in the EU. Coming soon.</span>
+    <span><a href="mailto:hi@runbrowser.dev">hi@runbrowser.dev</a></span>
+  </footer>
+</main>
+</body>
+</html>
