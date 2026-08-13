@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP server — runbrowser docs</title>
+<meta name="description" content="MCP server — runbrowser documentation.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser</span>
+  </a>
+  <a class="back" href="/">&larr; back to site</a>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Docs</span>
+    <div class="nav-links">
+        <a class="" href="/docs/quickstart.html">Quickstart</a>
+        <a class="" href="/docs/concepts.html">Concepts</a>
+        <a class="" href="/docs/api-reference.html">API reference</a>
+        <a class="active" href="/docs/mcp.html">MCP server</a>
+        <a class="" href="/docs/migrating-from-browserless.html">From Browserless</a>
+        <a class="" href="/docs/migrating-from-browserbase.html">From Browserbase</a>
+    </div>
+  </nav>
+  <main class="prose">
+<h1>MCP server</h1>
+<p>The gateway exposes an <a href="https://modelcontextprotocol.io">MCP</a> endpoint at
+<code>/mcp</code>, so any MCP-aware agent — Claude Desktop, Claude Code, Cursor,
+OpenCode, a LangGraph node — can use a real browser as a tool with no SDK
+and no glue code.</p>
+<pre><code>https://connect.runbrowser.dev/mcp     Authorization: Bearer ab_yourkey
+</code></pre>
+<p>Transport is Streamable HTTP (protocol <code>2025-06-18</code>, with <code>2025-03-26</code>
+accepted for older clients).</p>
+<h2>Connecting</h2>
+<p>Most desktop clients still launch MCP servers as subprocesses, so they
+reach a remote server through the <code>mcp-remote</code> bridge:</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;runbrowser&quot;: {
+      &quot;command&quot;: &quot;npx&quot;,
+      &quot;args&quot;: [
+        &quot;-y&quot;, &quot;mcp-remote&quot;,
+        &quot;https://connect.example.com/mcp&quot;,
+        &quot;--header&quot;, &quot;Authorization: Bearer ab_yourkey&quot;
+      ]
+    }
+  }
+}
+</code></pre>
+<p>Clients with native remote-server support (including Claude Code via
+<code>claude mcp add --transport http</code>) can point straight at the URL with the
+same header.</p>
+<p>Locally, against the dev stack, the endpoint is <code>http://localhost:3000/mcp</code>.</p>
+<h2>Tools</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Browser?</th>
+<th>What it&#39;s for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>fetch</code></td>
+<td>no</td>
+<td>Read one URL over plain HTTP. Fast, but no JavaScript runs.</td>
+</tr>
+<tr>
+<td><code>search</code></td>
+<td>no</td>
+<td>Web search: titles, URLs, snippets.</td>
+</tr>
+<tr>
+<td><code>extract</code></td>
+<td>no</td>
+<td>URL + JSON Schema → structured JSON. Renders the page first, so it handles JS-heavy sites.</td>
+</tr>
+<tr>
+<td><code>browser_navigate</code></td>
+<td>yes</td>
+<td>Open a URL in this session&#39;s persistent browser.</td>
+</tr>
+<tr>
+<td><code>browser_click</code></td>
+<td>yes</td>
+<td>Click the first element matching a CSS selector.</td>
+</tr>
+<tr>
+<td><code>browser_type</code></td>
+<td>yes</td>
+<td>Type into an element, optionally pressing Enter.</td>
+</tr>
+<tr>
+<td><code>browser_get_content</code></td>
+<td>yes</td>
+<td>Read the current page as text or HTML.</td>
+</tr>
+<tr>
+<td><code>browser_screenshot</code></td>
+<td>yes</td>
+<td>PNG of the current page.</td>
+</tr>
+<tr>
+<td><code>browser_close</code></td>
+<td>yes</td>
+<td>Release the browser and stop the meter.</td>
+</tr>
+</tbody></table>
+<p>The tool descriptions deliberately steer a model toward <code>fetch</code> /
+<code>search</code> / <code>extract</code> first. Those are stateless, fast, and don&#39;t hold a
+container; the <code>browser_*</code> family exists for the cases they can&#39;t
+handle — logging in, clicking through a flow, filling a form.</p>
+<p>Note the split inside that group: <code>fetch</code> is plain HTTP and runs no
+JavaScript, while <code>extract</code> renders the page in a real browser before
+handing it to the model. A model told otherwise will reach for <code>fetch</code> on
+a JS-heavy SPA, get an empty shell back, and conclude the site is broken.</p>
+<h2>How sessions work</h2>
+<p><code>initialize</code> returns an <code>Mcp-Session-Id</code>. Send it on every subsequent
+request; the server ties it to one browser.</p>
+<p>The browser is created <strong>lazily</strong>, on the first <code>browser_*</code> call — an
+agent that only ever calls <code>fetch</code> and <code>search</code> never starts one, and
+never pays for one. It&#39;s a normal keepAlive session from the same fleet
+customers drive directly, so per-org concurrency caps, monthly
+browser-time quotas, idle timers and metering all apply unchanged.</p>
+<p>Each tool call reattaches to that browser, acts, and parks it again. That
+is exactly the cycle a customer&#39;s own Playwright client goes through when
+it connects and disconnects, which is what keeps idle accounting honest.</p>
+<p>Three things end a browser:</p>
+<ul>
+<li><code>browser_close</code> — the polite path, and what the tool description tells
+the model to do when it&#39;s finished.</li>
+<li><code>DELETE /mcp</code> with the session header — what a well-behaved client sends
+when the user closes it.</li>
+<li>Idle timeout — the browser&#39;s own <code>MAX_KEEPALIVE_IDLE_SECONDS</code>, plus a
+30-minute sweep of MCP sessions nobody has touched.</li>
+</ul>
+<p>A gateway restart drops MCP sessions, exactly as it drops parked keepAlive
+sessions. Clients get a <code>404</code> and re-initialize, which the spec requires
+them to handle.</p>
+<h2>Errors</h2>
+<p>Two kinds, deliberately distinguished:</p>
+<ul>
+<li><strong>Protocol errors</strong> (JSON-RPC <code>error</code>) for unknown tools and malformed
+arguments — the call itself was invalid.</li>
+<li><strong>Execution failures</strong> (a result with <code>isError: true</code>) for everything
+else: no element matched the selector, quota exhausted, page wouldn&#39;t
+load. The model sees the message and can adapt, where a protocol error
+would just abort.</li>
+</ul>
+<p>Quota and concurrency rejections are phrased for a model rather than an
+operator — &quot;monthly browser-time quota exhausted (3600 of 3600 seconds
+used)&quot; rather than a bare 429.</p>
+<h2>Security notes</h2>
+<ul>
+<li>Every request is authenticated with the customer&#39;s API key, and the org
+is re-checked on each call, so revoking a key kills its MCP sessions
+immediately and a leaked session id is useless to another org.</li>
+<li>Requests carrying an <code>Origin</code> header are refused unless the origin is
+listed in <code>MCP_ALLOWED_ORIGINS</code>. Real MCP clients aren&#39;t browsers and
+don&#39;t send one; this is the spec&#39;s DNS-rebinding guard.</li>
+<li><code>GET /mcp</code> returns 405. There are no server-initiated messages, so
+there&#39;s no stream to open.</li>
+</ul>
+<h2>Testing it</h2>
+<pre><code class="language-bash">make mcp
+</code></pre>
+<p>Drives the whole surface against a running stack: initialize, <code>tools/list</code>,
+every tool, click-through navigation, a deliberate bad selector, then
+teardown.</p>
+
+    <hr>
+    <p class="foot">
+      Something wrong or missing here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+  </main>
+</div>
+</body>
+</html>

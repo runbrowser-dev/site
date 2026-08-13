@@ -4,3 +4,6 @@
 !.dev.vars.example
 .env*
 !.env.example
+
+# build tooling for the docs pages (output is pre-rendered and committed)
+node_modules

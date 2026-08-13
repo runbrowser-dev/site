@@ -1,0 +1,26 @@
+{
+  "name": "runbrowser-site",
+  "version": "1.0.0",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "docs": "node tools/build-docs.mjs",
+    "sync": "node tools/sync-docs.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/runbrowser-dev/site.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/runbrowser-dev/site/issues"
+  },
+  "homepage": "https://github.com/runbrowser-dev/site#readme",
+  "devDependencies": {
+    "marked": "^18.0.9"
+  },
+  "private": true,
+  "type": "module"
+}

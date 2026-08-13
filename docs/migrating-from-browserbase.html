@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migrating from Browserbase — runbrowser docs</title>
+<meta name="description" content="Migrating from Browserbase — runbrowser documentation.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser</span>
+  </a>
+  <a class="back" href="/">&larr; back to site</a>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Docs</span>
+    <div class="nav-links">
+        <a class="" href="/docs/quickstart.html">Quickstart</a>
+        <a class="" href="/docs/concepts.html">Concepts</a>
+        <a class="" href="/docs/api-reference.html">API reference</a>
+        <a class="" href="/docs/mcp.html">MCP server</a>
+        <a class="" href="/docs/migrating-from-browserless.html">From Browserless</a>
+        <a class="active" href="/docs/migrating-from-browserbase.html">From Browserbase</a>
+    </div>
+  </nav>
+  <main class="prose">
+<h1>Migrating from Browserbase</h1>
+<p>Browserbase gives you an SDK that creates a session and hands back a
+<code>connectUrl</code>. We give you a URL. The shapes are close enough that the
+migration is mostly deleting code.</p>
+<h2>The direct translation</h2>
+<pre><code class="language-diff">- import Browserbase from &quot;@browserbasehq/sdk&quot;;
+  import { chromium } from &quot;playwright-core&quot;;
+
+- const bb = new Browserbase({ apiKey: process.env.BROWSERBASE_API_KEY });
+- const session = await bb.sessions.create();
+- const browser = await chromium.connectOverCDP(session.connectUrl);
++ const browser = await chromium.connectOverCDP(
++   `wss://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
++ );
+
+  const context = browser.contexts()[0];
+  const page = context.pages()[0];
+</code></pre>
+<p>No SDK, no project ID, no session-create round trip. One dependency
+fewer in your <code>package.json</code>.</p>
+<p>If you <em>want</em> the create-then-connect shape — to pass a proxy without
+putting credentials in a URL, or to get a stable session — it exists:</p>
+<pre><code class="language-ts">const res = await fetch(`https://connect.runbrowser.dev/v1/sessions`, {
+  method: &#39;POST&#39;,
+  headers: { Authorization: `Bearer ${key}`, &#39;Content-Type&#39;: &#39;application/json&#39; },
+  body: JSON.stringify({ keepAlive: true, maxIdleSeconds: 600 }),
+});
+const { sessionId, connectUrl } = await res.json();
+</code></pre>
+<p>Same two-step, no SDK required.</p>
+<h2>Feature-by-feature</h2>
+<table>
+<thead>
+<tr>
+<th>Browserbase</th>
+<th>Us</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sessions.create()</code> → <code>connectUrl</code></td>
+<td>Direct connect URL, or <code>POST /v1/sessions</code></td>
+</tr>
+<tr>
+<td>Session persistence via <strong>Contexts</strong></td>
+<td><strong>Stable sessions</strong> — see below, they&#39;re different</td>
+</tr>
+<tr>
+<td>Live View</td>
+<td><a href="/docs/concepts.html#live-viewer">Live viewer</a>, signed expiring URLs</td>
+</tr>
+<tr>
+<td>Session recording / replay</td>
+<td><strong>No equivalent.</strong></td>
+</tr>
+<tr>
+<td>Stagehand</td>
+<td>Works — it connects over CDP like anything else</td>
+</tr>
+<tr>
+<td>Advanced Stealth (premium tiers)</td>
+<td>Always-on, no tier gate</td>
+</tr>
+<tr>
+<td>Bundled CAPTCHA solving</td>
+<td><code>POST /v1/captcha/solve</code>, allowance per paid plan. BYO key also works (<a href="/docs/">helper</a>)</td>
+</tr>
+<tr>
+<td>Bundled proxies</td>
+<td>BYO proxy, no markup</td>
+</tr>
+<tr>
+<td>Extensions, file uploads/downloads</td>
+<td>Via CDP, no dedicated API</td>
+</tr>
+<tr>
+<td>Multiple regions</td>
+<td>EU only (Falkenstein)</td>
+</tr>
+<tr>
+<td>Fetch, Search</td>
+<td><code>POST /v1/fetch</code>, <code>POST /v1/search</code> — comparable, separate allowance</td>
+</tr>
+<tr>
+<td>Agents, Functions, Model Gateway</td>
+<td><strong>No equivalent.</strong> We&#39;re infrastructure; the agent framework is yours.</td>
+</tr>
+</tbody></table>
+<h2>Contexts vs stable sessions — the one real difference</h2>
+<p>A Browserbase <strong>Context</strong> persists cookies, localStorage and cached auth,
+and you attach it to a <em>new</em> browser on each run. Our <strong>stable session</strong>
+keeps the actual browser alive between connects.</p>
+<p>That difference cuts both ways, and which one you want depends on what
+you&#39;re doing:</p>
+<p><strong>Contexts are better when</strong> you want to run the same logged-in identity
+across many independent, spread-out runs. A context costs nothing while
+idle, because there&#39;s no browser.</p>
+<p><strong>Stable sessions are better when</strong> you&#39;re mid-workflow — a multi-step
+form, a flow behind MFA, an agent that needs to come back to a page it was
+already on. Everything survives, including in-memory SPA state, open tabs,
+in-flight requests and scroll position, because it&#39;s the same browser.</p>
+<p><strong>The cost model differs and it matters.</strong> A parked stable session bills
+while parked; a context doesn&#39;t. If your pattern is &quot;log in, do something
+once a day&quot;, contexts are cheaper and we don&#39;t have an equivalent yet — a
+Redis-persisted context is on the list, waiting on someone asking. If your
+pattern is &quot;an agent working through a flow over minutes&quot;, stable sessions
+do something contexts can&#39;t.</p>
+<p>Be honest about which one you actually have.</p>
+<h2>Pricing</h2>
+<p>Browserbase&#39;s structure is a monthly plan plus browser-hours, with stealth
+and CAPTCHA solving gated to higher tiers. Ours is a plan plus
+browser-hours too (€0 / €19 / €99 / €499), with two structural
+differences:</p>
+<ul>
+<li><strong>Stealth isn&#39;t a tier.</strong> Free-tier browsers get the same stack as Scale.
+There&#39;s nothing to upgrade into, because our stealth is a handful of
+launch flags rather than a product SKU.</li>
+<li><strong>CAPTCHA is included, proxies are yours to buy.</strong> Managed solving comes
+out of a plan allowance rather than a per-solve markup. Proxies stay BYO
+at your provider&#39;s wholesale price — cheaper, but more setup. If you&#39;d
+rather the invoice be one line, we&#39;re the wrong choice today.</li>
+</ul>
+<p>We deliberately don&#39;t publish a &quot;cheaper by X%&quot; claim: their pricing moves,
+and per-tier comparisons depend on your mix of browser-hours, solves and
+proxy traffic. Price both against your own workload.</p>
+<p>Concurrency runs 3 / 10 / 25 / 50 across Free → Scale. Browserbase sells
+higher ceilings than that; if you genuinely need hundreds of simultaneous
+browsers, they have the fleet for it today and we don&#39;t.</p>
+<h2>What we don&#39;t have, plainly</h2>
+<ul>
+<li>No session recording or replay.</li>
+<li>No Director, no semantic actions (<code>clickByDescription</code>). Stagehand works
+against us, but the vision-based tooling is theirs.</li>
+<li>No Agents, Functions or Model Gateway. Browserbase has been growing into
+a platform; we&#39;re deliberately staying infrastructure. If you want the
+agent runtime bundled with the browser, that&#39;s them, not us.</li>
+<li>One region.</li>
+<li>No bundled proxy (CAPTCHA solving <em>is</em> included — see Pricing).</li>
+<li>Lower concurrency ceiling.</li>
+</ul>
+<p>If your product depends on any of those, stay. If you&#39;re paying premium
+tiers mostly for stealth and stable sessions, that&#39;s the trade we&#39;re built
+for.</p>
+<h2>What you get instead</h2>
+<ul>
+<li><strong>An MCP server</strong> — nine tools, no integration code. <a href="/docs/mcp.html">Details</a>.</li>
+<li><strong><code>/v1/fetch</code> and <code>/v1/search</code></strong>, billed against separate monthly
+allowances rather than browser-time, so agent loops stop burning
+browser-seconds on cheap operations. Browserbase ships Fetch and Search
+too — this isn&#39;t a capability we have and they don&#39;t. Compare the
+billing rather than the feature list: what matters is whether those
+calls draw from the same balance as your browser time.</li>
+<li><strong>EU residency</strong> by default.</li>
+<li><strong>No proprietary SDK to unpick.</strong> You connect over standard CDP, so the
+automation you write here runs anywhere that speaks it. The lock-in
+question for a browser service is whether <em>your code</em> is portable, and
+ours is. (The Chromium image our fleet runs is
+<a href="https://github.com/runbrowser-dev/runbrowser">published</a> if you want to
+match your local environment to production — the hosted service itself is
+not open source.)</li>
+</ul>
+
+    <hr>
+    <p class="foot">
+      Something wrong or missing here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+  </main>
+</div>
+</body>
+</html>

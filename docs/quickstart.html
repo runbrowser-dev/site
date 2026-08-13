@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quickstart — runbrowser docs</title>
+<meta name="description" content="Quickstart — runbrowser documentation.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser</span>
+  </a>
+  <a class="back" href="/">&larr; back to site</a>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Docs</span>
+    <div class="nav-links">
+        <a class="active" href="/docs/quickstart.html">Quickstart</a>
+        <a class="" href="/docs/concepts.html">Concepts</a>
+        <a class="" href="/docs/api-reference.html">API reference</a>
+        <a class="" href="/docs/mcp.html">MCP server</a>
+        <a class="" href="/docs/migrating-from-browserless.html">From Browserless</a>
+        <a class="" href="/docs/migrating-from-browserbase.html">From Browserbase</a>
+    </div>
+  </nav>
+  <main class="prose">
+<h1>Quickstart</h1>
+<p>Change one line in a Playwright or Puppeteer script and it runs on our
+browsers instead of yours.</p>
+<h2>1. Get a key</h2>
+<p>Sign in at <code>https://app.runbrowser.dev</code> (magic link, no password), then
+<strong>API keys → Create</strong>. The key is shown once and looks like <code>ab_…</code>.</p>
+<h2>2. Point your script at us</h2>
+<pre><code class="language-ts">import { chromium } from &#39;playwright&#39;;
+
+const browser = await chromium.connectOverCDP(
+  `https://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
+);
+const page = await browser.newPage();
+await page.goto(&#39;https://example.com&#39;);
+await page.screenshot({ path: &#39;out.png&#39; });
+await browser.close();
+</code></pre>
+<p>Puppeteer is the same idea:</p>
+<pre><code class="language-ts">import puppeteer from &#39;puppeteer-core&#39;;
+
+const browser = await puppeteer.connect({
+  browserWSEndpoint: `wss://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
+});
+</code></pre>
+<p>That&#39;s the whole migration. No SDK, no wrapper, no rewrite — your
+existing selectors, waits and assertions are unchanged.</p>
+<h2>3. Or skip the browser entirely</h2>
+<p>Half of what agents do with a browser doesn&#39;t need one. These cost no
+browser-time:</p>
+<pre><code class="language-bash"># Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
+curl -X POST https://api.runbrowser.dev/v1/fetch \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{&quot;url&quot;: &quot;https://example.com&quot;, &quot;format&quot;: &quot;markdown&quot;}&#39;
+
+# Search the web
+curl -X POST https://api.runbrowser.dev/v1/search \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{&quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 5}&#39;
+
+# Pull structured data out of a page (renders it in a real browser first)
+curl -X POST https://api.runbrowser.dev/v1/extract \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{
+    &quot;url&quot;: &quot;https://example.com&quot;,
+    &quot;schema&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: { &quot;title&quot;: {&quot;type&quot;: &quot;string&quot;} },
+      &quot;required&quot;: [&quot;title&quot;]
+    }
+  }&#39;
+</code></pre>
+<h2>4. Or give your agent the browser as a tool</h2>
+<p>If you&#39;re building with an MCP-aware agent, skip the code entirely:</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;runbrowser&quot;: {
+      &quot;command&quot;: &quot;npx&quot;,
+      &quot;args&quot;: [&quot;-y&quot;, &quot;mcp-remote&quot;, &quot;https://connect.runbrowser.dev/mcp&quot;,
+               &quot;--header&quot;, &quot;Authorization: Bearer ab_yourkey&quot;]
+    }
+  }
+}
+</code></pre>
+<p>Nine tools appear: <code>fetch</code>, <code>search</code>, <code>extract</code>, and a <code>browser_*</code> family
+that drives one persistent browser across calls. See <a href="/docs/mcp.html">mcp.md</a>.</p>
+<h2>What you&#39;re billed for</h2>
+<p><strong>Browser-time, by the second</strong> — from the moment a browser is provisioned
+to the moment it&#39;s released. Not per session, so a script that opens one
+browser and drives it for an hour costs the same as sixty scripts that
+each take a minute.</p>
+<p><code>/v1/fetch</code> and <code>/v1/search</code> are billed per call against a separate
+monthly allowance and consume no browser-time at all. <code>/v1/extract</code> uses a
+browser, so it does.</p>
+<p>The meter stops when your CDP connection closes — unless you asked for a
+<a href="/docs/concepts.html#stable-sessions">stable session</a>, which keeps the browser
+parked and <em>keeps billing</em> until it&#39;s closed or idles out. That trade is
+the point of the feature, but know that you&#39;re making it.</p>
+<h2>Next</h2>
+<ul>
+<li><a href="/docs/concepts.html">Concepts</a> — sessions, quotas, stable sessions, the viewer</li>
+<li><a href="/docs/api-reference.html">API reference</a> — every endpoint</li>
+<li><a href="/docs/migrating-from-browserless.html">Migrating from Browserless</a></li>
+<li><a href="/docs/migrating-from-browserbase.html">Migrating from Browserbase</a></li>
+</ul>
+
+    <hr>
+    <p class="foot">
+      Something wrong or missing here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+  </main>
+</div>
+</body>
+</html>
