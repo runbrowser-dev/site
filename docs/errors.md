@@ -13,7 +13,7 @@ status you got instead of guessing.
 
 `connect.runbrowser.dev` (browsers, sessions, the REST shortcuts, MCP)
 answers with **plain text**. `api.runbrowser.dev` (`/v1/fetch`,
-`/v1/search`, `/v1/extract`, `/v1/captcha/solve`) answers with **JSON**.
+`/v1/search`, `/v1/extract`) answers with **JSON**.
 
 If you write one error handler that assumes JSON everywhere, it will throw
 a parse error on the exact request that was already failing, and you'll
@@ -67,10 +67,9 @@ The short version, before the exhaustive tables.
 |---|---|---|
 | 400, 403, 413, 415 | **No** | Your request is wrong. Retrying sends the same wrong request |
 | 401 | **No** | Fix the key |
-| 402 | **No** | Your plan doesn't include this. Upgrade |
 | 404 | **No** | The session is gone. Create a new one |
 | 409 | Yes | Something else holds the session. Retry after closing it |
-| 422 | Sometimes | Model output or CAPTCHA solve failed. A retry may succeed; two won't |
+| 422 | Sometimes | The model couldn't match your schema. A retry may succeed; two won't |
 | 429 | **Yes, with backoff** — unless it's a monthly quota, which won't clear until you upgrade or the month rolls over |
 | 502, 504 | Yes, with backoff | Something upstream failed or was too slow |
 | 503 | **Yes, after 30s** | We're full. `Retry-After: 30` is on the response |
@@ -228,21 +227,6 @@ so this is the clearest case for branching on `error` rather than status.
 but the result didn't fit the shape you asked for. That is usually a
 schema problem, not a page problem. Loosen the required fields first.
 
-## /v1/captcha/solve
-
-| Status | `error` | Cause | What to do |
-|---|---|---|---|
-| 400 | `validation_failed` | Unsupported `type` | Use `recaptcha_v2`, `hcaptcha`, or `turnstile` |
-| **402** | `captcha_not_included` | **Your plan includes zero managed solves** — this is the Free tier | Upgrade, or pass your own solver key |
-| 429 | `monthly_quota_exceeded` | You had an allowance and used it | Upgrade or wait |
-| 503 | `captcha_not_configured` | Managed solving isn't enabled here | Use your own solver key |
-| **422** | `captcha_timeout` | The solver didn't finish in its window | Retry |
-| **422** | `captcha_unsolvable` | The solver couldn't clear this challenge | Try again from a residential proxy |
-| 502 | `captcha_provider_unreachable`, `captcha_provider_error` | The solving provider failed | Retry |
-
-**Failed solves are refunded** to your monthly allowance. You are not
-billed for a CAPTCHA we didn't solve.
-
 ## MCP server
 
 Two layers, and they fail differently.
@@ -359,7 +343,6 @@ timezone, not your billing date.
 | Concurrent sessions | Requests **wait ~20 seconds** for a free slot, then `429`. A short burst usually resolves itself |
 | Monthly browser-seconds | `429 monthly_quota_exceeded` with `used_seconds`/`limit_seconds` |
 | Monthly fetches, searches, extracts | `429 monthly_quota_exceeded` with `type`/`used`/`limit` |
-| Monthly CAPTCHAs | `429` if you had an allowance; `402 captcha_not_included` if your plan has none |
 | Fleet capacity | `503` with `Retry-After: 30` |
 
 The difference between `429` and `503` is worth keeping straight: `429`
@@ -372,7 +355,7 @@ both exist.
 Retry the transient things, fail fast on the rest, and always cap it.
 
 ```ts tab=TypeScript
-const TRANSIENT = new Set([408, 409, 502, 503, 504]);
+const TRANSIENT = new Set([409, 502, 503, 504]);
 
 async function call(path: string, body: unknown, attempt = 0): Promise<any> {
   const res = await fetch(`https://api.runbrowser.dev${path}`, {
@@ -407,7 +390,7 @@ async function call(path: string, body: unknown, attempt = 0): Promise<any> {
 ```python tab=Python
 import os, random, time, requests
 
-TRANSIENT = {408, 409, 502, 503, 504}
+TRANSIENT = {409, 502, 503, 504}
 API = "https://api.runbrowser.dev"
 
 

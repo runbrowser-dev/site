@@ -23,12 +23,12 @@ can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.
 
-| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract | CAPTCHAs |
-|---|---|---|---|---|---|---|---|---|
-| Free | €0 | 3 | 1 | 15 min | 1,000 | 1,000 | 25 | 0 |
-| Hobby | €19/mo | 10 | 150 | 60 min | 5,000 | 5,000 | 100 | 100 |
-| Startup | €99/mo | 25 | 600 | 180 min | 25,000 | 25,000 | 600 | 1,000 |
-| Scale | €499/mo | 50 | 2,500 | 360 min | 100,000 | 100,000 | 3,000 | 10,000 |
+| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract |
+|---|---|---|---|---|---|---|---|
+| Free | €0 | 3 | 1 | 15 min | 1,000 | 1,000 | 25 |
+| Hobby | €19/mo | 10 | 150 | 60 min | 5,000 | 5,000 | 100 |
+| Startup | €99/mo | 25 | 600 | 180 min | 25,000 | 25,000 | 600 |
+| Scale | €499/mo | 50 | 2,500 | 360 min | 100,000 | 100,000 | 3,000 |
 
 `/extract` has its own allowance because it costs twice — browser-time to
 render the page, plus LLM tokens to read it. The numbers are sized against
@@ -177,21 +177,25 @@ from your own provider instead of our markup.
 
 ## CAPTCHAs
 
-Two ways, and the helper in [examples/captcha](../examples/captcha/) does
-both:
+**We don't solve CAPTCHAs for you.** You bring your own solver key, and the
+helper in [examples/captcha](../examples/captcha/) wires it up:
 
-**Managed** (`provider: 'managed'`) solves on our provider account against
-a monthly allowance — 0 on Free, 100 on Hobby, 1,000 on Startup, 10,000 on
-Scale. No solver signup. Failed solves are refunded, because the provider
-doesn't charge us for challenges it can't clear.
+```ts
+await solveCaptcha(page, {
+  provider: 'capsolver',            // or '2captcha'
+  apiKey: process.env.CAPSOLVER_KEY!,
+});
+```
 
-**Bring your own key** (`provider: 'capsolver' | '2captcha'`) talks to that
-provider directly. It costs us nothing, so it works on every tier including
-Free, and you pay wholesale (~\$0.001/solve) instead of our allowance.
+It talks to that provider directly from your process. Your key never
+reaches us. Because it costs us nothing, it works on every tier including
+Free, and you pay wholesale (~\$0.001/solve) rather than a marked-up
+allowance — competitors bundle this at roughly \$0.02–0.05 per solve.
 
-Free tier deliberately gets no managed allowance. Every managed solve
-spends real money at the provider, and an unfunded tier that can spend it
-is an invitation.
+We used to offer managed solving on our own account and removed it. Doing
+the solve ourselves and selling it as a plan feature makes us a participant
+in circumventing an access control rather than neutral infrastructure. You
+hold the provider account and make that call; we are only the browser.
 
 Invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren't solvable
 by anyone. They score your session rather than posing a question. A

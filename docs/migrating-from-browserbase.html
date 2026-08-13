@@ -124,7 +124,7 @@ const { sessionId, connectUrl } = await res.json();">Copy</button></div><pre cla
 </tr>
 <tr>
 <td>Bundled CAPTCHA solving</td>
-<td><code>POST /v1/captcha/solve</code>, allowance per paid plan. BYO key also works (<a href="/docs/">helper</a>)</td>
+<td><strong>Not offered.</strong> BYO solver key via the <a href="/docs/">helper</a> — you pay wholesale</td>
 </tr>
 <tr>
 <td>Bundled proxies</td>
@@ -176,10 +176,10 @@ differences:</p>
 <li><strong>Stealth isn&#39;t a tier.</strong> Free-tier browsers get the same stack as Scale.
 There&#39;s nothing to upgrade into, because our stealth is a handful of
 launch flags rather than a product SKU.</li>
-<li><strong>CAPTCHA is included, proxies are yours to buy.</strong> Managed solving comes
-out of a plan allowance rather than a per-solve markup. Proxies stay BYO
-at your provider&#39;s wholesale price — cheaper, but more setup. If you&#39;d
-rather the invoice be one line, we&#39;re the wrong choice today.</li>
+<li><strong>CAPTCHAs and proxies are both yours to buy.</strong> We don&#39;t solve CAPTCHAs
+on your behalf and we don&#39;t resell proxies; you bring a key for each and
+pay wholesale. Cheaper, but more setup. If you&#39;d rather the invoice be
+one line, we&#39;re the wrong choice today.</li>
 </ul>
 <p>We deliberately don&#39;t publish a &quot;cheaper by X%&quot; claim: their pricing moves,
 and per-tier comparisons depend on your mix of browser-hours, solves and
@@ -196,7 +196,7 @@ against us, but the vision-based tooling is theirs.</li>
 a platform; we&#39;re deliberately staying infrastructure. If you want the
 agent runtime bundled with the browser, that&#39;s them, not us.</li>
 <li>One region.</li>
-<li>No bundled proxy (CAPTCHA solving <em>is</em> included — see Pricing).</li>
+<li>No bundled proxy and no bundled CAPTCHA solving — both are BYO.</li>
 <li>Lower concurrency ceiling.</li>
 </ul>
 <p>If your product depends on any of those, stay. If you&#39;re paying premium

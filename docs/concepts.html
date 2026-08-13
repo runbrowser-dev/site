@@ -77,7 +77,6 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <th>/fetch</th>
 <th>/search</th>
 <th>/extract</th>
-<th>CAPTCHAs</th>
 </tr>
 </thead>
 <tbody><tr>
@@ -89,7 +88,6 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>1,000</td>
 <td>1,000</td>
 <td>25</td>
-<td>0</td>
 </tr>
 <tr>
 <td>Hobby</td>
@@ -99,7 +97,6 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>60 min</td>
 <td>5,000</td>
 <td>5,000</td>
-<td>100</td>
 <td>100</td>
 </tr>
 <tr>
@@ -111,7 +108,6 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>25,000</td>
 <td>25,000</td>
 <td>600</td>
-<td>1,000</td>
 </tr>
 <tr>
 <td>Scale</td>
@@ -122,7 +118,6 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>100,000</td>
 <td>100,000</td>
 <td>3,000</td>
-<td>10,000</td>
 </tr>
 </tbody></table>
 </div><p><code>/extract</code> has its own allowance because it costs twice — browser-time to
@@ -244,18 +239,22 @@ refused; http/https/socks5 only) and never logged.</p>
 customer saying they&#39;d pay for it. Until then you get wholesale pricing
 from your own provider instead of our markup.</p>
 <h2 id="captchas">CAPTCHAs<a class="anchor" href="#captchas" aria-label="Link to this section">#</a></h2>
-<p>Two ways, and the helper in <a href="/docs/">examples/captcha</a> does
-both:</p>
-<p><strong>Managed</strong> (<code>provider: &#39;managed&#39;</code>) solves on our provider account against
-a monthly allowance — 0 on Free, 100 on Hobby, 1,000 on Startup, 10,000 on
-Scale. No solver signup. Failed solves are refunded, because the provider
-doesn&#39;t charge us for challenges it can&#39;t clear.</p>
-<p><strong>Bring your own key</strong> (<code>provider: &#39;capsolver&#39; | &#39;2captcha&#39;</code>) talks to that
-provider directly. It costs us nothing, so it works on every tier including
-Free, and you pay wholesale (~$0.001/solve) instead of our allowance.</p>
-<p>Free tier deliberately gets no managed allowance. Every managed solve
-spends real money at the provider, and an unfunded tier that can spend it
-is an invitation.</p>
+<p><strong>We don&#39;t solve CAPTCHAs for you.</strong> You bring your own solver key, and the
+helper in <a href="/docs/">examples/captcha</a> wires it up:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="await solveCaptcha(page, {
+  provider: 'capsolver',            // or '2captcha'
+  apiKey: process.env.CAPSOLVER_KEY!,
+});">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">await</span> <span class="token function">solveCaptcha</span><span class="token punctuation">(</span>page<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  provider<span class="token operator">:</span> <span class="token string">'capsolver'</span><span class="token punctuation">,</span>            <span class="token comment">// or '2captcha'</span>
+  apiKey<span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CAPSOLVER_KEY</span><span class="token operator">!</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div><p>It talks to that provider directly from your process. Your key never
+reaches us. Because it costs us nothing, it works on every tier including
+Free, and you pay wholesale (~$0.001/solve) rather than a marked-up
+allowance — competitors bundle this at roughly $0.02–0.05 per solve.</p>
+<p>We used to offer managed solving on our own account and removed it. Doing
+the solve ourselves and selling it as a plan feature makes us a participant
+in circumventing an access control rather than neutral infrastructure. You
+hold the provider account and make that call; we are only the browser.</p>
 <p>Invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren&#39;t solvable
 by anyone. They score your session rather than posing a question. A
 residential proxy is the answer there, and both paths tell you so instead
