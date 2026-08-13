@@ -204,5 +204,15 @@ of timing out.
 
 ## Regions
 
-EU only (Falkenstein) at launch. US is a post-revenue decision, not a
-roadmap promise.
+**One region: the EU.** Every browser, and every byte of session data, stays
+inside the European Union.
+
+We name the union rather than the datacentre on purpose. The jurisdiction is
+the part you can rely on and the part your DPA and procurement questionnaire
+actually ask about; the specific facility is an operational detail we may
+change without telling you, and a promise at that granularity would be one we
+could break by accident.
+
+Adding a second region — US or otherwise — is a post-revenue decision, not a
+roadmap promise. If you need multi-region today, we are the wrong choice and
+you should say so early.

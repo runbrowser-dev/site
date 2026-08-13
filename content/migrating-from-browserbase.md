@@ -51,7 +51,7 @@ Same two-step, no SDK required.
 | Bundled CAPTCHA solving | **Not offered.** BYO solver key via the [helper](../examples/captcha/) — you pay wholesale |
 | Bundled proxies | BYO proxy, no markup |
 | Extensions, file uploads/downloads | Via CDP, no dedicated API |
-| Multiple regions | EU only (Falkenstein) |
+| Multiple regions | EU only |
 | Fetch, Search | `POST /v1/fetch`, `POST /v1/search` — comparable, separate allowance |
 | Agents, Functions, Model Gateway | **No equivalent.** We're infrastructure; the agent framework is yours. |
 

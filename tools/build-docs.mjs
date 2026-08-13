@@ -470,7 +470,7 @@ const llms = [
   '# runbrowser',
   '',
   '> Hosted Chromium you drive over CDP with Playwright, Puppeteer, or anything else that speaks it.',
-  '> EU-hosted (Falkenstein, Germany). Sessions are billed by the second.',
+  '> Hosted entirely in the EU. Sessions are billed by the second.',
   '',
   '## Getting started',
   '',
