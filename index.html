@@ -274,6 +274,13 @@
   }
   .btn:hover .arrow { transform: translateX(3px); }
 
+  .hero-note {
+    margin: 0.9rem 0 0;
+    color: var(--muted);
+    font-size: 13.5px;
+    max-width: 52ch;
+  }
+
   /* Pricing */
   .plans {
     display: grid;
@@ -375,13 +382,28 @@
       <span class="mark"><img src="/assets/logo.svg" alt="" width="28" height="28"></span>
       <span>runbrowser</span>
     </a>
-    <span class="status" aria-label="Status: private beta"><span class="dot"></span>Private beta</span>
+    <span class="status" aria-label="Status: early access"><span class="dot"></span>Early access</span>
   </header>
 
   <section class="rise" style="animation-delay: 100ms">
     <h1>Browser infrastructure for <span class="accent">developers</span> and <span class="accent">agents</span>.</h1>
     <p class="lede">
-      Hosted Chromium you connect to over WebSocket. Drop-in for Playwright and Puppeteer. Stable sessions your agent can reconnect to. Billed per second, not per rounded-up half-minute.
+      Running your own Chrome fleet means memory leaks, zombie processes, cold
+      starts and a scaling problem you didn't want. Point your existing
+      Playwright or Puppeteer at us instead — one line changes, everything else
+      stays.
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="mailto:hi@runbrowser.dev?subject=Early%20access%20-%20runbrowser&amp;body=What%20are%20you%20automating%3F%20Roughly%20how%20many%20browser%20hours%20a%20month%3F">
+        Get early access <span class="arrow">&rarr;</span>
+      </a>
+      <a class="btn" href="#pricing">
+        See pricing <span class="arrow">&rarr;</span>
+      </a>
+    </div>
+    <p class="hero-note">
+      We're onboarding early users now. Tell us what you're automating and we'll
+      get you a key.
     </p>
   </section>
 
@@ -421,7 +443,7 @@ await browser.close()</pre>
     </ul>
   </section>
 
-  <section class="rise" style="animation-delay: 460ms">
+  <section class="rise" id="pricing" style="animation-delay: 460ms">
     <h2>Pricing</h2>
     <div class="plans">
       <div class="plan">
@@ -466,9 +488,12 @@ await browser.close()</pre>
       </div>
     </div>
     <p class="price-note">
-      Browser time is billed <b>per second</b>, floored at 10 seconds per session —
-      about <b>$0.14&ndash;0.22 an effective browser-hour</b>, and a 3-second job
-      costs 10 seconds rather than a rounded-up half minute.
+      Every plan includes CAPTCHA solving, stealth, stable sessions and the
+      live viewer — nothing here is gated to a higher tier. Browser time is
+      billed <b>per second</b>, floored at 10 seconds, which works out at about
+      <b>$0.14&ndash;0.22 an effective browser-hour</b>. Most services bill in
+      30-second blocks and round up, so a 3-second job costs you 10 seconds
+      here and half a minute there.
       A stable session left parked keeps billing until it idles out — the dashboard
       lists what's running so you can stop it. Proxies stay yours to buy at
       wholesale; we don't mark them up.
@@ -476,17 +501,15 @@ await browser.close()</pre>
   </section>
 
   <section class="rise" style="animation-delay: 560ms">
-    <h2>Start</h2>
+    <h2>Get early access</h2>
     <p class="body-copy">
-      Free tier, no card. Create a key and point your existing Playwright or
-      Puppeteer code at a new endpoint — that's usually the whole migration.
+      We're taking on early users while we finish hardening the platform. Free
+      tier at launch, no card. Tell us what you're building and roughly how much
+      browser time you need, and we'll send you a key and the docs.
     </p>
     <div class="cta">
-      <a class="btn primary" href="https://app.runbrowser.dev">
-        Start free <span class="arrow">&rarr;</span>
-      </a>
-      <a class="btn" href="https://docs.runbrowser.dev/quickstart">
-        Read the docs <span class="arrow">&rarr;</span>
+      <a class="btn primary" href="mailto:hi@runbrowser.dev?subject=Early%20access%20-%20runbrowser&amp;body=What%20are%20you%20automating%3F%20Roughly%20how%20many%20browser%20hours%20a%20month%3F">
+        Email us <span class="arrow">&rarr;</span>
       </a>
       <a class="btn" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">
         Our Chromium image <span class="arrow">&rarr;</span>
@@ -495,7 +518,7 @@ await browser.close()</pre>
   </section>
 
   <footer>
-    <span>© 2026 runbrowser · Hosted in the EU · <a href="https://app.runbrowser.dev/legal/terms">Terms</a> · <a href="https://app.runbrowser.dev/legal/privacy">Privacy</a></span>
+    <span>© 2026 runbrowser · Hosted in the EU</span>
     <span><a href="mailto:hi@runbrowser.dev">hi@runbrowser.dev</a></span>
   </footer>
 </main>
