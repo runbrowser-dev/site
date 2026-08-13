@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Errors — runbrowser docs</title>
+<meta name="description" content="Every status we return, what actually causes it, and what to do about it.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
+  </a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
+</header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Documentation</span>
+    <div class="nav-links">
+        <a class="" href="/docs/quickstart">Quickstart</a>
+        <a class="" href="/docs/concepts">Concepts</a>
+        <a class="" href="/docs/api-reference">API reference</a>
+        <a class="active" href="/docs/errors">Errors</a>
+        <a class="" href="/docs/mcp">MCP server</a>
+        <a class="" href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="" href="/docs/migrating-from-browserbase">From Browserbase</a>
+    </div>
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a href="/#pricing">Pricing</a>
+        <a href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
+  </nav>
+  <main class="prose">
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Errors</span></div>
+<h1 id="errors">Errors</h1>
+<p>Every status we return, what actually causes it, and what to do about it.</p>
+<p>Browser automation fails constantly and mostly not because of your code —
+pages hang, sites block you, proxies die, capacity runs out. This page
+exists so that when something breaks at 3am you can look up the exact
+status you got instead of guessing.</p>
+<h2 id="the-one-thing-to-know-first">The one thing to know first<a class="anchor" href="#the-one-thing-to-know-first" aria-label="Link to this section">#</a></h2>
+<p><strong>Two services answer you, and their error bodies are not the same shape.</strong></p>
+<p><code>connect.runbrowser.dev</code> (browsers, sessions, the REST shortcuts, MCP)
+answers with <strong>plain text</strong>. <code>api.runbrowser.dev</code> (<code>/v1/fetch</code>,
+<code>/v1/search</code>, <code>/v1/extract</code>, <code>/v1/captcha/solve</code>) answers with <strong>JSON</strong>.</p>
+<p>If you write one error handler that assumes JSON everywhere, it will throw
+a parse error on the exact request that was already failing, and you&#39;ll
+debug the wrong thing. Branch on the host, or on the response&#39;s
+content type.</p>
+<div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="connect.*  →  concurrency limit reached for this org
+              (text/plain, with a trailing newline)
+
+api.*      →  { &quot;error&quot;: &quot;target_timeout&quot; }
+              (application/json)">Copy</button></div><pre class="language-"><code>connect.*  →  concurrency limit reached for this org
+              (text/plain, with a trailing newline)
+
+api.*      →  { &quot;error&quot;: &quot;target_timeout&quot; }
+              (application/json)</code></pre></div><p>There is one exception, and it is the one you are most likely to hit:
+<strong>quota rejections from <code>connect.*</code> are JSON</strong>, and they use different
+field names from the ones <code>api.*</code> uses for the same idea.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;error&quot;: &quot;monthly_quota_exceeded&quot;, &quot;used_seconds&quot;: 3600, &quot;limit_seconds&quot;: 3600 }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"error"</span><span class="token operator">:</span> <span class="token string">"monthly_quota_exceeded"</span><span class="token punctuation">,</span> <span class="token property">"used_seconds"</span><span class="token operator">:</span> <span class="token number">3600</span><span class="token punctuation">,</span> <span class="token property">"limit_seconds"</span><span class="token operator">:</span> <span class="token number">3600</span> <span class="token punctuation">}</span></code></pre></div><p>versus, from <code>api.*</code>:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;error&quot;: &quot;monthly_quota_exceeded&quot;, &quot;type&quot;: &quot;extract&quot;, &quot;used&quot;: 105, &quot;limit&quot;: 100 }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"error"</span><span class="token operator">:</span> <span class="token string">"monthly_quota_exceeded"</span><span class="token punctuation">,</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"extract"</span><span class="token punctuation">,</span> <span class="token property">"used"</span><span class="token operator">:</span> <span class="token number">105</span><span class="token punctuation">,</span> <span class="token property">"limit"</span><span class="token operator">:</span> <span class="token number">100</span> <span class="token punctuation">}</span></code></pre></div><p>We would rather tell you this than have you find it in production.</p>
+<h2 id="json-error-shapes-on-apirunbrowserdev">JSON error shapes on api.runbrowser.dev<a class="anchor" href="#json-error-shapes-on-apirunbrowserdev" aria-label="Link to this section">#</a></h2>
+<p><code>error</code> is always present and is the thing to branch on. Everything else
+is optional and you must not assume it exists.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Shape</th>
+<th>When</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Code only</td>
+<td>Most execution failures. <strong>There is no <code>message</code> key at all</strong></td>
+<td><code>{&quot;error&quot;: &quot;target_timeout&quot;}</code></td>
+</tr>
+<tr>
+<td>Code + message</td>
+<td>When there&#39;s something useful to add</td>
+<td><code>{&quot;error&quot;: &quot;schema_invalid&quot;, &quot;message&quot;: &quot;schema is not valid JSON Schema: …&quot;}</code></td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>Bad request fields, one entry per field as <code>name: reason</code></td>
+<td><code>{&quot;error&quot;: &quot;invalid_request&quot;, &quot;fields&quot;: [&quot;url: must not be blank&quot;]}</code></td>
+</tr>
+<tr>
+<td>Quota</td>
+<td>Allowance exhausted. Details are <strong>flat</strong>, not nested</td>
+<td><code>{&quot;error&quot;: &quot;monthly_quota_exceeded&quot;, &quot;type&quot;: &quot;fetch&quot;, &quot;used&quot;: 5001, &quot;limit&quot;: 5000}</code></td>
+</tr>
+</tbody></table>
+</div><p>Read <code>error</code> first. Treat <code>message</code>, <code>fields</code>, <code>type</code>, <code>used</code> and <code>limit</code>
+as all potentially absent.</p>
+<h2 id="what-to-retry-and-what-not-to">What to retry, and what not to<a class="anchor" href="#what-to-retry-and-what-not-to" aria-label="Link to this section">#</a></h2>
+<p>The short version, before the exhaustive tables.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Retry?</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400, 403, 413, 415</td>
+<td><strong>No</strong></td>
+<td>Your request is wrong. Retrying sends the same wrong request</td>
+</tr>
+<tr>
+<td>401</td>
+<td><strong>No</strong></td>
+<td>Fix the key</td>
+</tr>
+<tr>
+<td>402</td>
+<td><strong>No</strong></td>
+<td>Your plan doesn&#39;t include this. Upgrade</td>
+</tr>
+<tr>
+<td>404</td>
+<td><strong>No</strong></td>
+<td>The session is gone. Create a new one</td>
+</tr>
+<tr>
+<td>409</td>
+<td>Yes</td>
+<td>Something else holds the session. Retry after closing it</td>
+</tr>
+<tr>
+<td>422</td>
+<td>Sometimes</td>
+<td>Model output or CAPTCHA solve failed. A retry may succeed; two won&#39;t</td>
+</tr>
+<tr>
+<td>429</td>
+<td><strong>Yes, with backoff</strong> — unless it&#39;s a monthly quota, which won&#39;t clear until you upgrade or the month rolls over</td>
+<td></td>
+</tr>
+<tr>
+<td>502, 504</td>
+<td>Yes, with backoff</td>
+<td>Something upstream failed or was too slow</td>
+</tr>
+<tr>
+<td>503</td>
+<td><strong>Yes, after 30s</strong></td>
+<td>We&#39;re full. <code>Retry-After: 30</code> is on the response</td>
+</tr>
+</tbody></table>
+</div><p><strong><code>Retry-After</code> is only ever set on the fleet-capacity 503</strong>, always with
+the value <code>30</code>. We do not send it on 429, and we do not send
+<code>X-RateLimit-*</code> headers on anything. Don&#39;t build a client that depends on
+headers we don&#39;t send — use exponential backoff with jitter.</p>
+<h2 id="connecting-a-browser">Connecting a browser<a class="anchor" href="#connecting-a-browser" aria-label="Link to this section">#</a></h2>
+<p>Failures at <code>wss://connect.runbrowser.dev</code> split cleanly in two, and the
+split matters more than any individual code.</p>
+<p><strong>Before the WebSocket upgrade</strong>, you get a normal HTTP response with a
+status and a plain-text body. Playwright and Puppeteer surface this as
+<code>Unexpected server response: 429</code>. The status is the real information.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Body</th>
+<th>Cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>401</td>
+<td><code>invalid or missing token</code></td>
+<td>No key, unknown key, or one you revoked</td>
+<td>Fix the key. Revocation normally takes effect fleet-wide in ~100–150ms; if that signal is missed it clears within 5 minutes</td>
+</tr>
+<tr>
+<td>401</td>
+<td><code>stable session reattach requires bearer auth</code></td>
+<td>Reattaching to a stable session without auth</td>
+<td>Send <code>Authorization: Bearer</code> or <code>?token=</code></td>
+</tr>
+<tr>
+<td>401</td>
+<td><code>session token invalid, expired, or already used</code></td>
+<td>One-use tokens live <strong>60 seconds</strong> and work once</td>
+<td>Call <code>POST /v1/sessions</code> again and connect promptly</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>invalid proxy parameter: …</code></td>
+<td>Your proxy URL didn&#39;t validate</td>
+<td>See <a href="#proxies">Proxies</a> below</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>session was not created with keepAlive=true and cannot be reattached</code></td>
+<td>Only stable sessions can be reattached</td>
+<td>Recreate with <code>keepAlive: true</code></td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>session belongs to a different org</code></td>
+<td>That session isn&#39;t yours</td>
+<td>Check which key you&#39;re using</td>
+</tr>
+<tr>
+<td>404</td>
+<td><code>session not found, expired, or already destroyed</code></td>
+<td>It idled out, hit its ceiling, or was closed</td>
+<td>Create a new one</td>
+</tr>
+<tr>
+<td>409</td>
+<td><code>session is currently attached; close the existing CDP connection first</code></td>
+<td>One CDP client per session</td>
+<td>Close the other connection first</td>
+</tr>
+<tr>
+<td>429</td>
+<td>JSON <code>monthly_quota_exceeded</code></td>
+<td>Monthly browser-seconds are gone</td>
+<td>Upgrade, or wait for the UTC month to roll over</td>
+</tr>
+<tr>
+<td>429</td>
+<td><code>concurrency limit reached for this org</code></td>
+<td>You&#39;re at your tier&#39;s concurrent limit, after waiting ~20s for a slot</td>
+<td>Close a session, back off, or upgrade</td>
+</tr>
+<tr>
+<td>503</td>
+<td><code>the fleet is at capacity; retry shortly</code></td>
+<td>The box is genuinely full. <strong>Not your fault and not your limit</strong></td>
+<td>Retry after 30s. <code>Retry-After: 30</code> is set</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>could not provision browser: …</code></td>
+<td>The browser failed to start</td>
+<td>Retry with backoff</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>upstream chrome dial failed: …</code></td>
+<td>We couldn&#39;t reach the browser we just started</td>
+<td>Retry</td>
+</tr>
+</tbody></table>
+</div><p><strong>After the upgrade</strong>, there is no such luxury. When a session ends, the
+socket closes <strong>without a close frame</strong> — your client reports code <code>1006</code>
+(abnormal closure), or <code>Target closed</code> / <code>Connection closed</code>. There is no
+reason string and no status field.</p>
+<p>That is a real limitation and worth being explicit about: <strong>you cannot
+tell from the connection itself why a session ended.</strong> To find out, ask:</p>
+<ul>
+<li><code>GET /v1/sessions</code> — if it&#39;s not listed, it&#39;s gone</li>
+<li>Try to reattach — a <code>404</code> confirms it was destroyed</li>
+</ul>
+<h2 id="why-did-my-session-end">Why did my session end?<a class="anchor" href="#why-did-my-session-end" aria-label="Link to this section">#</a></h2>
+<p>Every termination looks identical on the wire (see above), so here is the
+list of things that actually cause one.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>When</th>
+<th>Applies to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Max session duration</strong></td>
+<td>After <strong>1 hour</strong>, or your plan&#39;s ceiling if it&#39;s lower — Free 15 min, Hobby 60 min, Startup 3 hours, Scale 6 hours</td>
+<td><strong>Every session</strong>, whether or not it&#39;s stable</td>
+</tr>
+<tr>
+<td><strong>Idle timeout</strong></td>
+<td><strong>10 minutes</strong> with nothing connected</td>
+<td>Stable (<code>keepAlive</code>) sessions only</td>
+</tr>
+<tr>
+<td><strong>You closed it</strong></td>
+<td><code>POST /v1/sessions/{id}/close</code>, or the dashboard</td>
+<td>Any</td>
+</tr>
+<tr>
+<td><strong>You disconnected</strong></td>
+<td>Ordinary sessions end when your CDP connection does</td>
+<td>Non-<code>keepAlive</code> sessions</td>
+</tr>
+<tr>
+<td><strong>MCP session reaped</strong></td>
+<td><strong>30 minutes</strong> idle</td>
+<td>Browsers owned by the MCP server</td>
+</tr>
+<tr>
+<td><strong>We restarted the gateway</strong></td>
+<td>Stable sessions survive with their remaining time intact. Ordinary sessions do not</td>
+<td>Depends</td>
+</tr>
+</tbody></table>
+</div><p><code>GET /v1/sessions</code> tells you both deadlines <strong>before</strong> they fire, as
+<code>expiresAt</code> and (for stable sessions) <code>idleExpiresAt</code>. If you have a
+long-running job, read those rather than being surprised by them.</p>
+<p>The lower of your plan&#39;s ceiling and the platform ceiling always wins.</p>
+<h2 id="sessions-api">Sessions API<a class="anchor" href="#sessions-api" aria-label="Link to this section">#</a></h2>
+<p><code>POST /v1/sessions</code> and its subresources, on <code>connect.runbrowser.dev</code>.
+Plain-text bodies.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Body</th>
+<th>Cause</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>405</td>
+<td><code>method not allowed</code></td>
+<td>Wrong verb. The <code>Allow</code> header lists what&#39;s accepted</td>
+</tr>
+<tr>
+<td>401</td>
+<td><code>invalid or missing token</code></td>
+<td>Bad key</td>
+</tr>
+<tr>
+<td>415</td>
+<td><code>Content-Type must be application/json</code></td>
+<td>Wrong content type. Omitting the header entirely is fine</td>
+</tr>
+<tr>
+<td>413</td>
+<td><code>request body too large (16 KB limit)</code></td>
+<td>Body over 16 KB</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>invalid JSON: …</code></td>
+<td>Malformed body — <strong>or an unknown field</strong>. We reject fields we don&#39;t recognise rather than ignoring them, so a typo&#39;d option is an error instead of a silent no-op</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>proxy.url is required for type=external</code></td>
+<td>Missing proxy URL</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>unsupported proxy.type … (only &quot;external&quot; in v1)</code></td>
+<td>Only external proxies for now</td>
+</tr>
+<tr>
+<td>404</td>
+<td><code>session not found</code></td>
+<td>Already gone</td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>session belongs to a different org</code></td>
+<td>Wrong key</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>could not create session: …</code></td>
+<td>We failed to record it. Retry</td>
+</tr>
+</tbody></table>
+</div><h2 id="rest-shortcuts">REST shortcuts<a class="anchor" href="#rest-shortcuts" aria-label="Link to this section">#</a></h2>
+<p><code>/screenshot</code>, <code>/pdf</code>, <code>/content</code> and <code>/scrape</code> on
+<code>connect.runbrowser.dev</code>. Plain-text bodies.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Body</th>
+<th>Cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>401</td>
+<td><code>invalid or missing token</code></td>
+<td>Bad key. We check auth <strong>before</strong> reading your body</td>
+<td>Fix the key</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>url must be http(s)://...</code></td>
+<td>Bad scheme, <strong>or</strong> a URL pointing at a private/internal address, which we refuse</td>
+<td>Use a public http(s) URL</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>invalid json: …</code></td>
+<td>Malformed body. Limit is 1 MiB</td>
+<td>Fix the body</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>invalid cookies: …</code></td>
+<td>e.g. <code>cookies[0].name is required</code></td>
+<td>Fix the cookie</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>format must be png|jpeg|webp</code></td>
+<td><code>/screenshot</code> only</td>
+<td>Use a supported format</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>selector &quot;…&quot; matched no element</code></td>
+<td><code>/screenshot</code>. Note <code>/scrape</code> returns an <strong>empty result set</strong>, not an error, for the same situation</td>
+<td>Fix the selector</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>elements must be a non-empty array</code></td>
+<td><code>/scrape</code> without <code>elements</code></td>
+<td>Supply them</td>
+</tr>
+<tr>
+<td><strong>504</strong></td>
+<td><code>page never reached document.readyState=complete: …</code></td>
+<td><strong>The page never finished loading.</strong> Default 30s, max 60s</td>
+<td>Raise <code>waitForTimeout</code> (in ms, ≤60000), or target a page that settles</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>navigate failed: …</code>, <code>attach failed: …</code>, <code>printToPDF failed: …</code></td>
+<td>The browser failed mid-operation</td>
+<td>Retry with backoff</td>
+</tr>
+<tr>
+<td>429 / 503</td>
+<td>as <a href="#connecting-a-browser">Connecting a browser</a></td>
+<td>Quota, concurrency, or fleet capacity</td>
+<td>Same handling</td>
+</tr>
+</tbody></table>
+</div><h2 id="v1fetch">/v1/fetch<a class="anchor" href="#v1fetch" aria-label="Link to this section">#</a></h2>
+<p>JSON bodies. Note that most of these have <strong>no <code>message</code> field</strong> — the
+code is the whole answer.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th><code>error</code></th>
+<th>Cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>403</td>
+<td><code>invalid_url</code></td>
+<td>Blank, unparseable, or hostless</td>
+<td>Send an absolute URL</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>url_too_long</code></td>
+<td>Over 2048 characters</td>
+<td>Shorten it</td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>invalid_url_scheme</code></td>
+<td>Not http or https</td>
+<td>Use http(s)</td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>blocked_target</code></td>
+<td>The hostname or the address it resolves to is internal</td>
+<td>Target a public address</td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>dns_unresolved</code></td>
+<td>The hostname didn&#39;t resolve</td>
+<td>Check it; may be transient</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>invalid_method</code></td>
+<td>Method not allowed</td>
+<td>Use a standard method</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>request_body_too_large</code></td>
+<td>Over 1,000,000 bytes</td>
+<td>Shrink it</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>headers_too_large</code></td>
+<td>Over 100 headers, or one over 8192 characters</td>
+<td>Send fewer</td>
+</tr>
+<tr>
+<td><strong>504</strong></td>
+<td><code>target_timeout</code></td>
+<td><strong>The site didn&#39;t respond in time.</strong> Default 30s, max 60s</td>
+<td>Raise <code>timeoutMs</code> (≤60000), or retry</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>target_unreachable</code></td>
+<td>Connection refused, or the transfer failed</td>
+<td>Check the URL; retry</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>target_tls_error</code></td>
+<td>Their certificate is broken</td>
+<td>Usually not fixable from your side</td>
+</tr>
+<tr>
+<td>429</td>
+<td><code>monthly_quota_exceeded</code></td>
+<td>Fetch allowance exhausted</td>
+<td>Upgrade or wait for month rollover</td>
+</tr>
+</tbody></table>
+</div><p>A response over 10 MB comes back as a <strong>success</strong> with <code>truncated: true</code>.
+It is not an error.</p>
+<h2 id="v1search">/v1/search<a class="anchor" href="#v1search" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th><code>error</code></th>
+<th>Cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td><code>validation_failed</code></td>
+<td>Bad <code>includeHosts</code>/<code>excludeHosts</code>. Max 50 entries, 200 chars each</td>
+<td>See <code>message</code> for which</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>invalid_query</code></td>
+<td>Empty <code>q</code></td>
+<td>Supply a query</td>
+</tr>
+<tr>
+<td><strong>504</strong></td>
+<td><code>search_provider_timeout</code></td>
+<td>The search backend was too slow</td>
+<td>Retry</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>search_provider_unavailable</code></td>
+<td>The backend failed or returned nonsense</td>
+<td>Retry with backoff</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>search_provider_error</code></td>
+<td>The backend rejected the query</td>
+<td>Retry; tell us if it persists</td>
+</tr>
+<tr>
+<td>429</td>
+<td><code>monthly_quota_exceeded</code></td>
+<td>Search allowance exhausted</td>
+<td>Upgrade or wait</td>
+</tr>
+</tbody></table>
+</div><p><strong>Zero results is a 200 with an empty array</strong>, not a 404 and not an error.</p>
+<h2 id="v1extract">/v1/extract<a class="anchor" href="#v1extract" aria-label="Link to this section">#</a></h2>
+<p>Extract is the one endpoint where two different things both return <code>429</code>,
+so this is the clearest case for branching on <code>error</code> rather than status.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th><code>error</code></th>
+<th>Cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td><code>schema_invalid</code></td>
+<td>Your JSON Schema isn&#39;t valid</td>
+<td>Fix the schema; <code>message</code> says how</td>
+</tr>
+<tr>
+<td><strong>422</strong></td>
+<td><code>schema_validation_failed</code></td>
+<td><strong>The model couldn&#39;t produce data matching your schema</strong>, even after a retry</td>
+<td>Simplify the schema, or add <code>instructions</code> telling it where to look</td>
+</tr>
+<tr>
+<td>401 / 403</td>
+<td><code>auth_failed</code></td>
+<td>Your key was rejected downstream</td>
+<td>Fix the key</td>
+</tr>
+<tr>
+<td><strong>429</strong></td>
+<td><code>rate_limited</code></td>
+<td>A concurrency or capacity limit downstream — <strong>transient</strong></td>
+<td>Back off and retry</td>
+</tr>
+<tr>
+<td><strong>429</strong></td>
+<td><code>monthly_quota_exceeded</code></td>
+<td>Your extract allowance is gone — <strong>not transient</strong></td>
+<td>Upgrade or wait for rollover</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>gateway_unreachable</code>, <code>gateway_error</code></td>
+<td>The browser tier failed</td>
+<td>Retry</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>llm_transport_failed</code>, <code>llm_provider_error</code>, <code>llm_unparseable</code></td>
+<td>The model provider failed</td>
+<td>Retry</td>
+</tr>
+<tr>
+<td>503</td>
+<td><code>llm_not_configured</code></td>
+<td>Extraction isn&#39;t available on this deployment</td>
+<td>Contact us</td>
+</tr>
+</tbody></table>
+</div><p><code>422</code> is worth internalising: it means we reached the page and read it,
+but the result didn&#39;t fit the shape you asked for. That is usually a
+schema problem, not a page problem. Loosen the required fields first.</p>
+<h2 id="v1captchasolve">/v1/captcha/solve<a class="anchor" href="#v1captchasolve" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th><code>error</code></th>
+<th>Cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td><code>validation_failed</code></td>
+<td>Unsupported <code>type</code></td>
+<td>Use <code>recaptcha_v2</code>, <code>hcaptcha</code>, or <code>turnstile</code></td>
+</tr>
+<tr>
+<td><strong>402</strong></td>
+<td><code>captcha_not_included</code></td>
+<td><strong>Your plan includes zero managed solves</strong> — this is the Free tier</td>
+<td>Upgrade, or pass your own solver key</td>
+</tr>
+<tr>
+<td>429</td>
+<td><code>monthly_quota_exceeded</code></td>
+<td>You had an allowance and used it</td>
+<td>Upgrade or wait</td>
+</tr>
+<tr>
+<td>503</td>
+<td><code>captcha_not_configured</code></td>
+<td>Managed solving isn&#39;t enabled here</td>
+<td>Use your own solver key</td>
+</tr>
+<tr>
+<td><strong>422</strong></td>
+<td><code>captcha_timeout</code></td>
+<td>The solver didn&#39;t finish in its window</td>
+<td>Retry</td>
+</tr>
+<tr>
+<td><strong>422</strong></td>
+<td><code>captcha_unsolvable</code></td>
+<td>The solver couldn&#39;t clear this challenge</td>
+<td>Try again from a residential proxy</td>
+</tr>
+<tr>
+<td>502</td>
+<td><code>captcha_provider_unreachable</code>, <code>captcha_provider_error</code></td>
+<td>The solving provider failed</td>
+<td>Retry</td>
+</tr>
+</tbody></table>
+</div><p><strong>Failed solves are refunded</strong> to your monthly allowance. You are not
+billed for a CAPTCHA we didn&#39;t solve.</p>
+<h2 id="mcp-server">MCP server<a class="anchor" href="#mcp-server" aria-label="Link to this section">#</a></h2>
+<p>Two layers, and they fail differently.</p>
+<p><strong>HTTP layer</strong> — plain text:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Body</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>401</td>
+<td><code>invalid or missing token</code></td>
+<td>Fix the key</td>
+</tr>
+<tr>
+<td><strong>404</strong></td>
+<td><code>unknown or expired MCP session</code></td>
+<td><strong>Your session was reaped after 30 minutes idle.</strong> Send <code>initialize</code> again — the MCP spec expects clients to handle this</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>Mcp-Session-Id header required</code></td>
+<td>Send the ID you got from <code>initialize</code></td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>unsupported MCP-Protocol-Version</code></td>
+<td>Use <code>2025-06-18</code> or <code>2025-03-26</code></td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>origin not allowed</code></td>
+<td>You&#39;re calling from a browser origin we don&#39;t allow</td>
+</tr>
+<tr>
+<td>405</td>
+<td><code>this server does not offer an SSE stream</code></td>
+<td>Use POST, not GET</td>
+</tr>
+</tbody></table>
+</div><p><strong>Tool failures are not HTTP errors.</strong> A tool that fails returns <code>200</code>
+with <code>isError: true</code> and the reason as text, because that&#39;s what lets a
+model read the problem and adapt instead of crashing:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;content&quot;: [{ &quot;type&quot;: &quot;text&quot;, &quot;text&quot;: &quot;this account already has the maximum number of browsers running; close one and retry&quot; }], &quot;isError&quot;: true }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"content"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"text"</span><span class="token punctuation">,</span> <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"this account already has the maximum number of browsers running; close one and retry"</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token property">"isError"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span></code></pre></div><p>Tools time out at 120 seconds, and returned content is truncated at
+120,000 characters with a marker saying so.</p>
+<h2 id="live-viewer">Live viewer<a class="anchor" href="#live-viewer" aria-label="Link to this section">#</a></h2>
+<p>Viewer URLs are signed and short-lived on purpose — anyone with the link
+can watch the session.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Body</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>401</td>
+<td><code>a signed viewer URL is required; …</code></td>
+<td>Mint one with <code>POST /v1/sessions/{id}/viewer-token</code>. <strong>Bearer tokens are not accepted here</strong></td>
+</tr>
+<tr>
+<td>401</td>
+<td><code>viewer URL: viewer URL expired</code></td>
+<td>Mint a new one. Default life is 1 hour, max 24</td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>viewer URL: viewer URL signature invalid</code></td>
+<td>The URL was altered, or was minted before a gateway restart. Mint a new one</td>
+</tr>
+<tr>
+<td>404</td>
+<td><code>session not found</code></td>
+<td>The session has ended</td>
+</tr>
+</tbody></table>
+</div><h2 id="blocked-not-broken">Blocked, not broken<a class="anchor" href="#blocked-not-broken" aria-label="Link to this section">#</a></h2>
+<p>The most confusing failure in this whole product is not an error at all.</p>
+<p>When a site blocks you, <code>/v1/fetch</code> returns <strong>HTTP 200</strong>. The block is
+reported in the body, and <code>status</code> carries the site&#39;s real status:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;status&quot;: 403,
+  &quot;blocked&quot;: true,
+  &quot;blockReason&quot;: &quot;bot_blocked&quot;,
+  &quot;blockProvider&quot;: &quot;cloudflare&quot;,
+  &quot;body&quot;: &quot;…&quot;
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"status"</span><span class="token operator">:</span> <span class="token number">403</span><span class="token punctuation">,</span>
+  <span class="token property">"blocked"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"blockReason"</span><span class="token operator">:</span> <span class="token string">"bot_blocked"</span><span class="token punctuation">,</span>
+  <span class="token property">"blockProvider"</span><span class="token operator">:</span> <span class="token string">"cloudflare"</span><span class="token punctuation">,</span>
+  <span class="token property">"body"</span><span class="token operator">:</span> <span class="token string">"…"</span>
+<span class="token punctuation">}</span></code></pre></div><p>Check <code>blocked</code> before you trust <code>body</code>. Otherwise you will happily parse
+a &quot;Checking your browser&quot; interstitial as if it were the page, and the
+bug will surface much later as bad data rather than as a failure.</p>
+<p><code>blockReason</code> is one of:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>waf_challenge</code></td>
+<td>A firewall is running an interstitial challenge</td>
+</tr>
+<tr>
+<td><code>captcha</code></td>
+<td>A CAPTCHA wall</td>
+</tr>
+<tr>
+<td><code>rate_limited</code></td>
+<td>The site is rate-limiting you</td>
+</tr>
+<tr>
+<td><code>geo_blocked</code></td>
+<td>Refused in this region</td>
+</tr>
+<tr>
+<td><code>waf_block</code></td>
+<td>A firewall refused outright</td>
+</tr>
+<tr>
+<td><code>bot_blocked</code></td>
+<td>Identified as a bot</td>
+</tr>
+<tr>
+<td><code>shell_page</code></td>
+<td>A suspiciously empty page — usually a soft block</td>
+</tr>
+</tbody></table>
+</div><p><code>blockProvider</code> is one of <code>cloudflare</code>, <code>aws_waf</code>, <code>akamai</code>, <code>datadome</code>,
+<code>imperva</code>, <code>perimeterx</code>, <code>kasada</code>, <code>vercel</code> — <strong>and may be <code>null</code> even
+when <code>blocked</code> is true</strong>, because not every blocker identifies itself.</p>
+<p>When you hit this, <code>/v1/fetch</code> is the wrong tool: it&#39;s plain HTTP and runs
+no JavaScript. Use a real browser session, optionally with
+<a href="/docs/concepts#stealth">stealth and a residential proxy</a>.</p>
+<p>The MCP <code>fetch</code> tool prepends <code>[anti-bot block detected: …]</code> to the text
+for the same reason — so a model doesn&#39;t summarise a block page as
+content.</p>
+<h2 id="proxies">Proxies<a class="anchor" href="#proxies" aria-label="Link to this section">#</a></h2>
+<p>We validate the <strong>syntax and safety</strong> of your proxy URL, not whether it
+works. A proxy that is unreachable, or whose credentials are wrong, will
+pass validation and then fail inside the browser as ordinary navigation
+failures. That&#39;s deliberate — we can&#39;t reach your proxy to test it — but
+it does mean a broken proxy looks like a broken site.</p>
+<p>Proxy problems that <em>are</em> immediate 400s:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Message</th>
+<th>Cause</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>scheme &quot;…&quot; not supported; use http, https, or socks5</code></td>
+<td>SOCKS4 isn&#39;t supported — it has no authentication</td>
+</tr>
+<tr>
+<td><code>proxy port is required</code></td>
+<td>No port</td>
+</tr>
+<tr>
+<td><code>proxy host is empty</code></td>
+<td>No host</td>
+</tr>
+<tr>
+<td><code>proxy URL exceeds 2048 bytes</code></td>
+<td>Too long</td>
+</tr>
+<tr>
+<td><code>proxy points to disallowed address …</code></td>
+<td>Points at a private or loopback address</td>
+</tr>
+<tr>
+<td><code>proxy hostname &quot;…&quot; is disallowed</code></td>
+<td><code>localhost</code>, <code>*.local</code>, <code>*.internal</code>, <code>*.localdomain</code></td>
+</tr>
+<tr>
+<td><code>proxy hostname &quot;…&quot; resolves to disallowed address …</code></td>
+<td>Resolves to something internal</td>
+</tr>
+</tbody></table>
+</div><p>If pages fail only when a proxy is set, and you get no proxy error from
+us, the proxy itself is the first thing to check.</p>
+<h2 id="quotas-and-limits">Quotas and limits<a class="anchor" href="#quotas-and-limits" aria-label="Link to this section">#</a></h2>
+<p>Every monthly allowance resets at the <strong>UTC</strong> month boundary. Not your
+timezone, not your billing date.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Behaviour at the limit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Concurrent sessions</td>
+<td>Requests <strong>wait ~20 seconds</strong> for a free slot, then <code>429</code>. A short burst usually resolves itself</td>
+</tr>
+<tr>
+<td>Monthly browser-seconds</td>
+<td><code>429 monthly_quota_exceeded</code> with <code>used_seconds</code>/<code>limit_seconds</code></td>
+</tr>
+<tr>
+<td>Monthly fetches, searches, extracts</td>
+<td><code>429 monthly_quota_exceeded</code> with <code>type</code>/<code>used</code>/<code>limit</code></td>
+</tr>
+<tr>
+<td>Monthly CAPTCHAs</td>
+<td><code>429</code> if you had an allowance; <code>402 captcha_not_included</code> if your plan has none</td>
+</tr>
+<tr>
+<td>Fleet capacity</td>
+<td><code>503</code> with <code>Retry-After: 30</code></td>
+</tr>
+</tbody></table>
+</div><p>The difference between <code>429</code> and <code>503</code> is worth keeping straight: <code>429</code>
+means <em>you</em> hit a limit, <code>503</code> means <em>we</em> did. See
+<a href="/docs/concepts#concurrency-and-queueing">Concurrency and queueing</a> for why
+both exist.</p>
+<h2 id="a-retry-policy-that-works">A retry policy that works<a class="anchor" href="#a-retry-policy-that-works" aria-label="Link to this section">#</a></h2>
+<p>Retry the transient things, fail fast on the rest, and always cap it.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="const TRANSIENT = new Set([408, 409, 502, 503, 504]);
+
+async function call(path: string, body: unknown, attempt = 0): Promise&lt;any&gt; {
+  const res = await fetch(`https://api.runbrowser.dev${path}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (res.ok) return res.json();
+
+  const err = await res.json().catch(() =&gt; ({}));
+
+  // A monthly quota will not clear by retrying — only an upgrade or the
+  // UTC month rollover fixes it. Every other 429 is worth backing off for.
+  const permanent429 = res.status === 429 &amp;&amp; err.error === 'monthly_quota_exceeded';
+  const worthRetrying = (TRANSIENT.has(res.status) || res.status === 429) &amp;&amp; !permanent429;
+
+  if (!worthRetrying || attempt &gt;= 4) {
+    throw new Error(`${path} failed: ${res.status} ${err.error ?? ''}`);
+  }
+
+  // Honour Retry-After when we send it (only on the 503), else back off.
+  const after = Number(res.headers.get('retry-after'));
+  const delay = after ? after * 1000 : 2 ** attempt * 500 + Math.random() * 250;
+  await new Promise((r) =&gt; setTimeout(r, delay));
+  return call(path, body, attempt + 1);
+}">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="const TRANSIENT = new Set([408, 409, 502, 503, 504]);
+
+async function call(path: string, body: unknown, attempt = 0): Promise&lt;any&gt; {
+  const res = await fetch(`https://api.runbrowser.dev${path}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (res.ok) return res.json();
+
+  const err = await res.json().catch(() =&gt; ({}));
+
+  // A monthly quota will not clear by retrying — only an upgrade or the
+  // UTC month rollover fixes it. Every other 429 is worth backing off for.
+  const permanent429 = res.status === 429 &amp;&amp; err.error === 'monthly_quota_exceeded';
+  const worthRetrying = (TRANSIENT.has(res.status) || res.status === 429) &amp;&amp; !permanent429;
+
+  if (!worthRetrying || attempt &gt;= 4) {
+    throw new Error(`${path} failed: ${res.status} ${err.error ?? ''}`);
+  }
+
+  // Honour Retry-After when we send it (only on the 503), else back off.
+  const after = Number(res.headers.get('retry-after'));
+  const delay = after ? after * 1000 : 2 ** attempt * 500 + Math.random() * 250;
+  await new Promise((r) =&gt; setTimeout(r, delay));
+  return call(path, body, attempt + 1);
+}"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">const</span> <span class="token constant">TRANSIENT</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">408</span><span class="token punctuation">,</span> <span class="token number">409</span><span class="token punctuation">,</span> <span class="token number">502</span><span class="token punctuation">,</span> <span class="token number">503</span><span class="token punctuation">,</span> <span class="token number">504</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">call</span><span class="token punctuation">(</span>path<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> attempt <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://api.runbrowser.dev</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>path<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
+    headers<span class="token operator">:</span> <span class="token punctuation">{</span>
+      Authorization<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Bearer </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+      <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json'</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>body<span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>res<span class="token punctuation">.</span>ok<span class="token punctuation">)</span> <span class="token keyword">return</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> err <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// A monthly quota will not clear by retrying — only an upgrade or the</span>
+  <span class="token comment">// UTC month rollover fixes it. Every other 429 is worth backing off for.</span>
+  <span class="token keyword">const</span> permanent429 <span class="token operator">=</span> res<span class="token punctuation">.</span>status <span class="token operator">===</span> <span class="token number">429</span> <span class="token operator">&amp;&amp;</span> err<span class="token punctuation">.</span>error <span class="token operator">===</span> <span class="token string">'monthly_quota_exceeded'</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> worthRetrying <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token constant">TRANSIENT</span><span class="token punctuation">.</span><span class="token function">has</span><span class="token punctuation">(</span>res<span class="token punctuation">.</span>status<span class="token punctuation">)</span> <span class="token operator">||</span> res<span class="token punctuation">.</span>status <span class="token operator">===</span> <span class="token number">429</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>permanent429<span class="token punctuation">;</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>worthRetrying <span class="token operator">||</span> attempt <span class="token operator">>=</span> <span class="token number">4</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>path<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> failed: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>res<span class="token punctuation">.</span>status<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>err<span class="token punctuation">.</span>error <span class="token operator">??</span> <span class="token string">''</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">// Honour Retry-After when we send it (only on the 503), else back off.</span>
+  <span class="token keyword">const</span> after <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>res<span class="token punctuation">.</span>headers<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'retry-after'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> delay <span class="token operator">=</span> after <span class="token operator">?</span> after <span class="token operator">*</span> <span class="token number">1000</span> <span class="token operator">:</span> <span class="token number">2</span> <span class="token operator">**</span> attempt <span class="token operator">*</span> <span class="token number">500</span> <span class="token operator">+</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">250</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token builtin">Promise</span></span><span class="token punctuation">(</span><span class="token punctuation">(</span>r<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>r<span class="token punctuation">,</span> delay<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> <span class="token function">call</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> body<span class="token punctuation">,</span> attempt <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="import os, random, time, requests
+
+TRANSIENT = {408, 409, 502, 503, 504}
+API = &quot;https://api.runbrowser.dev&quot;
+
+
+def call(path, body, attempts=5):
+    headers = {&quot;Authorization&quot;: f&quot;Bearer {os.environ['RUNBROWSER_TOKEN']}&quot;}
+    for attempt in range(attempts):
+        res = requests.post(f&quot;{API}{path}&quot;, headers=headers, json=body)
+        if res.ok:
+            return res.json()
+
+        err = res.json() if &quot;json&quot; in res.headers.get(&quot;content-type&quot;, &quot;&quot;) else {}
+
+        # A monthly quota will not clear by retrying — only an upgrade or the
+        # UTC month rollover fixes it. Every other 429 is worth backing off for.
+        permanent_429 = res.status_code == 429 and err.get(&quot;error&quot;) == &quot;monthly_quota_exceeded&quot;
+        worth_retrying = (res.status_code in TRANSIENT or res.status_code == 429) and not permanent_429
+
+        if not worth_retrying or attempt == attempts - 1:
+            raise RuntimeError(f&quot;{path} failed: {res.status_code} {err.get('error', '')}&quot;)
+
+        # Honour Retry-After when we send it (only on the 503), else back off.
+        after = res.headers.get(&quot;retry-after&quot;)
+        time.sleep(int(after) if after else 2**attempt * 0.5 + random.random() * 0.25)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">import</span> os<span class="token punctuation">,</span> random<span class="token punctuation">,</span> time<span class="token punctuation">,</span> requests
+
+TRANSIENT <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token number">408</span><span class="token punctuation">,</span> <span class="token number">409</span><span class="token punctuation">,</span> <span class="token number">502</span><span class="token punctuation">,</span> <span class="token number">503</span><span class="token punctuation">,</span> <span class="token number">504</span><span class="token punctuation">}</span>
+API <span class="token operator">=</span> <span class="token string">"https://api.runbrowser.dev"</span>
+
+
+<span class="token keyword">def</span> <span class="token function">call</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> body<span class="token punctuation">,</span> attempts<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    headers <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token string">"Authorization"</span><span class="token punctuation">:</span> <span class="token string-interpolation"><span class="token string">f"Bearer </span><span class="token interpolation"><span class="token punctuation">{</span>os<span class="token punctuation">.</span>environ<span class="token punctuation">[</span><span class="token string">'RUNBROWSER_TOKEN'</span><span class="token punctuation">]</span><span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> attempt <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span>attempts<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        res <span class="token operator">=</span> requests<span class="token punctuation">.</span>post<span class="token punctuation">(</span><span class="token string-interpolation"><span class="token string">f"</span><span class="token interpolation"><span class="token punctuation">{</span>API<span class="token punctuation">}</span></span><span class="token interpolation"><span class="token punctuation">{</span>path<span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">,</span> headers<span class="token operator">=</span>headers<span class="token punctuation">,</span> json<span class="token operator">=</span>body<span class="token punctuation">)</span>
+        <span class="token keyword">if</span> res<span class="token punctuation">.</span>ok<span class="token punctuation">:</span>
+            <span class="token keyword">return</span> res<span class="token punctuation">.</span>json<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+        err <span class="token operator">=</span> res<span class="token punctuation">.</span>json<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">if</span> <span class="token string">"json"</span> <span class="token keyword">in</span> res<span class="token punctuation">.</span>headers<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"content-type"</span><span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">)</span> <span class="token keyword">else</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+        <span class="token comment"># A monthly quota will not clear by retrying — only an upgrade or the</span>
+        <span class="token comment"># UTC month rollover fixes it. Every other 429 is worth backing off for.</span>
+        permanent_429 <span class="token operator">=</span> res<span class="token punctuation">.</span>status_code <span class="token operator">==</span> <span class="token number">429</span> <span class="token keyword">and</span> err<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"error"</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string">"monthly_quota_exceeded"</span>
+        worth_retrying <span class="token operator">=</span> <span class="token punctuation">(</span>res<span class="token punctuation">.</span>status_code <span class="token keyword">in</span> TRANSIENT <span class="token keyword">or</span> res<span class="token punctuation">.</span>status_code <span class="token operator">==</span> <span class="token number">429</span><span class="token punctuation">)</span> <span class="token keyword">and</span> <span class="token keyword">not</span> permanent_429
+
+        <span class="token keyword">if</span> <span class="token keyword">not</span> worth_retrying <span class="token keyword">or</span> attempt <span class="token operator">==</span> attempts <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">:</span>
+            <span class="token keyword">raise</span> RuntimeError<span class="token punctuation">(</span><span class="token string-interpolation"><span class="token string">f"</span><span class="token interpolation"><span class="token punctuation">{</span>path<span class="token punctuation">}</span></span><span class="token string"> failed: </span><span class="token interpolation"><span class="token punctuation">{</span>res<span class="token punctuation">.</span>status_code<span class="token punctuation">}</span></span><span class="token string"> </span><span class="token interpolation"><span class="token punctuation">{</span>err<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">'error'</span><span class="token punctuation">,</span> <span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">)</span>
+
+        <span class="token comment"># Honour Retry-After when we send it (only on the 503), else back off.</span>
+        after <span class="token operator">=</span> res<span class="token punctuation">.</span>headers<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"retry-after"</span><span class="token punctuation">)</span>
+        time<span class="token punctuation">.</span>sleep<span class="token punctuation">(</span><span class="token builtin">int</span><span class="token punctuation">(</span>after<span class="token punctuation">)</span> <span class="token keyword">if</span> after <span class="token keyword">else</span> <span class="token number">2</span><span class="token operator">**</span>attempt <span class="token operator">*</span> <span class="token number">0.5</span> <span class="token operator">+</span> random<span class="token punctuation">.</span>random<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.25</span><span class="token punctuation">)</span></code></pre></div></div><p>For CDP connections, the equivalent is to catch the connect failure, read
+the status out of the message, and reconnect on <code>429</code>/<code>503</code> only.</p>
+<h2 id="still-stuck">Still stuck?<a class="anchor" href="#still-stuck" aria-label="Link to this section">#</a></h2>
+<p>If you get a status that isn&#39;t on this page, or one that is but the
+explanation doesn&#39;t match what you&#39;re seeing, that&#39;s a bug in our docs and
+we want to know. Mail <a href="mailto:hi@runbrowser.dev">hi@runbrowser.dev</a> with the status, the <code>error</code>
+code, and roughly when it happened, and we&#39;ll look at the actual logs.</p>
+<h2 id="next">Next<a class="anchor" href="#next" aria-label="Link to this section">#</a></h2>
+<ul>
+<li><a href="/docs/concepts">Concepts</a> — sessions, quotas, stable sessions, the viewer</li>
+<li><a href="/docs/api-reference">API reference</a> — every endpoint</li>
+<li><a href="/docs/quickstart">Quickstart</a> — connect in one line</li>
+</ul>
+
+    <nav class="pager">
+      <a class="prev" href="/docs/api-reference"><span>Previous</span>API reference</a>
+      <a class="next" href="/docs/mcp"><span>Next</span>MCP server</a>
+    </nav>
+    <hr>
+    <p class="foot">
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Errors">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+    <p class="updated">Last updated 2026-08-13</p>
+  </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#the-one-thing-to-know-first">The one thing to know first</a>
+    <a class="toc-2" href="#json-error-shapes-on-apirunbrowserdev">JSON error shapes on api.runbrowser.dev</a>
+    <a class="toc-2" href="#what-to-retry-and-what-not-to">What to retry, and what not to</a>
+    <a class="toc-2" href="#connecting-a-browser">Connecting a browser</a>
+    <a class="toc-2" href="#why-did-my-session-end">Why did my session end?</a>
+    <a class="toc-2" href="#sessions-api">Sessions API</a>
+    <a class="toc-2" href="#rest-shortcuts">REST shortcuts</a>
+    <a class="toc-2" href="#v1fetch">/v1/fetch</a>
+    <a class="toc-2" href="#v1search">/v1/search</a>
+    <a class="toc-2" href="#v1extract">/v1/extract</a>
+    <a class="toc-2" href="#v1captchasolve">/v1/captcha/solve</a>
+    <a class="toc-2" href="#mcp-server">MCP server</a>
+    <a class="toc-2" href="#live-viewer">Live viewer</a>
+    <a class="toc-2" href="#blocked-not-broken">Blocked, not broken</a>
+    <a class="toc-2" href="#proxies">Proxies</a>
+    <a class="toc-2" href="#quotas-and-limits">Quotas and limits</a>
+    <a class="toc-2" href="#a-retry-policy-that-works">A retry policy that works</a>
+    <a class="toc-2" href="#still-stuck">Still stuck?</a>
+    <a class="toc-2" href="#next">Next</a>
+  </aside>
+</div>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Concepts — runbrowser docs</title>
-<meta name="description" content="Concepts — runbrowser documentation.">
+<meta name="description" content="A session is one browser. It begins when you connect and ends when you disconnect; the container is then destroyed, never reused. Chromium state isn't safe">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="stylesheet" href="/assets/docs.css">
 </head>
@@ -12,25 +12,44 @@
 <header class="docs-header">
   <a class="logo" href="/">
     <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
-    <span>runbrowser</span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
   </a>
-  <a class="back" href="/">&larr; back to site</a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
 </header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
 <div class="layout">
   <nav class="sidebar">
-    <span class="nav-title">Docs</span>
+    <span class="nav-title">Documentation</span>
     <div class="nav-links">
         <a class="" href="/docs/quickstart">Quickstart</a>
         <a class="active" href="/docs/concepts">Concepts</a>
         <a class="" href="/docs/api-reference">API reference</a>
+        <a class="" href="/docs/errors">Errors</a>
         <a class="" href="/docs/mcp">MCP server</a>
         <a class="" href="/docs/migrating-from-browserless">From Browserless</a>
         <a class="" href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a href="/#pricing">Pricing</a>
+        <a href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
   </nav>
   <main class="prose">
-<h1>Concepts</h1>
-<h2>Sessions</h2>
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Concepts</span></div>
+<h1 id="concepts">Concepts</h1>
+<h2 id="sessions">Sessions<a class="anchor" href="#sessions" aria-label="Link to this section">#</a></h2>
 <p>A session is one browser. It begins when you connect and ends when you
 disconnect; the container is then destroyed, never reused. Chromium state
 isn&#39;t safe to recycle between tenants, so every customer gets a browser
@@ -39,7 +58,7 @@ that has never seen anyone else&#39;s traffic.</p>
 than the ~350ms a cold spawn takes. Pre-warmed browsers are rotated out
 after 15 minutes so you never receive one that has been sitting idle for
 hours.</p>
-<h2>Browser-time billing</h2>
+<h2 id="browser-time-billing">Browser-time billing<a class="anchor" href="#browser-time-billing" aria-label="Link to this section">#</a></h2>
 <p>You&#39;re billed for the seconds a browser exists, not for the number of
 sessions you open. Per-session duration is floored at 10 seconds.</p>
 <p>This is deliberate and it&#39;s the main thing that differs from
@@ -47,7 +66,7 @@ session-count pricing. Under per-session billing, the cheapest thing you
 can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Tier</th>
@@ -106,14 +125,14 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>10,000</td>
 </tr>
 </tbody></table>
-<p><code>/extract</code> has its own allowance because it costs twice — browser-time to
+</div><p><code>/extract</code> has its own allowance because it costs twice — browser-time to
 render the page, plus LLM tokens to read it. The numbers are sized against
 worst-case content (a full 200k-char page); typical pages are a fraction of
 that, so real usage goes considerably further than the figure suggests.</p>
 <p>Concurrency is a ceiling, not a reservation, and the fleet has a hard cap
 underneath it — see <a href="#concurrency-and-queueing">Concurrency and queueing</a>
 for what that means when the box is busy.</p>
-<h2>Concurrency and queueing</h2>
+<h2 id="concurrency-and-queueing">Concurrency and queueing<a class="anchor" href="#concurrency-and-queueing" aria-label="Link to this section">#</a></h2>
 <p>Two separate limits apply, and they mean different things.</p>
 <p><strong>Your tier&#39;s concurrency</strong> — Free 3, Hobby 10, Startup 25, Scale 50 — is
 your own ceiling. At it, new requests <strong>wait</strong> for a slot rather than
@@ -133,11 +152,11 @@ and killing live sessions that were well inside their limits.</p>
 <p>Operationally the <code>503</code> is the signal to add capacity, and it&#39;s alarmed on
 our side (<code>agentbrowser_fleet_rejections_total</code>) rather than left for you
 to report.</p>
-<h2>Stable sessions</h2>
+<h2 id="stable-sessions">Stable sessions<a class="anchor" href="#stable-sessions" aria-label="Link to this section">#</a></h2>
 <p>Normally the browser dies when you disconnect. A stable session doesn&#39;t:</p>
-<pre><code class="language-ts">const res = await fetch(`https://connect.${domain}/v1/sessions`, {
-  method: &#39;POST&#39;,
-  headers: { Authorization: `Bearer ${key}`, &#39;Content-Type&#39;: &#39;application/json&#39; },
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="const res = await fetch(`https://connect.${domain}/v1/sessions`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
   body: JSON.stringify({ keepAlive: true, maxIdleSeconds: 600 }),
 });
 const { sessionId, connectUrl } = await res.json();
@@ -145,20 +164,29 @@ const { sessionId, connectUrl } = await res.json();
 const browser = await chromium.connectOverCDP(connectUrl);
 // ... log in, do work, disconnect ...
 // later, from a different process:
-const again = await chromium.connectOverCDP(connectUrl);
-</code></pre>
-<p>Everything survives: cookies, localStorage, in-memory SPA state, open
+const again = await chromium.connectOverCDP(connectUrl);">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>domain<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/v1/sessions</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
+  headers<span class="token operator">:</span> <span class="token punctuation">{</span> Authorization<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Bearer </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>key<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> keepAlive<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> maxIdleSeconds<span class="token operator">:</span> <span class="token number">600</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> sessionId<span class="token punctuation">,</span> connectUrl <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>connectUrl<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// ... log in, do work, disconnect ...</span>
+<span class="token comment">// later, from a different process:</span>
+<span class="token keyword">const</span> again <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>connectUrl<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div><p>Everything survives: cookies, localStorage, in-memory SPA state, open
 tabs, in-flight requests, scroll position. We park the container rather
 than snapshotting state, which is why the coverage is total instead of
 &quot;cookies and localStorage&quot;.</p>
 <p><strong>The meter runs while it&#39;s parked.</strong> You&#39;re holding a browser; nobody
 else can use it. Close it when you&#39;re done:</p>
-<pre><code class="language-ts">await fetch(`https://connect.${domain}/v1/sessions/${sessionId}/close`, {
-  method: &#39;POST&#39;,
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="await fetch(`https://connect.${domain}/v1/sessions/${sessionId}/close`, {
+  method: 'POST',
   headers: { Authorization: `Bearer ${key}` },
-});
-</code></pre>
-<p>Two ceilings apply, whichever comes first: idle timeout (default 10 min)
+});">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>domain<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/v1/sessions/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>sessionId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/close</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
+  headers<span class="token operator">:</span> <span class="token punctuation">{</span> Authorization<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Bearer </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>key<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div><p>Two ceilings apply, whichever comes first: idle timeout (default 10 min)
 and total session duration (per tier, above).</p>
 <p>Parked sessions <strong>survive a gateway restart</strong>, including a redeploy. The
 browser container keeps running while the gateway is down and is adopted
@@ -170,23 +198,26 @@ redeploy doesn&#39;t quietly extend anything you&#39;re being billed for.</p>
 <p><strong>What doesn&#39;t survive:</strong> a restart of the <em>machine</em>. Containers die with
 the host, so a reboot or host failure loses parked sessions. Reattaching
 then returns &quot;not found&quot;, and that&#39;s the case worth writing a retry for.</p>
-<h2>Live viewer</h2>
+<h2 id="live-viewer">Live viewer<a class="anchor" href="#live-viewer" aria-label="Link to this section">#</a></h2>
 <p>Watch a session in real time, or hand someone a link:</p>
-<pre><code class="language-ts">const res = await fetch(`https://connect.${domain}/v1/sessions/${id}/viewer-token`, {
-  method: &#39;POST&#39;,
-  headers: { Authorization: `Bearer ${key}`, &#39;Content-Type&#39;: &#39;application/json&#39; },
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="const res = await fetch(`https://connect.${domain}/v1/sessions/${id}/viewer-token`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
   body: JSON.stringify({ ttlSeconds: 3600 }),
 });
-const { webUrl } = await res.json();   // signed, expiring, no API key inside
-</code></pre>
-<p>The URL is HMAC-signed and expires (1h default, 24h max). Anyone holding
+const { webUrl } = await res.json();   // signed, expiring, no API key inside">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>domain<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/v1/sessions/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/viewer-token</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
+  headers<span class="token operator">:</span> <span class="token punctuation">{</span> Authorization<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Bearer </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>key<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ttlSeconds<span class="token operator">:</span> <span class="token number">3600</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> webUrl <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// signed, expiring, no API key inside</span></code></pre></div><p>The URL is HMAC-signed and expires (1h default, 24h max). Anyone holding
 it can watch until then — no bearer token rides in the URL, so it&#39;s safe
 to paste into a ticket. The page is built to be iframed: no chrome, no
 controls, <code>?fit=cover|fill|contain</code> for sizing, <code>?debug=1</code> for a
 diagnostic pill, and <code>postMessage</code> events to the parent frame.</p>
 <p>Read-only in v1. Mouse and keyboard back through CDP is a v1.5 feature
 waiting on someone asking for it.</p>
-<h2>Stealth</h2>
+<h2 id="stealth">Stealth<a class="anchor" href="#stealth" aria-label="Link to this section">#</a></h2>
 <p>Our stealth is deliberately <strong>not</strong> a fingerprint injector.</p>
 <p>We built nine iterations of one — an 883-line JS injector, a 50-profile
 pool, a content-script extension — and measured them against both CreepJS
@@ -203,18 +234,16 @@ whose PerimeterX threshold for price-scraping is set lower than anyone
 else&#39;s and which never offers a challenge to solve.</p>
 <p>If a target still blocks you, the lever is almost always a residential
 IP, not more JavaScript.</p>
-<h2>Proxies</h2>
+<h2 id="proxies">Proxies<a class="anchor" href="#proxies" aria-label="Link to this section">#</a></h2>
 <p>Bring your own, per session:</p>
-<pre><code class="language-ts">await chromium.connectOverCDP(`https://connect.${domain}?token=${key}&amp;proxy=${encodeURIComponent(proxyUrl)}`);
-</code></pre>
-<p>Or keep the credentials out of the URL entirely by POSTing them to
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="await chromium.connectOverCDP(`https://connect.${domain}?token=${key}&amp;proxy=${encodeURIComponent(proxyUrl)}`);">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>domain<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">?token=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>key<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&amp;proxy=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">encodeURIComponent</span><span class="token punctuation">(</span>proxyUrl<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div><p>Or keep the credentials out of the URL entirely by POSTing them to
 <code>/v1/sessions</code> and connecting with the opaque token you get back. Proxy
 URLs are validated against SSRF (RFC1918, loopback and link-local are
 refused; http/https/socks5 only) and never logged.</p>
 <p>Managed proxy pools are designed but not built — the trigger is a
 customer saying they&#39;d pay for it. Until then you get wholesale pricing
 from your own provider instead of our markup.</p>
-<h2>CAPTCHAs</h2>
+<h2 id="captchas">CAPTCHAs<a class="anchor" href="#captchas" aria-label="Link to this section">#</a></h2>
 <p>Two ways, and the helper in <a href="/docs/">examples/captcha</a> does
 both:</p>
 <p><strong>Managed</strong> (<code>provider: &#39;managed&#39;</code>) solves on our provider account against
@@ -231,17 +260,35 @@ is an invitation.</p>
 by anyone. They score your session rather than posing a question. A
 residential proxy is the answer there, and both paths tell you so instead
 of timing out.</p>
-<h2>Regions</h2>
+<h2 id="regions">Regions<a class="anchor" href="#regions" aria-label="Link to this section">#</a></h2>
 <p>EU only (Falkenstein) at launch. US is a post-revenue decision, not a
 roadmap promise.</p>
 
+    <nav class="pager">
+      <a class="prev" href="/docs/quickstart"><span>Previous</span>Quickstart</a>
+      <a class="next" href="/docs/api-reference"><span>Next</span>API reference</a>
+    </nav>
     <hr>
     <p class="foot">
-      Something wrong or missing here?
-      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Concepts">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
+    <p class="updated">Last updated 2026-08-13</p>
   </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#sessions">Sessions</a>
+    <a class="toc-2" href="#browser-time-billing">Browser-time billing</a>
+    <a class="toc-2" href="#concurrency-and-queueing">Concurrency and queueing</a>
+    <a class="toc-2" href="#stable-sessions">Stable sessions</a>
+    <a class="toc-2" href="#live-viewer">Live viewer</a>
+    <a class="toc-2" href="#stealth">Stealth</a>
+    <a class="toc-2" href="#proxies">Proxies</a>
+    <a class="toc-2" href="#captchas">CAPTCHAs</a>
+    <a class="toc-2" href="#regions">Regions</a>
+  </aside>
 </div>
+<script src="/assets/docs.js" defer></script>
 </body>
 </html>

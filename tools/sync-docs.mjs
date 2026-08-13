@@ -17,6 +17,7 @@ const PUBLIC_DOCS = [
   'quickstart.md',
   'concepts.md',
   'api-reference.md',
+  'errors.md',
   'mcp.md',
   'migrating-from-browserless.md',
   'migrating-from-browserbase.md',

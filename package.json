@@ -6,7 +6,9 @@
   },
   "scripts": {
     "docs": "node tools/build-docs.mjs",
-    "sync": "node tools/sync-docs.mjs"
+    "sync": "node tools/sync-docs.mjs",
+    "serve": "python3 -m http.server 8899",
+    "verify": "node tools/verify-docs.mjs"
   },
   "repository": {
     "type": "git",
@@ -19,7 +21,9 @@
   },
   "homepage": "https://github.com/runbrowser-dev/site#readme",
   "devDependencies": {
-    "marked": "^18.0.9"
+    "marked": "^18.0.9",
+    "playwright": "^1.62.1",
+    "prismjs": "^1.30.0"
   },
   "private": true,
   "type": "module"

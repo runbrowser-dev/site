@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quickstart — runbrowser docs</title>
-<meta name="description" content="Quickstart — runbrowser documentation.">
+<meta name="description" content="Change one line in a Playwright or Puppeteer script and it runs on our browsers instead of yours.">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="stylesheet" href="/assets/docs.css">
 </head>
@@ -12,80 +12,299 @@
 <header class="docs-header">
   <a class="logo" href="/">
     <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
-    <span>runbrowser</span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
   </a>
-  <a class="back" href="/">&larr; back to site</a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
 </header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
 <div class="layout">
   <nav class="sidebar">
-    <span class="nav-title">Docs</span>
+    <span class="nav-title">Documentation</span>
     <div class="nav-links">
         <a class="active" href="/docs/quickstart">Quickstart</a>
         <a class="" href="/docs/concepts">Concepts</a>
         <a class="" href="/docs/api-reference">API reference</a>
+        <a class="" href="/docs/errors">Errors</a>
         <a class="" href="/docs/mcp">MCP server</a>
         <a class="" href="/docs/migrating-from-browserless">From Browserless</a>
         <a class="" href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a href="/#pricing">Pricing</a>
+        <a href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
   </nav>
   <main class="prose">
-<h1>Quickstart</h1>
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Quickstart</span></div>
+<h1 id="quickstart">Quickstart</h1>
 <p>Change one line in a Playwright or Puppeteer script and it runs on our
 browsers instead of yours.</p>
-<h2>1. Get a key</h2>
+<h2 id="1-get-a-key">1. Get a key<a class="anchor" href="#1-get-a-key" aria-label="Link to this section">#</a></h2>
 <p>Sign in at <code>https://app.runbrowser.dev</code> (magic link, no password), then
 <strong>API keys → Create</strong>. The key is shown once and looks like <code>ab_…</code>.</p>
-<h2>2. Point your script at us</h2>
-<pre><code class="language-ts">import { chromium } from &#39;playwright&#39;;
+<p>Keep it in an environment variable. A key pasted into source is a key that
+ends up in git history, and ours grant browser-time that costs real money.</p>
+<h2 id="2-point-your-script-at-us">2. Point your script at us<a class="anchor" href="#2-point-your-script-at-us" aria-label="Link to this section">#</a></h2>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="import { chromium } from 'playwright';
 
 const browser = await chromium.connectOverCDP(
   `https://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
 );
 const page = await browser.newPage();
-await page.goto(&#39;https://example.com&#39;);
-await page.screenshot({ path: &#39;out.png&#39; });
-await browser.close();
-</code></pre>
-<p>Puppeteer is the same idea:</p>
-<pre><code class="language-ts">import puppeteer from &#39;puppeteer-core&#39;;
+await page.goto('https://example.com');
+await page.screenshot({ path: 'out.png' });
+await browser.close();">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="import { chromium } from 'playwright';
+
+const browser = await chromium.connectOverCDP(
+  `https://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
+);
+const page = await browser.newPage();
+await page.goto('https://example.com');
+await page.screenshot({ path: 'out.png' });
+await browser.close();"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> chromium <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'playwright'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>
+  <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.runbrowser.dev?token=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> page <span class="token operator">=</span> <span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">newPage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://example.com'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">screenshot</span><span class="token punctuation">(</span><span class="token punctuation">{</span> path<span class="token operator">:</span> <span class="token string">'out.png'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="import os
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.connect_over_cdp(
+        f&quot;https://connect.runbrowser.dev?token={os.environ['RUNBROWSER_TOKEN']}&quot;
+    )
+    page = browser.new_page()
+    page.goto(&quot;https://example.com&quot;)
+    page.screenshot(path=&quot;out.png&quot;)
+    browser.close()"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">import</span> os
+<span class="token keyword">from</span> playwright<span class="token punctuation">.</span>sync_api <span class="token keyword">import</span> sync_playwright
+
+<span class="token keyword">with</span> sync_playwright<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> p<span class="token punctuation">:</span>
+    browser <span class="token operator">=</span> p<span class="token punctuation">.</span>chromium<span class="token punctuation">.</span>connect_over_cdp<span class="token punctuation">(</span>
+        <span class="token string-interpolation"><span class="token string">f"https://connect.runbrowser.dev?token=</span><span class="token interpolation"><span class="token punctuation">{</span>os<span class="token punctuation">.</span>environ<span class="token punctuation">[</span><span class="token string">'RUNBROWSER_TOKEN'</span><span class="token punctuation">]</span><span class="token punctuation">}</span></span><span class="token string">"</span></span>
+    <span class="token punctuation">)</span>
+    page <span class="token operator">=</span> browser<span class="token punctuation">.</span>new_page<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    page<span class="token punctuation">.</span>goto<span class="token punctuation">(</span><span class="token string">"https://example.com"</span><span class="token punctuation">)</span>
+    page<span class="token punctuation">.</span>screenshot<span class="token punctuation">(</span>path<span class="token operator">=</span><span class="token string">"out.png"</span><span class="token punctuation">)</span>
+    browser<span class="token punctuation">.</span>close<span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre></div></div><p>Puppeteer is the same idea:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="import puppeteer from 'puppeteer-core';
 
 const browser = await puppeteer.connect({
   browserWSEndpoint: `wss://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
-});
-</code></pre>
-<p>That&#39;s the whole migration. No SDK, no wrapper, no rewrite — your
+});">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">import</span> puppeteer <span class="token keyword">from</span> <span class="token string">'puppeteer-core'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> puppeteer<span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  browserWSEndpoint<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">wss://connect.runbrowser.dev?token=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div><p>That&#39;s the whole migration. No SDK, no wrapper, no rewrite — your
 existing selectors, waits and assertions are unchanged.</p>
-<h2>3. Or skip the browser entirely</h2>
+<p>If the connection is refused, the reason is in the close code — see
+<a href="/docs/errors">Errors</a>.</p>
+<h2 id="3-or-skip-the-browser-entirely">3. Or skip the browser entirely<a class="anchor" href="#3-or-skip-the-browser-entirely" aria-label="Link to this section">#</a></h2>
 <p>Half of what agents do with a browser doesn&#39;t need one. These cost no
 browser-time:</p>
-<pre><code class="language-bash"># Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="cURL">cURL</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button></div><button class="copy tabs-copy" type="button" data-code="# Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
 curl -X POST https://api.runbrowser.dev/v1/fetch \
   -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
-  -H &#39;Content-Type: application/json&#39; \
-  -d &#39;{&quot;url&quot;: &quot;https://example.com&quot;, &quot;format&quot;: &quot;markdown&quot;}&#39;
+  -H 'Content-Type: application/json' \
+  -d '{&quot;url&quot;: &quot;https://example.com&quot;, &quot;format&quot;: &quot;markdown&quot;}'
 
 # Search the web
 curl -X POST https://api.runbrowser.dev/v1/search \
   -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
-  -H &#39;Content-Type: application/json&#39; \
-  -d &#39;{&quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 5}&#39;
+  -H 'Content-Type: application/json' \
+  -d '{&quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 5}'
 
 # Pull structured data out of a page (renders it in a real browser first)
 curl -X POST https://api.runbrowser.dev/v1/extract \
   -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
-  -H &#39;Content-Type: application/json&#39; \
-  -d &#39;{
+  -H 'Content-Type: application/json' \
+  -d '{
     &quot;url&quot;: &quot;https://example.com&quot;,
     &quot;schema&quot;: {
       &quot;type&quot;: &quot;object&quot;,
       &quot;properties&quot;: { &quot;title&quot;: {&quot;type&quot;: &quot;string&quot;} },
       &quot;required&quot;: [&quot;title&quot;]
     }
-  }&#39;
-</code></pre>
-<h2>4. Or give your agent the browser as a tool</h2>
+  }'">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="cURL" data-code="# Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
+curl -X POST https://api.runbrowser.dev/v1/fetch \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H 'Content-Type: application/json' \
+  -d '{&quot;url&quot;: &quot;https://example.com&quot;, &quot;format&quot;: &quot;markdown&quot;}'
+
+# Search the web
+curl -X POST https://api.runbrowser.dev/v1/search \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H 'Content-Type: application/json' \
+  -d '{&quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 5}'
+
+# Pull structured data out of a page (renders it in a real browser first)
+curl -X POST https://api.runbrowser.dev/v1/extract \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H 'Content-Type: application/json' \
+  -d '{
+    &quot;url&quot;: &quot;https://example.com&quot;,
+    &quot;schema&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: { &quot;title&quot;: {&quot;type&quot;: &quot;string&quot;} },
+      &quot;required&quot;: [&quot;title&quot;]
+    }
+  }'"><span class="code-lang panel-lang">cURL</span><pre class="language-bash"><code><span class="token comment"># Read a page as markdown (plain HTTP — fast, but no JavaScript runs)</span>
+<span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://api.runbrowser.dev/v1/fetch <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">'Content-Type: application/json'</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{"url": "https://example.com", "format": "markdown"}'</span>
+
+<span class="token comment"># Search the web</span>
+<span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://api.runbrowser.dev/v1/search <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">'Content-Type: application/json'</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{"q": "browser automation", "count": 5}'</span>
+
+<span class="token comment"># Pull structured data out of a page (renders it in a real browser first)</span>
+<span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://api.runbrowser.dev/v1/extract <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">'Content-Type: application/json'</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{
+    "url": "https://example.com",
+    "schema": {
+      "type": "object",
+      "properties": { "title": {"type": "string"} },
+      "required": ["title"]
+    }
+  }'</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="import os, requests
+
+API = &quot;https://api.runbrowser.dev&quot;
+auth = {&quot;Authorization&quot;: f&quot;Bearer {os.environ['RUNBROWSER_TOKEN']}&quot;}
+
+# Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
+page = requests.post(
+    f&quot;{API}/v1/fetch&quot;, headers=auth,
+    json={&quot;url&quot;: &quot;https://example.com&quot;, &quot;format&quot;: &quot;markdown&quot;},
+).json()
+
+# Search the web
+hits = requests.post(
+    f&quot;{API}/v1/search&quot;, headers=auth,
+    json={&quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 5},
+).json()
+
+# Pull structured data out of a page (renders it in a real browser first)
+data = requests.post(
+    f&quot;{API}/v1/extract&quot;, headers=auth,
+    json={
+        &quot;url&quot;: &quot;https://example.com&quot;,
+        &quot;schema&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {&quot;title&quot;: {&quot;type&quot;: &quot;string&quot;}},
+            &quot;required&quot;: [&quot;title&quot;],
+        },
+    },
+).json()"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">import</span> os<span class="token punctuation">,</span> requests
+
+API <span class="token operator">=</span> <span class="token string">"https://api.runbrowser.dev"</span>
+auth <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token string">"Authorization"</span><span class="token punctuation">:</span> <span class="token string-interpolation"><span class="token string">f"Bearer </span><span class="token interpolation"><span class="token punctuation">{</span>os<span class="token punctuation">.</span>environ<span class="token punctuation">[</span><span class="token string">'RUNBROWSER_TOKEN'</span><span class="token punctuation">]</span><span class="token punctuation">}</span></span><span class="token string">"</span></span><span class="token punctuation">}</span>
+
+<span class="token comment"># Read a page as markdown (plain HTTP — fast, but no JavaScript runs)</span>
+page <span class="token operator">=</span> requests<span class="token punctuation">.</span>post<span class="token punctuation">(</span>
+    <span class="token string-interpolation"><span class="token string">f"</span><span class="token interpolation"><span class="token punctuation">{</span>API<span class="token punctuation">}</span></span><span class="token string">/v1/fetch"</span></span><span class="token punctuation">,</span> headers<span class="token operator">=</span>auth<span class="token punctuation">,</span>
+    json<span class="token operator">=</span><span class="token punctuation">{</span><span class="token string">"url"</span><span class="token punctuation">:</span> <span class="token string">"https://example.com"</span><span class="token punctuation">,</span> <span class="token string">"format"</span><span class="token punctuation">:</span> <span class="token string">"markdown"</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">.</span>json<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment"># Search the web</span>
+hits <span class="token operator">=</span> requests<span class="token punctuation">.</span>post<span class="token punctuation">(</span>
+    <span class="token string-interpolation"><span class="token string">f"</span><span class="token interpolation"><span class="token punctuation">{</span>API<span class="token punctuation">}</span></span><span class="token string">/v1/search"</span></span><span class="token punctuation">,</span> headers<span class="token operator">=</span>auth<span class="token punctuation">,</span>
+    json<span class="token operator">=</span><span class="token punctuation">{</span><span class="token string">"q"</span><span class="token punctuation">:</span> <span class="token string">"browser automation"</span><span class="token punctuation">,</span> <span class="token string">"count"</span><span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">.</span>json<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment"># Pull structured data out of a page (renders it in a real browser first)</span>
+data <span class="token operator">=</span> requests<span class="token punctuation">.</span>post<span class="token punctuation">(</span>
+    <span class="token string-interpolation"><span class="token string">f"</span><span class="token interpolation"><span class="token punctuation">{</span>API<span class="token punctuation">}</span></span><span class="token string">/v1/extract"</span></span><span class="token punctuation">,</span> headers<span class="token operator">=</span>auth<span class="token punctuation">,</span>
+    json<span class="token operator">=</span><span class="token punctuation">{</span>
+        <span class="token string">"url"</span><span class="token punctuation">:</span> <span class="token string">"https://example.com"</span><span class="token punctuation">,</span>
+        <span class="token string">"schema"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+            <span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"object"</span><span class="token punctuation">,</span>
+            <span class="token string">"properties"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">"title"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"string"</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token string">"required"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"title"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">.</span>json<span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="const API = 'https://api.runbrowser.dev';
+const auth = {
+  Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+  'Content-Type': 'application/json',
+};
+
+const call = async (path: string, body: unknown) =&gt; {
+  const res = await fetch(`${API}${path}`, {
+    method: 'POST',
+    headers: auth,
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`${path} failed: ${res.status} ${await res.text()}`);
+  return res.json();
+};
+
+// Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
+const page = await call('/v1/fetch', { url: 'https://example.com', format: 'markdown' });
+
+// Search the web
+const hits = await call('/v1/search', { q: 'browser automation', count: 5 });
+
+// Pull structured data out of a page (renders it in a real browser first)
+const data = await call('/v1/extract', {
+  url: 'https://example.com',
+  schema: {
+    type: 'object',
+    properties: { title: { type: 'string' } },
+    required: ['title'],
+  },
+});"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">const</span> <span class="token constant">API</span> <span class="token operator">=</span> <span class="token string">'https://api.runbrowser.dev'</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> auth <span class="token operator">=</span> <span class="token punctuation">{</span>
+  Authorization<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Bearer </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json'</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">call</span> <span class="token operator">=</span> <span class="token keyword">async</span> <span class="token punctuation">(</span>path<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">API</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>path<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
+    headers<span class="token operator">:</span> auth<span class="token punctuation">,</span>
+    body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>body<span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>res<span class="token punctuation">.</span>ok<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>path<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> failed: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>res<span class="token punctuation">.</span>status<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">await</span> res<span class="token punctuation">.</span><span class="token function">text</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Read a page as markdown (plain HTTP — fast, but no JavaScript runs)</span>
+<span class="token keyword">const</span> page <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'/v1/fetch'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> url<span class="token operator">:</span> <span class="token string">'https://example.com'</span><span class="token punctuation">,</span> format<span class="token operator">:</span> <span class="token string">'markdown'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Search the web</span>
+<span class="token keyword">const</span> hits <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'/v1/search'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> q<span class="token operator">:</span> <span class="token string">'browser automation'</span><span class="token punctuation">,</span> count<span class="token operator">:</span> <span class="token number">5</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Pull structured data out of a page (renders it in a real browser first)</span>
+<span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'/v1/extract'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  url<span class="token operator">:</span> <span class="token string">'https://example.com'</span><span class="token punctuation">,</span>
+  schema<span class="token operator">:</span> <span class="token punctuation">{</span>
+    type<span class="token operator">:</span> <span class="token string">'object'</span><span class="token punctuation">,</span>
+    properties<span class="token operator">:</span> <span class="token punctuation">{</span> title<span class="token operator">:</span> <span class="token punctuation">{</span> type<span class="token operator">:</span> <span class="token string">'string'</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    required<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'title'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div></div><h2 id="4-or-give-your-agent-the-browser-as-a-tool">4. Or give your agent the browser as a tool<a class="anchor" href="#4-or-give-your-agent-the-browser-as-a-tool" aria-label="Link to this section">#</a></h2>
 <p>If you&#39;re building with an MCP-aware agent, skip the code entirely:</p>
-<pre><code class="language-json">{
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
   &quot;mcpServers&quot;: {
     &quot;runbrowser&quot;: {
       &quot;command&quot;: &quot;npx&quot;,
@@ -93,11 +312,17 @@ curl -X POST https://api.runbrowser.dev/v1/extract \
                &quot;--header&quot;, &quot;Authorization: Bearer ab_yourkey&quot;]
     }
   }
-}
-</code></pre>
-<p>Nine tools appear: <code>fetch</code>, <code>search</code>, <code>extract</code>, and a <code>browser_*</code> family
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"mcpServers"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"runbrowser"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"command"</span><span class="token operator">:</span> <span class="token string">"npx"</span><span class="token punctuation">,</span>
+      <span class="token property">"args"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"-y"</span><span class="token punctuation">,</span> <span class="token string">"mcp-remote"</span><span class="token punctuation">,</span> <span class="token string">"https://connect.runbrowser.dev/mcp"</span><span class="token punctuation">,</span>
+               <span class="token string">"--header"</span><span class="token punctuation">,</span> <span class="token string">"Authorization: Bearer ab_yourkey"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre></div><p>Nine tools appear: <code>fetch</code>, <code>search</code>, <code>extract</code>, and a <code>browser_*</code> family
 that drives one persistent browser across calls. See <a href="/docs/mcp">mcp.md</a>.</p>
-<h2>What you&#39;re billed for</h2>
+<h2 id="what-youre-billed-for">What you&#39;re billed for<a class="anchor" href="#what-youre-billed-for" aria-label="Link to this section">#</a></h2>
 <p><strong>Browser-time, by the second</strong> — from the moment a browser is provisioned
 to the moment it&#39;s released. Not per session, so a script that opens one
 browser and drives it for an hour costs the same as sixty scripts that
@@ -109,21 +334,37 @@ browser, so it does.</p>
 <a href="/docs/concepts#stable-sessions">stable session</a>, which keeps the browser
 parked and <em>keeps billing</em> until it&#39;s closed or idles out. That trade is
 the point of the feature, but know that you&#39;re making it.</p>
-<h2>Next</h2>
+<h2 id="next">Next<a class="anchor" href="#next" aria-label="Link to this section">#</a></h2>
 <ul>
 <li><a href="/docs/concepts">Concepts</a> — sessions, quotas, stable sessions, the viewer</li>
 <li><a href="/docs/api-reference">API reference</a> — every endpoint</li>
+<li><a href="/docs/errors">Errors</a> — every status code, what causes it, what to do</li>
 <li><a href="/docs/migrating-from-browserless">Migrating from Browserless</a></li>
 <li><a href="/docs/migrating-from-browserbase">Migrating from Browserbase</a></li>
 </ul>
 
+    <nav class="pager">
+      <span></span>
+      <a class="next" href="/docs/concepts"><span>Next</span>Concepts</a>
+    </nav>
     <hr>
     <p class="foot">
-      Something wrong or missing here?
-      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Quickstart">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
+    <p class="updated">Last updated 2026-08-13</p>
   </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#1-get-a-key">1. Get a key</a>
+    <a class="toc-2" href="#2-point-your-script-at-us">2. Point your script at us</a>
+    <a class="toc-2" href="#3-or-skip-the-browser-entirely">3. Or skip the browser entirely</a>
+    <a class="toc-2" href="#4-or-give-your-agent-the-browser-as-a-tool">4. Or give your agent the browser as a tool</a>
+    <a class="toc-2" href="#what-youre-billed-for">What you're billed for</a>
+    <a class="toc-2" href="#next">Next</a>
+  </aside>
 </div>
+<script src="/assets/docs.js" defer></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Migrating from Browserbase — runbrowser docs</title>
-<meta name="description" content="Migrating from Browserbase — runbrowser documentation.">
+<meta name="description" content="Browserbase gives you an SDK that creates a session and hands back a `connectUrl`. We give you a URL. The shapes are close enough that the migration is mos">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="stylesheet" href="/assets/docs.css">
 </head>
@@ -12,29 +12,48 @@
 <header class="docs-header">
   <a class="logo" href="/">
     <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
-    <span>runbrowser</span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
   </a>
-  <a class="back" href="/">&larr; back to site</a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
 </header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
 <div class="layout">
   <nav class="sidebar">
-    <span class="nav-title">Docs</span>
+    <span class="nav-title">Documentation</span>
     <div class="nav-links">
         <a class="" href="/docs/quickstart">Quickstart</a>
         <a class="" href="/docs/concepts">Concepts</a>
         <a class="" href="/docs/api-reference">API reference</a>
+        <a class="" href="/docs/errors">Errors</a>
         <a class="" href="/docs/mcp">MCP server</a>
         <a class="" href="/docs/migrating-from-browserless">From Browserless</a>
         <a class="active" href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a href="/#pricing">Pricing</a>
+        <a href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
   </nav>
   <main class="prose">
-<h1>Migrating from Browserbase</h1>
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Migrating from Browserbase</span></div>
+<h1 id="migrating-from-browserbase">Migrating from Browserbase</h1>
 <p>Browserbase gives you an SDK that creates a session and hands back a
 <code>connectUrl</code>. We give you a URL. The shapes are close enough that the
 migration is mostly deleting code.</p>
-<h2>The direct translation</h2>
-<pre><code class="language-diff">- import Browserbase from &quot;@browserbasehq/sdk&quot;;
+<h2 id="the-direct-translation">The direct translation<a class="anchor" href="#the-direct-translation" aria-label="Link to this section">#</a></h2>
+<div class="code-block"><div class="code-bar"><span class="code-lang">diff</span><button class="copy" type="button" data-code="- import Browserbase from &quot;@browserbasehq/sdk&quot;;
   import { chromium } from &quot;playwright-core&quot;;
 
 - const bb = new Browserbase({ apiKey: process.env.BROWSERBASE_API_KEY });
@@ -45,22 +64,34 @@ migration is mostly deleting code.</p>
 + );
 
   const context = browser.contexts()[0];
-  const page = context.pages()[0];
-</code></pre>
-<p>No SDK, no project ID, no session-create round trip. One dependency
+  const page = context.pages()[0];">Copy</button></div><pre class="language-diff"><code><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line"> import Browserbase from "@browserbasehq/sdk";
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> import { chromium } from "playwright-core";
+</span></span>
+<span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line"> const bb = new Browserbase({ apiKey: process.env.BROWSERBASE_API_KEY });
+</span><span class="token prefix deleted">-</span><span class="token line"> const session = await bb.sessions.create();
+</span><span class="token prefix deleted">-</span><span class="token line"> const browser = await chromium.connectOverCDP(session.connectUrl);
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line"> const browser = await chromium.connectOverCDP(
+</span><span class="token prefix inserted">+</span><span class="token line">   `wss://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
+</span><span class="token prefix inserted">+</span><span class="token line"> );
+</span></span>
+<span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> const context = browser.contexts()[0];
+</span><span class="token prefix unchanged"> </span><span class="token line"> const page = context.pages()[0];</span></span></code></pre></div><p>No SDK, no project ID, no session-create round trip. One dependency
 fewer in your <code>package.json</code>.</p>
 <p>If you <em>want</em> the create-then-connect shape — to pass a proxy without
 putting credentials in a URL, or to get a stable session — it exists:</p>
-<pre><code class="language-ts">const res = await fetch(`https://connect.runbrowser.dev/v1/sessions`, {
-  method: &#39;POST&#39;,
-  headers: { Authorization: `Bearer ${key}`, &#39;Content-Type&#39;: &#39;application/json&#39; },
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="const res = await fetch(`https://connect.runbrowser.dev/v1/sessions`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
   body: JSON.stringify({ keepAlive: true, maxIdleSeconds: 600 }),
 });
-const { sessionId, connectUrl } = await res.json();
-</code></pre>
-<p>Same two-step, no SDK required.</p>
-<h2>Feature-by-feature</h2>
-<table>
+const { sessionId, connectUrl } = await res.json();">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.runbrowser.dev/v1/sessions</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
+  headers<span class="token operator">:</span> <span class="token punctuation">{</span> Authorization<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Bearer </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>key<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> keepAlive<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> maxIdleSeconds<span class="token operator">:</span> <span class="token number">600</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> sessionId<span class="token punctuation">,</span> connectUrl <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div><p>Same two-step, no SDK required.</p>
+<h2 id="feature-by-feature">Feature-by-feature<a class="anchor" href="#feature-by-feature" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Browserbase</th>
@@ -116,7 +147,7 @@ const { sessionId, connectUrl } = await res.json();
 <td><strong>No equivalent.</strong> We&#39;re infrastructure; the agent framework is yours.</td>
 </tr>
 </tbody></table>
-<h2>Contexts vs stable sessions — the one real difference</h2>
+</div><h2 id="contexts-vs-stable-sessions-the-one-real-difference">Contexts vs stable sessions — the one real difference<a class="anchor" href="#contexts-vs-stable-sessions-the-one-real-difference" aria-label="Link to this section">#</a></h2>
 <p>A Browserbase <strong>Context</strong> persists cookies, localStorage and cached auth,
 and you attach it to a <em>new</em> browser on each run. Our <strong>stable session</strong>
 keeps the actual browser alive between connects.</p>
@@ -136,7 +167,7 @@ Redis-persisted context is on the list, waiting on someone asking. If your
 pattern is &quot;an agent working through a flow over minutes&quot;, stable sessions
 do something contexts can&#39;t.</p>
 <p>Be honest about which one you actually have.</p>
-<h2>Pricing</h2>
+<h2 id="pricing">Pricing<a class="anchor" href="#pricing" aria-label="Link to this section">#</a></h2>
 <p>Browserbase&#39;s structure is a monthly plan plus browser-hours, with stealth
 and CAPTCHA solving gated to higher tiers. Ours is a plan plus
 browser-hours too (€0 / €19 / €99 / €499), with two structural
@@ -156,7 +187,7 @@ proxy traffic. Price both against your own workload.</p>
 <p>Concurrency runs 3 / 10 / 25 / 50 across Free → Scale. Browserbase sells
 higher ceilings than that; if you genuinely need hundreds of simultaneous
 browsers, they have the fleet for it today and we don&#39;t.</p>
-<h2>What we don&#39;t have, plainly</h2>
+<h2 id="what-we-dont-have-plainly">What we don&#39;t have, plainly<a class="anchor" href="#what-we-dont-have-plainly" aria-label="Link to this section">#</a></h2>
 <ul>
 <li>No session recording or replay.</li>
 <li>No Director, no semantic actions (<code>clickByDescription</code>). Stagehand works
@@ -171,7 +202,7 @@ agent runtime bundled with the browser, that&#39;s them, not us.</li>
 <p>If your product depends on any of those, stay. If you&#39;re paying premium
 tiers mostly for stealth and stable sessions, that&#39;s the trade we&#39;re built
 for.</p>
-<h2>What you get instead</h2>
+<h2 id="what-you-get-instead">What you get instead<a class="anchor" href="#what-you-get-instead" aria-label="Link to this section">#</a></h2>
 <ul>
 <li><strong>An MCP server</strong> — nine tools, no integration code. <a href="/docs/mcp">Details</a>.</li>
 <li><strong><code>/v1/fetch</code> and <code>/v1/search</code></strong>, billed against separate monthly
@@ -190,13 +221,28 @@ match your local environment to production — the hosted service itself is
 not open source.)</li>
 </ul>
 
+    <nav class="pager">
+      <a class="prev" href="/docs/migrating-from-browserless"><span>Previous</span>From Browserless</a>
+      <span></span>
+    </nav>
     <hr>
     <p class="foot">
-      Something wrong or missing here?
-      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Migrating%20from%20Browserbase">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
+    <p class="updated">Last updated 2026-08-13</p>
   </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#the-direct-translation">The direct translation</a>
+    <a class="toc-2" href="#feature-by-feature">Feature-by-feature</a>
+    <a class="toc-2" href="#contexts-vs-stable-sessions-the-one-real-difference">Contexts vs stable sessions — the one real difference</a>
+    <a class="toc-2" href="#pricing">Pricing</a>
+    <a class="toc-2" href="#what-we-dont-have-plainly">What we don't have, plainly</a>
+    <a class="toc-2" href="#what-you-get-instead">What you get instead</a>
+  </aside>
 </div>
+<script src="/assets/docs.js" defer></script>
 </body>
 </html>
