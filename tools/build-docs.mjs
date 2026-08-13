@@ -44,8 +44,8 @@ const NAV = [
 /**
  * Search tie-breaker. A migration guide has a "Concurrency" heading and
  * Concepts has "Concurrency and queueing", so an exact-match rule alone sends
- * someone asking about a core concept to a page written for people leaving a
- * competitor. Canonical pages win ties; comparison pages lose them.
+ * someone asking about a core concept to a migration page instead. Canonical
+ * pages win ties; migration pages lose them.
  */
 const PAGE_WEIGHT = {
   quickstart: 1.4,
@@ -161,10 +161,9 @@ marked.setOptions({ renderer })
 /**
  * Collapses runs of adjacent `tab=`-labelled fences into one tab group.
  *
- * The competitor with the better docs shows five languages per example; the
- * one with the better everything-else shows two. Showing the reader's own
- * language, and remembering which that is, is the single highest-leverage
- * thing on a quickstart page.
+ * Showing the reader their own language, and remembering which that is, is
+ * the single highest-leverage thing on a quickstart page — a reader who has
+ * to mentally port the one example before evaluating us often just leaves.
  */
 function groupTabs(tokens) {
   const out = []

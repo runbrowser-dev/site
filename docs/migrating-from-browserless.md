@@ -44,7 +44,7 @@ Be honest with yourself about this list before you switch:
 If you depend on `/function` or BrowserQL, this isn't a drop-in and you
 should budget real work — or stay where you are.
 
-## What you get that Browserless doesn't have
+## What you get here
 
 - **Stable sessions** that survive disconnect with *full* state — in-memory
   SPA state and open tabs, not just cookies. [Details](concepts.md#stable-sessions).
@@ -53,35 +53,36 @@ should budget real work — or stay where you are.
   integration code. [Details](mcp.md).
 - **Live viewer with signed shareable URLs** that are safe to paste into a
   ticket — no API key inside.
-- **EU residency** (Falkenstein). Browserless's shared fleet is US West,
-  London and Amsterdam; if EU-only matters to you legally, we're
-  single-region by design.
+- **EU residency** (Falkenstein). If EU-only matters to you legally, we're
+  single-region by design; check their current region list against your
+  own requirements.
 
 ## Billing differences that will actually surprise you
 
-Browserless bills in **units**: 1 unit per 30 seconds of browser time,
-**rounded up** — a 31-second session costs 2 units. CAPTCHA solves cost 10
-units each, and their built-in proxies cost 6 units/MB residential or 2
-units/MB datacenter. (Third-party proxies you connect yourself don't
-consume units there, same as here.)
+> Their pricing is theirs to change, and this page won't always keep up.
+> The figures below were read off browserless.io's published pricing on
+> **2026-08-13**; check the current terms before you make a decision on
+> them. We describe the *shape* of the difference because that's what
+> tends to persist — not to score a point on the numbers.
 
-We bill **browser-seconds**, floored at 10 seconds per session, plus
-separate monthly allowances for `/v1/fetch`, `/v1/search` and
-`/v1/extract`. Proxy traffic and CAPTCHA solving stay on your providers'
-bills rather than ours.
+Browserless bills in **units**, where a unit covers a block of browser
+time and partial blocks round **up**. We bill **browser-seconds**, floored
+at 10 seconds per session, plus separate monthly allowances for
+`/v1/fetch`, `/v1/search` and `/v1/extract`. Proxy traffic and CAPTCHA
+solving stay on your providers' bills rather than ours.
 
 The practical consequences:
 
-- **Short sessions get much cheaper.** Rounding up to 30 seconds means a
-  3-second session bills as 30. Ours bills as 10 seconds. If your workload
-  is many short sessions, this is the single biggest difference in the
-  whole migration.
-- **CAPTCHA solving moves to your own account.** Browserless bills 10
-  units per solve. We don't offer it — you bring a CapSolver or 2Captcha
-  key ([helper](../examples/captcha/)) and pay them roughly $0.001 a solve
-  directly. Cheaper, but it's a signup you didn't have before.
-- **Your proxy bill becomes visible.** Their bundled proxies stop being
-  units on one invoice and become a line item from your proxy provider.
+- **Short sessions get cheaper.** Rounding a block up means a 3-second
+  session bills as a whole block. Ours bills as 10 seconds. If your
+  workload is many short sessions, this is the single biggest difference
+  in the whole migration — and the one to model against your own numbers.
+- **CAPTCHA solving moves to your own account.** We don't offer it. You
+  bring a CapSolver or 2Captcha key ([helper](../examples/captcha/)) and
+  pay them directly at their list price. Usually cheaper than a bundled
+  rate, but it's a signup you didn't have before.
+- **Your proxy bill becomes visible.** Bundled proxy traffic stops being
+  part of one invoice and becomes a line item from your proxy provider.
   Usually cheaper at wholesale, but always more work to set up.
 - **Parked stable sessions bill while parked.** Same as Browserbase, and
   worth knowing before you leave one open overnight.

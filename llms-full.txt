@@ -1110,7 +1110,7 @@ Same two-step, no SDK required.
 | Live View | [Live viewer](concepts.md#live-viewer), signed expiring URLs |
 | Session recording / replay | **No equivalent.** |
 | Stagehand | Works — it connects over CDP like anything else |
-| Advanced Stealth (premium tiers) | Always-on, no tier gate |
+| Advanced Stealth | Always-on here, no tier gate |
 | Bundled CAPTCHA solving | **Not offered.** BYO solver key via the [helper](../examples/captcha/) — you pay wholesale |
 | Bundled proxies | BYO proxy, no markup |
 | Extensions, file uploads/downloads | Via CDP, no dedicated API |
@@ -1147,14 +1147,19 @@ Be honest about which one you actually have.
 
 ## Pricing
 
-Browserbase's structure is a monthly plan plus browser-hours, with stealth
-and CAPTCHA solving gated to higher tiers. Ours is a plan plus
+> Read off browserbase.com's published pricing on **2026-08-13**. Their
+> terms are theirs to change and this page won't always keep up — verify
+> before deciding on it. What follows describes the shape of the
+> difference, which is what tends to persist.
+
+Browserbase's structure is a monthly plan plus browser-hours, with some
+capabilities associated with higher tiers. Ours is a plan plus
 browser-hours too (€0 / €19 / €99 / €499), with two structural
 differences:
 
-- **Stealth isn't a tier.** Free-tier browsers get the same stack as Scale.
-  There's nothing to upgrade into, because our stealth is a handful of
-  launch flags rather than a product SKU.
+- **Stealth isn't a tier here.** Free-tier browsers get the same stack as
+  Scale. There's nothing to upgrade into, because our stealth is a handful
+  of launch flags rather than a product SKU.
 - **CAPTCHAs and proxies are both yours to buy.** We don't solve CAPTCHAs
   on your behalf and we don't resell proxies; you bring a key for each and
   pay wholesale. Cheaper, but more setup. If you'd rather the invoice be
@@ -1166,16 +1171,17 @@ proxy traffic. Price both against your own workload.
 
 Concurrency runs 3 / 10 / 25 / 50 across Free → Scale. Browserbase sells
 higher ceilings than that; if you genuinely need hundreds of simultaneous
-browsers, they have the fleet for it today and we don't.
+browsers, they have the fleet for it today and we don't. That is a real
+capacity difference, not a pricing one.
 
 ## What we don't have, plainly
 
 - No session recording or replay.
 - No Director, no semantic actions (`clickByDescription`). Stagehand works
   against us, but the vision-based tooling is theirs.
-- No Agents, Functions or Model Gateway. Browserbase has been growing into
-  a platform; we're deliberately staying infrastructure. If you want the
-  agent runtime bundled with the browser, that's them, not us.
+- No Agents, Functions or Model Gateway. They offer a broader platform;
+  we're deliberately staying infrastructure. If you want the agent runtime
+  bundled with the browser, that's them, not us.
 - One region.
 - No bundled proxy and no bundled CAPTCHA solving — both are BYO.
 - Lower concurrency ceiling.
@@ -1250,7 +1256,7 @@ Be honest with yourself about this list before you switch:
 If you depend on `/function` or BrowserQL, this isn't a drop-in and you
 should budget real work — or stay where you are.
 
-## What you get that Browserless doesn't have
+## What you get here
 
 - **Stable sessions** that survive disconnect with *full* state — in-memory
   SPA state and open tabs, not just cookies. [Details](concepts.md#stable-sessions).
@@ -1259,35 +1265,36 @@ should budget real work — or stay where you are.
   integration code. [Details](mcp.md).
 - **Live viewer with signed shareable URLs** that are safe to paste into a
   ticket — no API key inside.
-- **EU residency** (Falkenstein). Browserless's shared fleet is US West,
-  London and Amsterdam; if EU-only matters to you legally, we're
-  single-region by design.
+- **EU residency** (Falkenstein). If EU-only matters to you legally, we're
+  single-region by design; check their current region list against your
+  own requirements.
 
 ## Billing differences that will actually surprise you
 
-Browserless bills in **units**: 1 unit per 30 seconds of browser time,
-**rounded up** — a 31-second session costs 2 units. CAPTCHA solves cost 10
-units each, and their built-in proxies cost 6 units/MB residential or 2
-units/MB datacenter. (Third-party proxies you connect yourself don't
-consume units there, same as here.)
+> Their pricing is theirs to change, and this page won't always keep up.
+> The figures below were read off browserless.io's published pricing on
+> **2026-08-13**; check the current terms before you make a decision on
+> them. We describe the *shape* of the difference because that's what
+> tends to persist — not to score a point on the numbers.
 
-We bill **browser-seconds**, floored at 10 seconds per session, plus
-separate monthly allowances for `/v1/fetch`, `/v1/search` and
-`/v1/extract`. Proxy traffic and CAPTCHA solving stay on your providers'
-bills rather than ours.
+Browserless bills in **units**, where a unit covers a block of browser
+time and partial blocks round **up**. We bill **browser-seconds**, floored
+at 10 seconds per session, plus separate monthly allowances for
+`/v1/fetch`, `/v1/search` and `/v1/extract`. Proxy traffic and CAPTCHA
+solving stay on your providers' bills rather than ours.
 
 The practical consequences:
 
-- **Short sessions get much cheaper.** Rounding up to 30 seconds means a
-  3-second session bills as 30. Ours bills as 10 seconds. If your workload
-  is many short sessions, this is the single biggest difference in the
-  whole migration.
-- **CAPTCHA solving moves to your own account.** Browserless bills 10
-  units per solve. We don't offer it — you bring a CapSolver or 2Captcha
-  key ([helper](../examples/captcha/)) and pay them roughly $0.001 a solve
-  directly. Cheaper, but it's a signup you didn't have before.
-- **Your proxy bill becomes visible.** Their bundled proxies stop being
-  units on one invoice and become a line item from your proxy provider.
+- **Short sessions get cheaper.** Rounding a block up means a 3-second
+  session bills as a whole block. Ours bills as 10 seconds. If your
+  workload is many short sessions, this is the single biggest difference
+  in the whole migration — and the one to model against your own numbers.
+- **CAPTCHA solving moves to your own account.** We don't offer it. You
+  bring a CapSolver or 2Captcha key ([helper](../examples/captcha/)) and
+  pay them directly at their list price. Usually cheaper than a bundled
+  rate, but it's a signup you didn't have before.
+- **Your proxy bill becomes visible.** Bundled proxy traffic stops being
+  part of one invoice and becomes a line item from your proxy provider.
   Usually cheaper at wholesale, but always more work to set up.
 - **Parked stable sessions bill while parked.** Same as Browserbase, and
   worth knowing before you leave one open overnight.
