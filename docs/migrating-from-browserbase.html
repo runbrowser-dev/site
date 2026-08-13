@@ -119,8 +119,8 @@ const { sessionId, connectUrl } = await res.json();">Copy</button></div><pre cla
 <td>Works — it connects over CDP like anything else</td>
 </tr>
 <tr>
-<td>Advanced Stealth (premium tiers)</td>
-<td>Always-on, no tier gate</td>
+<td>Advanced Stealth</td>
+<td>Always-on here, no tier gate</td>
 </tr>
 <tr>
 <td>Bundled CAPTCHA solving</td>
@@ -168,14 +168,20 @@ pattern is &quot;an agent working through a flow over minutes&quot;, stable sess
 do something contexts can&#39;t.</p>
 <p>Be honest about which one you actually have.</p>
 <h2 id="pricing">Pricing<a class="anchor" href="#pricing" aria-label="Link to this section">#</a></h2>
-<p>Browserbase&#39;s structure is a monthly plan plus browser-hours, with stealth
-and CAPTCHA solving gated to higher tiers. Ours is a plan plus
+<blockquote>
+<p>Read off browserbase.com&#39;s published pricing on <strong>2026-08-13</strong>. Their
+terms are theirs to change and this page won&#39;t always keep up — verify
+before deciding on it. What follows describes the shape of the
+difference, which is what tends to persist.</p>
+</blockquote>
+<p>Browserbase&#39;s structure is a monthly plan plus browser-hours, with some
+capabilities associated with higher tiers. Ours is a plan plus
 browser-hours too (€0 / €19 / €99 / €499), with two structural
 differences:</p>
 <ul>
-<li><strong>Stealth isn&#39;t a tier.</strong> Free-tier browsers get the same stack as Scale.
-There&#39;s nothing to upgrade into, because our stealth is a handful of
-launch flags rather than a product SKU.</li>
+<li><strong>Stealth isn&#39;t a tier here.</strong> Free-tier browsers get the same stack as
+Scale. There&#39;s nothing to upgrade into, because our stealth is a handful
+of launch flags rather than a product SKU.</li>
 <li><strong>CAPTCHAs and proxies are both yours to buy.</strong> We don&#39;t solve CAPTCHAs
 on your behalf and we don&#39;t resell proxies; you bring a key for each and
 pay wholesale. Cheaper, but more setup. If you&#39;d rather the invoice be
@@ -186,15 +192,16 @@ and per-tier comparisons depend on your mix of browser-hours, solves and
 proxy traffic. Price both against your own workload.</p>
 <p>Concurrency runs 3 / 10 / 25 / 50 across Free → Scale. Browserbase sells
 higher ceilings than that; if you genuinely need hundreds of simultaneous
-browsers, they have the fleet for it today and we don&#39;t.</p>
+browsers, they have the fleet for it today and we don&#39;t. That is a real
+capacity difference, not a pricing one.</p>
 <h2 id="what-we-dont-have-plainly">What we don&#39;t have, plainly<a class="anchor" href="#what-we-dont-have-plainly" aria-label="Link to this section">#</a></h2>
 <ul>
 <li>No session recording or replay.</li>
 <li>No Director, no semantic actions (<code>clickByDescription</code>). Stagehand works
 against us, but the vision-based tooling is theirs.</li>
-<li>No Agents, Functions or Model Gateway. Browserbase has been growing into
-a platform; we&#39;re deliberately staying infrastructure. If you want the
-agent runtime bundled with the browser, that&#39;s them, not us.</li>
+<li>No Agents, Functions or Model Gateway. They offer a broader platform;
+we&#39;re deliberately staying infrastructure. If you want the agent runtime
+bundled with the browser, that&#39;s them, not us.</li>
 <li>One region.</li>
 <li>No bundled proxy and no bundled CAPTCHA solving — both are BYO.</li>
 <li>Lower concurrency ceiling.</li>

@@ -47,7 +47,7 @@ Same two-step, no SDK required.
 | Live View | [Live viewer](concepts.md#live-viewer), signed expiring URLs |
 | Session recording / replay | **No equivalent.** |
 | Stagehand | Works — it connects over CDP like anything else |
-| Advanced Stealth (premium tiers) | Always-on, no tier gate |
+| Advanced Stealth | Always-on here, no tier gate |
 | Bundled CAPTCHA solving | **Not offered.** BYO solver key via the [helper](../examples/captcha/) — you pay wholesale |
 | Bundled proxies | BYO proxy, no markup |
 | Extensions, file uploads/downloads | Via CDP, no dedicated API |
@@ -84,14 +84,19 @@ Be honest about which one you actually have.
 
 ## Pricing
 
-Browserbase's structure is a monthly plan plus browser-hours, with stealth
-and CAPTCHA solving gated to higher tiers. Ours is a plan plus
+> Read off browserbase.com's published pricing on **2026-08-13**. Their
+> terms are theirs to change and this page won't always keep up — verify
+> before deciding on it. What follows describes the shape of the
+> difference, which is what tends to persist.
+
+Browserbase's structure is a monthly plan plus browser-hours, with some
+capabilities associated with higher tiers. Ours is a plan plus
 browser-hours too (€0 / €19 / €99 / €499), with two structural
 differences:
 
-- **Stealth isn't a tier.** Free-tier browsers get the same stack as Scale.
-  There's nothing to upgrade into, because our stealth is a handful of
-  launch flags rather than a product SKU.
+- **Stealth isn't a tier here.** Free-tier browsers get the same stack as
+  Scale. There's nothing to upgrade into, because our stealth is a handful
+  of launch flags rather than a product SKU.
 - **CAPTCHAs and proxies are both yours to buy.** We don't solve CAPTCHAs
   on your behalf and we don't resell proxies; you bring a key for each and
   pay wholesale. Cheaper, but more setup. If you'd rather the invoice be
@@ -103,16 +108,17 @@ proxy traffic. Price both against your own workload.
 
 Concurrency runs 3 / 10 / 25 / 50 across Free → Scale. Browserbase sells
 higher ceilings than that; if you genuinely need hundreds of simultaneous
-browsers, they have the fleet for it today and we don't.
+browsers, they have the fleet for it today and we don't. That is a real
+capacity difference, not a pricing one.
 
 ## What we don't have, plainly
 
 - No session recording or replay.
 - No Director, no semantic actions (`clickByDescription`). Stagehand works
   against us, but the vision-based tooling is theirs.
-- No Agents, Functions or Model Gateway. Browserbase has been growing into
-  a platform; we're deliberately staying infrastructure. If you want the
-  agent runtime bundled with the browser, that's them, not us.
+- No Agents, Functions or Model Gateway. They offer a broader platform;
+  we're deliberately staying infrastructure. If you want the agent runtime
+  bundled with the browser, that's them, not us.
 - One region.
 - No bundled proxy and no bundled CAPTCHA solving — both are BYO.
 - Lower concurrency ceiling.
