@@ -926,6 +926,16 @@ def call(path, body, attempts=5):
 For CDP connections, the equivalent is to catch the connect failure, read
 the status out of the message, and reconnect on `429`/`503` only.
 
+## Reporting abuse
+
+If traffic from our addresses is causing you a problem — scraping you didn't
+consent to, login attempts you didn't expect, anything that looks like an
+attack — mail <abuse@runbrowser.dev> with the target, the timestamps and any
+log lines you have.
+
+We can suspend a customer account, and we will where it's warranted. We would
+much rather hear from you than from your hosting provider.
+
 ## Still stuck?
 
 If you get a status that isn't on this page, or one that is but the

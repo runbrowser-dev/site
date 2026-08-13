@@ -1010,6 +1010,13 @@ API <span class="token operator">=</span> <span class="token string">"https://ap
         after <span class="token operator">=</span> res<span class="token punctuation">.</span>headers<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"retry-after"</span><span class="token punctuation">)</span>
         time<span class="token punctuation">.</span>sleep<span class="token punctuation">(</span><span class="token builtin">int</span><span class="token punctuation">(</span>after<span class="token punctuation">)</span> <span class="token keyword">if</span> after <span class="token keyword">else</span> <span class="token number">2</span><span class="token operator">**</span>attempt <span class="token operator">*</span> <span class="token number">0.5</span> <span class="token operator">+</span> random<span class="token punctuation">.</span>random<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.25</span><span class="token punctuation">)</span></code></pre></div></div><p>For CDP connections, the equivalent is to catch the connect failure, read
 the status out of the message, and reconnect on <code>429</code>/<code>503</code> only.</p>
+<h2 id="reporting-abuse">Reporting abuse<a class="anchor" href="#reporting-abuse" aria-label="Link to this section">#</a></h2>
+<p>If traffic from our addresses is causing you a problem — scraping you didn&#39;t
+consent to, login attempts you didn&#39;t expect, anything that looks like an
+attack — mail <a href="mailto:abuse@runbrowser.dev">abuse@runbrowser.dev</a> with the target, the timestamps and any
+log lines you have.</p>
+<p>We can suspend a customer account, and we will where it&#39;s warranted. We would
+much rather hear from you than from your hosting provider.</p>
 <h2 id="still-stuck">Still stuck?<a class="anchor" href="#still-stuck" aria-label="Link to this section">#</a></h2>
 <p>If you get a status that isn&#39;t on this page, or one that is but the
 explanation doesn&#39;t match what you&#39;re seeing, that&#39;s a bug in our docs and
@@ -1052,6 +1059,7 @@ code, and roughly when it happened, and we&#39;ll look at the actual logs.</p>
     <a class="toc-2" href="#proxies">Proxies</a>
     <a class="toc-2" href="#quotas-and-limits">Quotas and limits</a>
     <a class="toc-2" href="#a-retry-policy-that-works">A retry policy that works</a>
+    <a class="toc-2" href="#reporting-abuse">Reporting abuse</a>
     <a class="toc-2" href="#still-stuck">Still stuck?</a>
     <a class="toc-2" href="#next">Next</a>
   </aside>
