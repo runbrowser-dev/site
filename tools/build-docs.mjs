@@ -33,19 +33,24 @@ const NAV = [
 const escapeHtml = (s) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
-/** Internal .md links must point at the rendered pages, not the source files. */
+/**
+ * Internal .md links must point at the rendered pages, not the source files.
+ * Emit extensionless URLs: Cloudflare Assets serves /docs/foo and 307s
+ * /docs/foo.html to it, so linking with the extension costs a redirect on
+ * every navigation.
+ */
 function rewriteLinks(html) {
   return html
     // ../examples/... lives in a private repo — send people to the docs index.
     .replace(/href="\.\.\/examples\/[^"]*"/g, 'href="/docs/"')
-    .replace(/href="([a-z0-9-]+)\.md(#[^"]*)?"/gi, (_m, page, hash) => `href="/docs/${page}.html${hash || ''}"`)
+    .replace(/href="([a-z0-9-]+)\.md(#[^"]*)?"/gi, (_m, page, hash) => `href="/docs/${page}${hash || ''}"`)
     .replace(/href="\.\.\/[^"]*\.md"/g, 'href="/docs/"')
 }
 
 function page({ title, body, slug }) {
   const nav = NAV.map(
     ([s, label]) =>
-      `<a class="${s === slug ? 'active' : ''}" href="/docs/${s}.html">${escapeHtml(label)}</a>`,
+      `<a class="${s === slug ? 'active' : ''}" href="/docs/${s}">${escapeHtml(label)}</a>`,
   ).join('\n        ')
 
   return `<!doctype html>
@@ -115,7 +120,7 @@ const cards = [
 ]
   .map(
     ([slug, title, blurb]) =>
-      `      <a class="card" href="/docs/${slug}.html">
+      `      <a class="card" href="/docs/${slug}">
         <span class="card-title">${escapeHtml(title)}</span>
         <span class="card-blurb">${escapeHtml(blurb)}</span>
       </a>`,

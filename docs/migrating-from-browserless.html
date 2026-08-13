@@ -20,12 +20,12 @@
   <nav class="sidebar">
     <span class="nav-title">Docs</span>
     <div class="nav-links">
-        <a class="" href="/docs/quickstart.html">Quickstart</a>
-        <a class="" href="/docs/concepts.html">Concepts</a>
-        <a class="" href="/docs/api-reference.html">API reference</a>
-        <a class="" href="/docs/mcp.html">MCP server</a>
-        <a class="active" href="/docs/migrating-from-browserless.html">From Browserless</a>
-        <a class="" href="/docs/migrating-from-browserbase.html">From Browserbase</a>
+        <a class="" href="/docs/quickstart">Quickstart</a>
+        <a class="" href="/docs/concepts">Concepts</a>
+        <a class="" href="/docs/api-reference">API reference</a>
+        <a class="" href="/docs/mcp">MCP server</a>
+        <a class="active" href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="" href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
   </nav>
   <main class="prose">
@@ -117,7 +117,7 @@ existing calls generally work untouched.</p>
 </tr>
 <tr>
 <td>Session replay / recording</td>
-<td>No. The <a href="/docs/concepts.html#live-viewer">live viewer</a> shows the present, not the past.</td>
+<td>No. The <a href="/docs/concepts#live-viewer">live viewer</a> shows the present, not the past.</td>
 </tr>
 <tr>
 <td>Bundled proxies</td>
@@ -129,10 +129,10 @@ should budget real work — or stay where you are.</p>
 <h2>What you get that Browserless doesn&#39;t have</h2>
 <ul>
 <li><strong>Stable sessions</strong> that survive disconnect with <em>full</em> state — in-memory
-SPA state and open tabs, not just cookies. <a href="/docs/concepts.html#stable-sessions">Details</a>.</li>
+SPA state and open tabs, not just cookies. <a href="/docs/concepts#stable-sessions">Details</a>.</li>
 <li><strong><code>/v1/extract</code></strong> — URL plus JSON Schema in, validated structured JSON out.</li>
 <li><strong>An MCP server</strong>, so any MCP-aware agent gets browser tools with no
-integration code. <a href="/docs/mcp.html">Details</a>.</li>
+integration code. <a href="/docs/mcp">Details</a>.</li>
 <li><strong>Managed CAPTCHA solving</strong> — <code>POST /v1/captcha/solve</code>, with a monthly
 allowance on every paid plan and no per-solve markup. Browserless bills
 10 units per solve; ours comes out of your plan. You can still bring your
