@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>API reference — runbrowser docs</title>
-<meta name="description" content="API reference — runbrowser documentation.">
+<meta name="description" content="Three surfaces, three hostnames:">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="stylesheet" href="/assets/docs.css">
 </head>
@@ -12,26 +12,45 @@
 <header class="docs-header">
   <a class="logo" href="/">
     <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
-    <span>runbrowser</span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
   </a>
-  <a class="back" href="/">&larr; back to site</a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
 </header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
 <div class="layout">
   <nav class="sidebar">
-    <span class="nav-title">Docs</span>
+    <span class="nav-title">Documentation</span>
     <div class="nav-links">
         <a class="" href="/docs/quickstart">Quickstart</a>
         <a class="" href="/docs/concepts">Concepts</a>
         <a class="active" href="/docs/api-reference">API reference</a>
+        <a class="" href="/docs/errors">Errors</a>
         <a class="" href="/docs/mcp">MCP server</a>
         <a class="" href="/docs/migrating-from-browserless">From Browserless</a>
         <a class="" href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a href="/#pricing">Pricing</a>
+        <a href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
   </nav>
   <main class="prose">
-<h1>API reference</h1>
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>API reference</span></div>
+<h1 id="api-reference">API reference</h1>
 <p>Three surfaces, three hostnames:</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Host</th>
@@ -51,15 +70,13 @@
 <td>Dashboard, auth, keys, billing, usage</td>
 </tr>
 </tbody></table>
-<p>Auth everywhere is your API key, as <code>Authorization: Bearer ab_…</code> or
+</div><p>Auth everywhere is your API key, as <code>Authorization: Bearer ab_…</code> or
 <code>?token=ab_…</code> on connect URLs. The machine-readable spec for the <code>/v1</code>
 primitives is served at <code>GET https://api.runbrowser.dev/v1/openapi.yml</code>.</p>
 <hr>
-<h2>Connecting a browser</h2>
-<pre><code>wss://connect.runbrowser.dev?token=ab_…
-</code></pre>
-<p>Works with <code>chromium.connectOverCDP()</code> and <code>puppeteer.connect({browserWSEndpoint})</code>.</p>
-<table>
+<h2 id="connecting-a-browser">Connecting a browser<a class="anchor" href="#connecting-a-browser" aria-label="Link to this section">#</a></h2>
+<div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="wss://connect.runbrowser.dev?token=ab_…">Copy</button></div><pre class="language-"><code>wss://connect.runbrowser.dev?token=ab_…</code></pre></div><p>Works with <code>chromium.connectOverCDP()</code> and <code>puppeteer.connect({browserWSEndpoint})</code>.</p>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Query param</th>
@@ -79,34 +96,40 @@ primitives is served at <code>GET https://api.runbrowser.dev/v1/openapi.yml</cod
 <td>reattach to a stable session (<code>ssn_…</code>) or redeem a one-use token (<code>tk_…</code>)</td>
 </tr>
 </tbody></table>
-<hr>
-<h2>Sessions</h2>
-<h3><code>POST /v1/sessions</code></h3>
+</div><hr>
+<h2 id="sessions">Sessions<a class="anchor" href="#sessions" aria-label="Link to this section">#</a></h2>
+<h3 id="post-v1sessions"><code>POST /v1/sessions</code><a class="anchor" href="#post-v1sessions" aria-label="Link to this section">#</a></h3>
 <p>Create a session up front instead of connecting directly. Two reasons to
 bother: it keeps proxy credentials out of the connect URL, and it&#39;s how
 you get a stable session.</p>
-<pre><code class="language-json">{
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
   &quot;keepAlive&quot;: true,
   &quot;maxIdleSeconds&quot;: 600,
   &quot;proxy&quot;: { &quot;type&quot;: &quot;external&quot;, &quot;url&quot;: &quot;http://user:pass@host:port&quot; }
-}
-</code></pre>
-<pre><code class="language-json">{
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"keepAlive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"maxIdleSeconds"</span><span class="token operator">:</span> <span class="token number">600</span><span class="token punctuation">,</span>
+  <span class="token property">"proxy"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"external"</span><span class="token punctuation">,</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"http://user:pass@host:port"</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
   &quot;sessionId&quot;: &quot;ssn_…&quot;,
   &quot;connectUrl&quot;: &quot;wss://connect.runbrowser.dev/connect?session=ssn_…&quot;,
   &quot;expiresAt&quot;: &quot;2026-08-12T12:00:00Z&quot;,
   &quot;maxIdleSeconds&quot;: 600,
   &quot;maxDurationSeconds&quot;: 3600
-}
-</code></pre>
-<p>Without <code>keepAlive</code>, you get a short-lived one-use <code>tk_…</code> token instead —
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"sessionId"</span><span class="token operator">:</span> <span class="token string">"ssn_…"</span><span class="token punctuation">,</span>
+  <span class="token property">"connectUrl"</span><span class="token operator">:</span> <span class="token string">"wss://connect.runbrowser.dev/connect?session=ssn_…"</span><span class="token punctuation">,</span>
+  <span class="token property">"expiresAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-12T12:00:00Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"maxIdleSeconds"</span><span class="token operator">:</span> <span class="token number">600</span><span class="token punctuation">,</span>
+  <span class="token property">"maxDurationSeconds"</span><span class="token operator">:</span> <span class="token number">3600</span>
+<span class="token punctuation">}</span></code></pre></div><p>Without <code>keepAlive</code>, you get a short-lived one-use <code>tk_…</code> token instead —
 the credential-safe connect flow, with no parked browser and no idle
 billing.</p>
-<h3><code>GET /v1/sessions</code></h3>
+<h3 id="get-v1sessions"><code>GET /v1/sessions</code><a class="anchor" href="#get-v1sessions" aria-label="Link to this section">#</a></h3>
 <p>Every session your org currently has running, newest first. Use it to find
 sessions you&#39;ve lost track of — a parked stable session keeps billing until
 it idles out, so this is how you see what you&#39;re paying for.</p>
-<pre><code class="language-json">{
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
   &quot;count&quot;: 1,
   &quot;sessions&quot;: [
     {
@@ -119,85 +142,98 @@ it idles out, so this is how you see what you&#39;re paying for.</p>
       &quot;expiresAt&quot;: &quot;2026-08-12T22:18:04Z&quot;
     }
   ]
-}
-</code></pre>
-<p><code>parked</code> means no client is attached right now. <code>idleExpiresAt</code> is when the
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"count"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token property">"sessions"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token property">"sessionId"</span><span class="token operator">:</span> <span class="token string">"ssn_…"</span><span class="token punctuation">,</span>
+      <span class="token property">"startedAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-12T22:03:04Z"</span><span class="token punctuation">,</span>
+      <span class="token property">"keepAlive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      <span class="token property">"parked"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      <span class="token property">"parkedAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-12T22:03:04Z"</span><span class="token punctuation">,</span>
+      <span class="token property">"idleExpiresAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-12T22:08:04Z"</span><span class="token punctuation">,</span>
+      <span class="token property">"expiresAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-12T22:18:04Z"</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre></div><p><code>parked</code> means no client is attached right now. <code>idleExpiresAt</code> is when the
 session releases itself if nobody reconnects; <code>expiresAt</code> is the absolute
 ceiling. Whichever comes first wins. Both are absent for a one-shot session.</p>
-<h3><code>POST /v1/sessions/{id}/close</code></h3>
+<h3 id="post-v1sessionsidclose"><code>POST /v1/sessions/{id}/close</code><a class="anchor" href="#post-v1sessionsidclose" aria-label="Link to this section">#</a></h3>
 <p>Force-release. Stops the meter. Call it when you&#39;re done with a stable
 session.</p>
-<h3><code>POST /v1/sessions/{id}/viewer-token</code></h3>
-<pre><code class="language-json">{ &quot;ttlSeconds&quot;: 3600 }
-</code></pre>
-<pre><code class="language-json">{
+<h3 id="post-v1sessionsidviewer-token"><code>POST /v1/sessions/{id}/viewer-token</code><a class="anchor" href="#post-v1sessionsidviewer-token" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;ttlSeconds&quot;: 3600 }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"ttlSeconds"</span><span class="token operator">:</span> <span class="token number">3600</span> <span class="token punctuation">}</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
   &quot;sessionId&quot;: &quot;ssn_…&quot;,
   &quot;viewerUrl&quot;: &quot;wss://connect.runbrowser.dev/view/active?session=…&amp;exp=…&amp;sig=…&quot;,
   &quot;webUrl&quot;:    &quot;https://connect.runbrowser.dev/viewer?session=…&amp;exp=…&amp;sig=…&quot;,
   &quot;expiresAt&quot;: &quot;2026-08-12T13:00:00Z&quot;
-}
-</code></pre>
-<p>Default TTL 1 hour, max 24. HMAC-signed; no API key in the URL.</p>
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"sessionId"</span><span class="token operator">:</span> <span class="token string">"ssn_…"</span><span class="token punctuation">,</span>
+  <span class="token property">"viewerUrl"</span><span class="token operator">:</span> <span class="token string">"wss://connect.runbrowser.dev/view/active?session=…&amp;exp=…&amp;sig=…"</span><span class="token punctuation">,</span>
+  <span class="token property">"webUrl"</span><span class="token operator">:</span>    <span class="token string">"https://connect.runbrowser.dev/viewer?session=…&amp;exp=…&amp;sig=…"</span><span class="token punctuation">,</span>
+  <span class="token property">"expiresAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-12T13:00:00Z"</span>
+<span class="token punctuation">}</span></code></pre></div><p>Default TTL 1 hour, max 24. HMAC-signed; no API key in the URL.</p>
 <hr>
-<h2>REST shortcuts</h2>
+<h2 id="rest-shortcuts">REST shortcuts<a class="anchor" href="#rest-shortcuts" aria-label="Link to this section">#</a></h2>
 <p>Browserless-compatible body shapes, on <code>connect.runbrowser.dev</code>. Each one
 provisions a browser, does the work, and releases it.</p>
 <p>All four accept:</p>
-<pre><code class="language-json">{
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
   &quot;url&quot;: &quot;https://example.com&quot;,
   &quot;waitForTimeout&quot;: 5000,
   &quot;cookies&quot;: [{ &quot;name&quot;: &quot;session&quot;, &quot;value&quot;: &quot;…&quot; }],
   &quot;headers&quot;: { &quot;X-Custom&quot;: &quot;value&quot; }
-}
-</code></pre>
-<p><code>cookies</code> defaults its URL scope to the page you&#39;re loading, so
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"https://example.com"</span><span class="token punctuation">,</span>
+  <span class="token property">"waitForTimeout"</span><span class="token operator">:</span> <span class="token number">5000</span><span class="token punctuation">,</span>
+  <span class="token property">"cookies"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"session"</span><span class="token punctuation">,</span> <span class="token property">"value"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"headers"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"X-Custom"</span><span class="token operator">:</span> <span class="token string">"value"</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre></div><p><code>cookies</code> defaults its URL scope to the page you&#39;re loading, so
 <code>{name, value}</code> alone works for the common case — that&#39;s what gets you
 past consent walls and age gates in a single call.</p>
-<h3><code>POST /screenshot</code> → <code>image/png|jpeg|webp</code></h3>
-<pre><code class="language-json">{ &quot;url&quot;: &quot;…&quot;, &quot;options&quot;: { &quot;format&quot;: &quot;png&quot;, &quot;fullPage&quot;: true, &quot;quality&quot;: 80,
+<h3 id="post-screenshot-imagepngjpegwebp"><code>POST /screenshot</code> → <code>image/png|jpeg|webp</code><a class="anchor" href="#post-screenshot-imagepngjpegwebp" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;…&quot;, &quot;options&quot;: { &quot;format&quot;: &quot;png&quot;, &quot;fullPage&quot;: true, &quot;quality&quot;: 80,
                            &quot;selector&quot;: &quot;#chart&quot;,
-                           &quot;viewport&quot;: { &quot;width&quot;: 1280, &quot;height&quot;: 720 } } }
-</code></pre>
-<p><code>selector</code> clips the shot to the first matching element, including one below
+                           &quot;viewport&quot;: { &quot;width&quot;: 1280, &quot;height&quot;: 720 } } }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"options"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"format"</span><span class="token operator">:</span> <span class="token string">"png"</span><span class="token punctuation">,</span> <span class="token property">"fullPage"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"quality"</span><span class="token operator">:</span> <span class="token number">80</span><span class="token punctuation">,</span>
+                           <span class="token property">"selector"</span><span class="token operator">:</span> <span class="token string">"#chart"</span><span class="token punctuation">,</span>
+                           <span class="token property">"viewport"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"width"</span><span class="token operator">:</span> <span class="token number">1280</span><span class="token punctuation">,</span> <span class="token property">"height"</span><span class="token operator">:</span> <span class="token number">720</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span></code></pre></div><p><code>selector</code> clips the shot to the first matching element, including one below
 the fold, and takes precedence over <code>fullPage</code>. A selector that matches
 nothing returns <code>400</code> rather than quietly handing back the whole page.
 <code>quality</code> applies to <code>jpeg</code> and <code>webp</code> only.</p>
-<h3><code>POST /pdf</code> → <code>application/pdf</code></h3>
-<pre><code class="language-json">{ &quot;url&quot;: &quot;…&quot;, &quot;options&quot;: { &quot;format&quot;: &quot;A4&quot;, &quot;landscape&quot;: false, &quot;printBackground&quot;: true,
-                           &quot;marginTop&quot;: &quot;0.4in&quot;, &quot;marginBottom&quot;: &quot;0.4in&quot; } }
-</code></pre>
-<h3><code>POST /content</code> → <code>text/html</code></h3>
+<h3 id="post-pdf-applicationpdf"><code>POST /pdf</code> → <code>application/pdf</code><a class="anchor" href="#post-pdf-applicationpdf" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;…&quot;, &quot;options&quot;: { &quot;format&quot;: &quot;A4&quot;, &quot;landscape&quot;: false, &quot;printBackground&quot;: true,
+                           &quot;marginTop&quot;: &quot;0.4in&quot;, &quot;marginBottom&quot;: &quot;0.4in&quot; } }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"options"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"format"</span><span class="token operator">:</span> <span class="token string">"A4"</span><span class="token punctuation">,</span> <span class="token property">"landscape"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token property">"printBackground"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                           <span class="token property">"marginTop"</span><span class="token operator">:</span> <span class="token string">"0.4in"</span><span class="token punctuation">,</span> <span class="token property">"marginBottom"</span><span class="token operator">:</span> <span class="token string">"0.4in"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span></code></pre></div><h3 id="post-content-texthtml"><code>POST /content</code> → <code>text/html</code><a class="anchor" href="#post-content-texthtml" aria-label="Link to this section">#</a></h3>
 <p>Post-JavaScript rendered DOM.</p>
-<h3><code>POST /scrape</code> → JSON</h3>
-<pre><code class="language-json">{ &quot;url&quot;: &quot;…&quot;, &quot;elements&quot;: [
+<h3 id="post-scrape-json"><code>POST /scrape</code> → JSON<a class="anchor" href="#post-scrape-json" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;…&quot;, &quot;elements&quot;: [
   { &quot;selector&quot;: &quot;h1&quot; },
   { &quot;selector&quot;: &quot;a&quot;, &quot;result&quot;: &quot;attr&quot;, &quot;attribute&quot;: &quot;href&quot; }
-] }
-</code></pre>
-<hr>
-<h2>Primitives</h2>
+] }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"elements"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">{</span> <span class="token property">"selector"</span><span class="token operator">:</span> <span class="token string">"h1"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> <span class="token property">"selector"</span><span class="token operator">:</span> <span class="token string">"a"</span><span class="token punctuation">,</span> <span class="token property">"result"</span><span class="token operator">:</span> <span class="token string">"attr"</span><span class="token punctuation">,</span> <span class="token property">"attribute"</span><span class="token operator">:</span> <span class="token string">"href"</span> <span class="token punctuation">}</span>
+<span class="token punctuation">]</span> <span class="token punctuation">}</span></code></pre></div><hr>
+<h2 id="primitives">Primitives<a class="anchor" href="#primitives" aria-label="Link to this section">#</a></h2>
 <p>On <code>api.runbrowser.dev</code>. These are the ones that make agent loops cheap.</p>
-<h3><code>POST /v1/fetch</code></h3>
+<h3 id="post-v1fetch"><code>POST /v1/fetch</code><a class="anchor" href="#post-v1fetch" aria-label="Link to this section">#</a></h3>
 <p><strong>Plain HTTP — no browser, no JavaScript.</strong> Fast and billed against a
 separate allowance rather than browser-time. For pages that need
 rendering, use <code>/v1/extract</code> or a browser.</p>
-<pre><code class="language-json">{ &quot;url&quot;: &quot;…&quot;, &quot;format&quot;: &quot;markdown&quot;, &quot;method&quot;: &quot;GET&quot;,
-  &quot;headers&quot;: {}, &quot;timeoutMs&quot;: 30000, &quot;followRedirects&quot;: true }
-</code></pre>
-<p><code>format</code> is <code>html</code> (default), <code>text</code> or <code>markdown</code>. The response carries
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;…&quot;, &quot;format&quot;: &quot;markdown&quot;, &quot;method&quot;: &quot;GET&quot;,
+  &quot;headers&quot;: {}, &quot;timeoutMs&quot;: 30000, &quot;followRedirects&quot;: true }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"format"</span><span class="token operator">:</span> <span class="token string">"markdown"</span><span class="token punctuation">,</span> <span class="token property">"method"</span><span class="token operator">:</span> <span class="token string">"GET"</span><span class="token punctuation">,</span>
+  <span class="token property">"headers"</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token property">"timeoutMs"</span><span class="token operator">:</span> <span class="token number">30000</span><span class="token punctuation">,</span> <span class="token property">"followRedirects"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span></code></pre></div><p><code>format</code> is <code>html</code> (default), <code>text</code> or <code>markdown</code>. The response carries
 the body plus block detection — <code>blocked</code>, <code>blockProvider</code>, <code>blockReason</code>
 — so an agent can tell &quot;this page is a Cloudflare wall&quot; from &quot;this page is
 empty&quot; without guessing.</p>
-<h3><code>POST /v1/search</code></h3>
-<pre><code class="language-json">{ &quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 10, &quot;lang&quot;: &quot;en&quot;,
-  &quot;phrase&quot;: false, &quot;include_hosts&quot;: [&quot;example.com&quot;], &quot;exclude_hosts&quot;: [&quot;spam.example&quot;] }
-</code></pre>
-<p>Note the field names: <code>q</code> and <code>count</code>, not <code>query</code> and <code>limit</code>.
+<h3 id="post-v1search"><code>POST /v1/search</code><a class="anchor" href="#post-v1search" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 10, &quot;lang&quot;: &quot;en&quot;,
+  &quot;phrase&quot;: false, &quot;include_hosts&quot;: [&quot;example.com&quot;], &quot;exclude_hosts&quot;: [&quot;spam.example&quot;] }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"q"</span><span class="token operator">:</span> <span class="token string">"browser automation"</span><span class="token punctuation">,</span> <span class="token property">"count"</span><span class="token operator">:</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"en"</span><span class="token punctuation">,</span>
+  <span class="token property">"phrase"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token property">"include_hosts"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"example.com"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token property">"exclude_hosts"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"spam.example"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span></code></pre></div><p>Note the field names: <code>q</code> and <code>count</code>, not <code>query</code> and <code>limit</code>.
 <code>count</code> maxes at 20.</p>
-<h3><code>POST /v1/extract</code></h3>
+<h3 id="post-v1extract"><code>POST /v1/extract</code><a class="anchor" href="#post-v1extract" aria-label="Link to this section">#</a></h3>
 <p>Renders the page in a real browser, then asks an LLM for exactly the
 shape you asked for.</p>
-<pre><code class="language-json">{
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
   &quot;url&quot;: &quot;…&quot;,
   &quot;schema&quot;: { &quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: { … }, &quot;required&quot;: [ … ] },
   &quot;instructions&quot;: &quot;only in-stock items&quot;,
@@ -205,9 +241,15 @@ shape you asked for.</p>
   &quot;cookies&quot;: [ … ],
   &quot;headers&quot;: { … },
   &quot;waitForSelector&quot;: &quot;.results&quot;
-}
-</code></pre>
-<p><code>contentFormat</code> is worth knowing: <code>markdown</code> runs Readability first (right
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span>
+  <span class="token property">"schema"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span><span class="token punctuation">,</span> <span class="token property">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span> … <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token property">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span> … <span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"instructions"</span><span class="token operator">:</span> <span class="token string">"only in-stock items"</span><span class="token punctuation">,</span>
+  <span class="token property">"contentFormat"</span><span class="token operator">:</span> <span class="token string">"markdown-full"</span><span class="token punctuation">,</span>
+  <span class="token property">"cookies"</span><span class="token operator">:</span> <span class="token punctuation">[</span> … <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"headers"</span><span class="token operator">:</span> <span class="token punctuation">{</span> … <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"waitForSelector"</span><span class="token operator">:</span> <span class="token string">".results"</span>
+<span class="token punctuation">}</span></code></pre></div><p><code>contentFormat</code> is worth knowing: <code>markdown</code> runs Readability first (right
 for articles), <code>markdown-full</code> skips it and converts the whole
 noise-stripped body (right for listings, grids and search results), <code>text</code>
 and <code>html</code> do what they say. It cuts token cost 5–10x and makes small
@@ -218,16 +260,14 @@ browser and LLM tokens.</p>
 <p>Returns <code>{data, usage, trace}</code>. Output is validated against your schema;
 on a mismatch we retry once with the validation errors fed back, then
 return 422 rather than handing you data that doesn&#39;t fit.</p>
-<h3><code>POST /v1/captcha/solve</code></h3>
+<h3 id="post-v1captchasolve"><code>POST /v1/captcha/solve</code><a class="anchor" href="#post-v1captchasolve" aria-label="Link to this section">#</a></h3>
 <p>Solve a CAPTCHA on our provider account — no solver signup, no key of your
 own.</p>
-<pre><code class="language-json">{ &quot;type&quot;: &quot;turnstile&quot;, &quot;websiteURL&quot;: &quot;https://example.com/login&quot;,
-  &quot;websiteKey&quot;: &quot;0x4AAA…&quot;, &quot;action&quot;: &quot;login&quot;, &quot;cdata&quot;: &quot;…&quot; }
-</code></pre>
-<pre><code class="language-json">{ &quot;token&quot;: &quot;…&quot;, &quot;type&quot;: &quot;turnstile&quot;, &quot;durationMs&quot;: 14320,
-  &quot;used&quot;: 41, &quot;limit&quot;: 1000, &quot;remaining&quot;: 959 }
-</code></pre>
-<p><code>type</code> is <code>recaptcha_v2</code>, <code>hcaptcha</code> or <code>turnstile</code>. <code>action</code> and <code>cdata</code>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;type&quot;: &quot;turnstile&quot;, &quot;websiteURL&quot;: &quot;https://example.com/login&quot;,
+  &quot;websiteKey&quot;: &quot;0x4AAA…&quot;, &quot;action&quot;: &quot;login&quot;, &quot;cdata&quot;: &quot;…&quot; }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"turnstile"</span><span class="token punctuation">,</span> <span class="token property">"websiteURL"</span><span class="token operator">:</span> <span class="token string">"https://example.com/login"</span><span class="token punctuation">,</span>
+  <span class="token property">"websiteKey"</span><span class="token operator">:</span> <span class="token string">"0x4AAA…"</span><span class="token punctuation">,</span> <span class="token property">"action"</span><span class="token operator">:</span> <span class="token string">"login"</span><span class="token punctuation">,</span> <span class="token property">"cdata"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;token&quot;: &quot;…&quot;, &quot;type&quot;: &quot;turnstile&quot;, &quot;durationMs&quot;: 14320,
+  &quot;used&quot;: 41, &quot;limit&quot;: 1000, &quot;remaining&quot;: 959 }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"token"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"turnstile"</span><span class="token punctuation">,</span> <span class="token property">"durationMs"</span><span class="token operator">:</span> <span class="token number">14320</span><span class="token punctuation">,</span>
+  <span class="token property">"used"</span><span class="token operator">:</span> <span class="token number">41</span><span class="token punctuation">,</span> <span class="token property">"limit"</span><span class="token operator">:</span> <span class="token number">1000</span><span class="token punctuation">,</span> <span class="token property">"remaining"</span><span class="token operator">:</span> <span class="token number">959</span> <span class="token punctuation">}</span></code></pre></div><p><code>type</code> is <code>recaptcha_v2</code>, <code>hcaptcha</code> or <code>turnstile</code>. <code>action</code> and <code>cdata</code>
 are Turnstile-only, read off the widget&#39;s data attributes. Inject the
 returned token into the page&#39;s response field <strong>and</strong> invoke the widget&#39;s
 <code>data-callback</code> — most forms submit from the callback, not a button. The
@@ -236,7 +276,7 @@ returned token into the page&#39;s response field <strong>and</strong> invoke th
 1,000 on Startup, 10,000 on Scale. <strong>Failed solves are refunded</strong> — the
 provider doesn&#39;t charge us for challenges it can&#39;t clear, so we don&#39;t
 charge you.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Status</th>
@@ -260,31 +300,30 @@ charge you.</p>
 <td>Managed solving isn&#39;t enabled on this deployment.</td>
 </tr>
 </tbody></table>
-<p>Not everything is solvable. reCAPTCHA v3, DataDome and PerimeterX score the
+</div><p>Not everything is solvable. reCAPTCHA v3, DataDome and PerimeterX score the
 session rather than posing a challenge; <code>type</code> rejects them with an
 explanation rather than taking your money for a request that can&#39;t succeed.</p>
 <hr>
-<h2>MCP</h2>
+<h2 id="mcp">MCP<a class="anchor" href="#mcp" aria-label="Link to this section">#</a></h2>
 <p><code>POST https://connect.runbrowser.dev/mcp</code> — Model Context Protocol over
 Streamable HTTP. Nine tools. See <a href="/docs/mcp">mcp.md</a>.</p>
 <hr>
-<h2>Metrics</h2>
+<h2 id="metrics">Metrics<a class="anchor" href="#metrics" aria-label="Link to this section">#</a></h2>
 <p><code>GET /metrics</code> on the gateway and <code>/actuator/prometheus</code> on the control
-plane, both Prometheus format. Neither is routed publicly; they&#39;re for
-whoever operates the box. See <a href="/docs/deploy#monitoring">deploy.md</a>.</p>
+plane, both Prometheus format. Neither is routed publicly — they are for
+whoever operates the box, and there is nothing here for you to call. Your
+own usage is in the dashboard.</p>
 <hr>
-<h2>Errors</h2>
-<p><code>/v1</code> endpoints return a JSON envelope:</p>
-<pre><code class="language-json">{ &quot;error&quot;: &quot;invalid_request&quot;, &quot;fields&quot;: [&quot;q: must not be blank&quot;] }
-</code></pre>
-<p><code>error</code> is always present. <code>fields</code> appears on validation failures, one
-entry per offending field as <code>name: reason</code>. <code>message</code> appears when there
-is something to say beyond the code, and is omitted otherwise — so read
-<code>error</code> first and treat the other two as optional.</p>
-<p>Quota rejections carry the numbers:</p>
-<pre><code class="language-json">{ &quot;error&quot;: &quot;monthly_quota_exceeded&quot;, &quot;type&quot;: &quot;browser_seconds&quot;, &quot;used&quot;: 3600, &quot;limit&quot;: 3600 }
-</code></pre>
-<table>
+<h2 id="errors">Errors<a class="anchor" href="#errors" aria-label="Link to this section">#</a></h2>
+<p>Full reference, including every code and what to do about it:
+<strong><a href="/docs/errors">Errors</a></strong>.</p>
+<p>The essentials. <code>api.runbrowser.dev</code> returns a JSON envelope in which
+<code>error</code> is always present and everything else is optional:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;error&quot;: &quot;invalid_request&quot;, &quot;fields&quot;: [&quot;q: must not be blank&quot;] }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"error"</span><span class="token operator">:</span> <span class="token string">"invalid_request"</span><span class="token punctuation">,</span> <span class="token property">"fields"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"q: must not be blank"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span></code></pre></div><p><code>connect.runbrowser.dev</code> returns <strong>plain text</strong> instead — with one
+exception, quota rejections, which are JSON. A handler that assumes JSON
+from both will fail to parse the error it was trying to report. See
+<a href="/docs/errors#the-one-thing-to-know-first">the shapes</a>.</p>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Status</th>
@@ -296,8 +335,12 @@ is something to say beyond the code, and is omitted otherwise — so read
 <td>Missing, malformed, or revoked key</td>
 </tr>
 <tr>
+<td>402</td>
+<td>Your plan doesn&#39;t include this</td>
+</tr>
+<tr>
 <td>422</td>
-<td>Extraction couldn&#39;t produce data matching your schema</td>
+<td>Extraction couldn&#39;t match your schema, or a CAPTCHA couldn&#39;t be solved</td>
 </tr>
 <tr>
 <td>429</td>
@@ -308,20 +351,52 @@ is something to say beyond the code, and is omitted otherwise — so read
 <td>The browser or an upstream failed</td>
 </tr>
 <tr>
+<td>503</td>
+<td>The fleet is full — retry after 30s (<code>Retry-After</code> is set)</td>
+</tr>
+<tr>
 <td>504</td>
-<td>The page never finished loading</td>
+<td>The page or the target never finished loading</td>
 </tr>
 </tbody></table>
-<p>Revoking a key takes effect in about 100–150ms across the fleet, not at
-the end of a cache TTL.</p>
+</div><p>Revoking a key propagates across the fleet in about 100–150ms rather than
+waiting out a cache TTL.</p>
 
+    <nav class="pager">
+      <a class="prev" href="/docs/concepts"><span>Previous</span>Concepts</a>
+      <a class="next" href="/docs/errors"><span>Next</span>Errors</a>
+    </nav>
     <hr>
     <p class="foot">
-      Something wrong or missing here?
-      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20API%20reference">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
+    <p class="updated">Last updated 2026-08-13</p>
   </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#connecting-a-browser">Connecting a browser</a>
+    <a class="toc-2" href="#sessions">Sessions</a>
+    <a class="toc-3" href="#post-v1sessions">POST /v1/sessions</a>
+    <a class="toc-3" href="#get-v1sessions">GET /v1/sessions</a>
+    <a class="toc-3" href="#post-v1sessionsidclose">POST /v1/sessions/{id}/close</a>
+    <a class="toc-3" href="#post-v1sessionsidviewer-token">POST /v1/sessions/{id}/viewer-token</a>
+    <a class="toc-2" href="#rest-shortcuts">REST shortcuts</a>
+    <a class="toc-3" href="#post-screenshot-imagepngjpegwebp">POST /screenshot → image/png|jpeg|webp</a>
+    <a class="toc-3" href="#post-pdf-applicationpdf">POST /pdf → application/pdf</a>
+    <a class="toc-3" href="#post-content-texthtml">POST /content → text/html</a>
+    <a class="toc-3" href="#post-scrape-json">POST /scrape → JSON</a>
+    <a class="toc-2" href="#primitives">Primitives</a>
+    <a class="toc-3" href="#post-v1fetch">POST /v1/fetch</a>
+    <a class="toc-3" href="#post-v1search">POST /v1/search</a>
+    <a class="toc-3" href="#post-v1extract">POST /v1/extract</a>
+    <a class="toc-3" href="#post-v1captchasolve">POST /v1/captcha/solve</a>
+    <a class="toc-2" href="#mcp">MCP</a>
+    <a class="toc-2" href="#metrics">Metrics</a>
+    <a class="toc-2" href="#errors">Errors</a>
+  </aside>
 </div>
+<script src="/assets/docs.js" defer></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Migrating from Browserless — runbrowser docs</title>
-<meta name="description" content="Migrating from Browserless — runbrowser documentation.">
+<meta name="description" content="Change the host. That's usually the whole migration.">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="stylesheet" href="/assets/docs.css">
 </head>
@@ -12,33 +12,51 @@
 <header class="docs-header">
   <a class="logo" href="/">
     <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
-    <span>runbrowser</span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
   </a>
-  <a class="back" href="/">&larr; back to site</a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
 </header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
 <div class="layout">
   <nav class="sidebar">
-    <span class="nav-title">Docs</span>
+    <span class="nav-title">Documentation</span>
     <div class="nav-links">
         <a class="" href="/docs/quickstart">Quickstart</a>
         <a class="" href="/docs/concepts">Concepts</a>
         <a class="" href="/docs/api-reference">API reference</a>
+        <a class="" href="/docs/errors">Errors</a>
         <a class="" href="/docs/mcp">MCP server</a>
         <a class="active" href="/docs/migrating-from-browserless">From Browserless</a>
         <a class="" href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a href="/#pricing">Pricing</a>
+        <a href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
   </nav>
   <main class="prose">
-<h1>Migrating from Browserless</h1>
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Migrating from Browserless</span></div>
+<h1 id="migrating-from-browserless">Migrating from Browserless</h1>
 <p>Change the host. That&#39;s usually the whole migration.</p>
-<pre><code class="language-diff">- wss://production-sfo.browserless.io?token=YOUR_TOKEN
-+ wss://connect.runbrowser.dev?token=ab_yourkey
-</code></pre>
-<p>Both speak CDP, both take the token as a query parameter, both work with
+<div class="code-block"><div class="code-bar"><span class="code-lang">diff</span><button class="copy" type="button" data-code="- wss://production-sfo.browserless.io?token=YOUR_TOKEN
++ wss://connect.runbrowser.dev?token=ab_yourkey">Copy</button></div><pre class="language-diff"><code><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line"> wss://production-sfo.browserless.io?token=YOUR_TOKEN
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line"> wss://connect.runbrowser.dev?token=ab_yourkey</span></span></code></pre></div><p>Both speak CDP, both take the token as a query parameter, both work with
 <code>chromium.connectOverCDP()</code> and <code>puppeteer.connect()</code>. Your selectors,
 waits and assertions don&#39;t change.</p>
-<h2>What maps directly</h2>
-<table>
+<h2 id="what-maps-directly">What maps directly<a class="anchor" href="#what-maps-directly" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Browserless</th>
@@ -72,11 +90,11 @@ waits and assertions don&#39;t change.</p>
 <td>Same <code>elements[]</code> shape</td>
 </tr>
 </tbody></table>
-<p>The REST bodies were written against Browserless&#39;s shapes on purpose, so
+</div><p>The REST bodies were written against Browserless&#39;s shapes on purpose, so
 existing calls generally work untouched.</p>
-<h2>What we don&#39;t have</h2>
+<h2 id="what-we-dont-have">What we don&#39;t have<a class="anchor" href="#what-we-dont-have" aria-label="Link to this section">#</a></h2>
 <p>Be honest with yourself about this list before you switch:</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Browserless</th>
@@ -124,9 +142,9 @@ existing calls generally work untouched.</p>
 <td>BYO proxy. Wholesale pricing from your provider, no markup from us.</td>
 </tr>
 </tbody></table>
-<p>If you depend on <code>/function</code> or BrowserQL, this isn&#39;t a drop-in and you
+</div><p>If you depend on <code>/function</code> or BrowserQL, this isn&#39;t a drop-in and you
 should budget real work — or stay where you are.</p>
-<h2>What you get that Browserless doesn&#39;t have</h2>
+<h2 id="what-you-get-that-browserless-doesnt-have">What you get that Browserless doesn&#39;t have<a class="anchor" href="#what-you-get-that-browserless-doesnt-have" aria-label="Link to this section">#</a></h2>
 <ul>
 <li><strong>Stable sessions</strong> that survive disconnect with <em>full</em> state — in-memory
 SPA state and open tabs, not just cookies. <a href="/docs/concepts#stable-sessions">Details</a>.</li>
@@ -143,7 +161,7 @@ ticket — no API key inside.</li>
 London and Amsterdam; if EU-only matters to you legally, we&#39;re
 single-region by design.</li>
 </ul>
-<h2>Billing differences that will actually surprise you</h2>
+<h2 id="billing-differences-that-will-actually-surprise-you">Billing differences that will actually surprise you<a class="anchor" href="#billing-differences-that-will-actually-surprise-you" aria-label="Link to this section">#</a></h2>
 <p>Browserless bills in <strong>units</strong>: 1 unit per 30 seconds of browser time,
 <strong>rounded up</strong> — a 31-second session costs 2 units. CAPTCHA solves cost 10
 units each, and their built-in proxies cost 6 units/MB residential or 2
@@ -168,14 +186,14 @@ Usually cheaper at wholesale, but always more work to set up.</li>
 <li><strong>Parked stable sessions bill while parked.</strong> Same as Browserbase, and
 worth knowing before you leave one open overnight.</li>
 </ul>
-<h2>Concurrency</h2>
+<h2 id="concurrency">Concurrency<a class="anchor" href="#concurrency" aria-label="Link to this section">#</a></h2>
 <p>Browserless sells concurrency by plan; so do we, but at the limit we
 <strong>queue</strong> for about 20 seconds before returning 429, where a hard cap
 would reject immediately. Retry logic written against a strict cap still
 works — it&#39;ll just fire less often.</p>
 <p>Concurrency by tier: Free 3, Hobby 10, Startup 25, Scale 50.</p>
 <p>There are two limits, and they return different codes:</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Limit</th>
@@ -194,11 +212,11 @@ works — it&#39;ll just fire less often.</p>
 <td><code>503</code> + <code>Retry-After</code></td>
 </tr>
 </tbody></table>
-<p>The <code>503</code> is rare and not your fault — it means every customer&#39;s traffic
+</div><p>The <code>503</code> is rare and not your fault — it means every customer&#39;s traffic
 together exceeded the hardware. Treat it as retryable. We&#39;d rather return
 it than keep spawning browsers until the box runs out of memory and takes
 down sessions that were well inside their limits.</p>
-<h2>A realistic migration</h2>
+<h2 id="a-realistic-migration">A realistic migration<a class="anchor" href="#a-realistic-migration" aria-label="Link to this section">#</a></h2>
 <ol>
 <li>Point one non-critical script at <code>connect.runbrowser.dev</code> and run it.</li>
 <li>Grep your codebase for <code>browserless.io</code> — that finds the REST calls
@@ -209,13 +227,28 @@ you&#39;d forgotten.</li>
 <p>Most people are done in an afternoon. If you&#39;re not, the thing blocking
 you is almost certainly on that list.</p>
 
+    <nav class="pager">
+      <a class="prev" href="/docs/mcp"><span>Previous</span>MCP server</a>
+      <a class="next" href="/docs/migrating-from-browserbase"><span>Next</span>From Browserbase</a>
+    </nav>
     <hr>
     <p class="foot">
-      Something wrong or missing here?
-      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Migrating%20from%20Browserless">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
+    <p class="updated">Last updated 2026-08-13</p>
   </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#what-maps-directly">What maps directly</a>
+    <a class="toc-2" href="#what-we-dont-have">What we don't have</a>
+    <a class="toc-2" href="#what-you-get-that-browserless-doesnt-have">What you get that Browserless doesn't have</a>
+    <a class="toc-2" href="#billing-differences-that-will-actually-surprise-you">Billing differences that will actually surprise you</a>
+    <a class="toc-2" href="#concurrency">Concurrency</a>
+    <a class="toc-2" href="#a-realistic-migration">A realistic migration</a>
+  </aside>
 </div>
+<script src="/assets/docs.js" defer></script>
 </body>
 </html>
