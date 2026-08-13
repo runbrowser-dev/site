@@ -1,0 +1,12 @@
+# Workers Assets serves `assets.directory` verbatim, and that directory is the
+# repo root — so without this list the deploy publishes repo files at the site's
+# own domain. Nothing here should be reachable at runbrowser.dev.
+.git
+.gitignore
+.claude
+.assetsignore
+README.md
+wrangler.jsonc
+node_modules
+package.json
+package-lock.json
