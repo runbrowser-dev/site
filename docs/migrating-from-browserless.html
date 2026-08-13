@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migrating from Browserless — runbrowser docs</title>
+<meta name="description" content="Migrating from Browserless — runbrowser documentation.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser</span>
+  </a>
+  <a class="back" href="/">&larr; back to site</a>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Docs</span>
+    <div class="nav-links">
+        <a class="" href="/docs/quickstart.html">Quickstart</a>
+        <a class="" href="/docs/concepts.html">Concepts</a>
+        <a class="" href="/docs/api-reference.html">API reference</a>
+        <a class="" href="/docs/mcp.html">MCP server</a>
+        <a class="active" href="/docs/migrating-from-browserless.html">From Browserless</a>
+        <a class="" href="/docs/migrating-from-browserbase.html">From Browserbase</a>
+    </div>
+  </nav>
+  <main class="prose">
+<h1>Migrating from Browserless</h1>
+<p>Change the host. That&#39;s usually the whole migration.</p>
+<pre><code class="language-diff">- wss://production-sfo.browserless.io?token=YOUR_TOKEN
++ wss://connect.runbrowser.dev?token=ab_yourkey
+</code></pre>
+<p>Both speak CDP, both take the token as a query parameter, both work with
+<code>chromium.connectOverCDP()</code> and <code>puppeteer.connect()</code>. Your selectors,
+waits and assertions don&#39;t change.</p>
+<h2>What maps directly</h2>
+<table>
+<thead>
+<tr>
+<th>Browserless</th>
+<th>Us</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>wss://…?token=</code> (Puppeteer, Playwright over CDP)</td>
+<td><code>wss://connect.runbrowser.dev?token=</code></td>
+<td>Identical</td>
+</tr>
+<tr>
+<td><code>POST /screenshot</code></td>
+<td><code>POST /screenshot</code></td>
+<td>Same body shape</td>
+</tr>
+<tr>
+<td><code>POST /pdf</code></td>
+<td><code>POST /pdf</code></td>
+<td>Same body shape</td>
+</tr>
+<tr>
+<td><code>POST /content</code></td>
+<td><code>POST /content</code></td>
+<td>Same body shape</td>
+</tr>
+<tr>
+<td><code>POST /scrape</code></td>
+<td><code>POST /scrape</code></td>
+<td>Same <code>elements[]</code> shape</td>
+</tr>
+</tbody></table>
+<p>The REST bodies were written against Browserless&#39;s shapes on purpose, so
+existing calls generally work untouched.</p>
+<h2>What we don&#39;t have</h2>
+<p>Be honest with yourself about this list before you switch:</p>
+<table>
+<thead>
+<tr>
+<th>Browserless</th>
+<th>Status here</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/function</code></td>
+<td><strong>No equivalent.</strong> You run your own code via CDP instead.</td>
+</tr>
+<tr>
+<td><code>/unblock</code></td>
+<td>No. Our stealth is always-on and there&#39;s no bypass endpoint to call.</td>
+</tr>
+<tr>
+<td><code>/download</code>, <code>/export</code></td>
+<td>No. Use CDP&#39;s download handling.</td>
+</tr>
+<tr>
+<td><code>/performance</code> (Lighthouse)</td>
+<td>No.</td>
+</tr>
+<tr>
+<td><code>/crawl</code>, <code>/map</code>, <code>/smart-scrape</code></td>
+<td>No. <code>/v1/fetch</code> + <code>/v1/search</code> cover some of this differently.</td>
+</tr>
+<tr>
+<td>BrowserQL (GraphQL automation language)</td>
+<td>No, and not planned. We bet on plain Playwright.</td>
+</tr>
+<tr>
+<td>Firefox, WebKit</td>
+<td>No. Chromium only.</td>
+</tr>
+<tr>
+<td><code>/search</code></td>
+<td>Different: ours is <code>POST /v1/search</code> on the API host with <code>{q, count}</code>.</td>
+</tr>
+<tr>
+<td>Session replay / recording</td>
+<td>No. The <a href="/docs/concepts.html#live-viewer">live viewer</a> shows the present, not the past.</td>
+</tr>
+<tr>
+<td>Bundled proxies</td>
+<td>BYO proxy. Wholesale pricing from your provider, no markup from us.</td>
+</tr>
+</tbody></table>
+<p>If you depend on <code>/function</code> or BrowserQL, this isn&#39;t a drop-in and you
+should budget real work — or stay where you are.</p>
+<h2>What you get that Browserless doesn&#39;t have</h2>
+<ul>
+<li><strong>Stable sessions</strong> that survive disconnect with <em>full</em> state — in-memory
+SPA state and open tabs, not just cookies. <a href="/docs/concepts.html#stable-sessions">Details</a>.</li>
+<li><strong><code>/v1/extract</code></strong> — URL plus JSON Schema in, validated structured JSON out.</li>
+<li><strong>An MCP server</strong>, so any MCP-aware agent gets browser tools with no
+integration code. <a href="/docs/mcp.html">Details</a>.</li>
+<li><strong>Managed CAPTCHA solving</strong> — <code>POST /v1/captcha/solve</code>, with a monthly
+allowance on every paid plan and no per-solve markup. Browserless bills
+10 units per solve; ours comes out of your plan. You can still bring your
+own solver key if you&#39;d rather (<a href="/docs/">helper</a>).</li>
+<li><strong>Live viewer with signed shareable URLs</strong> that are safe to paste into a
+ticket — no API key inside.</li>
+<li><strong>EU residency</strong> (Falkenstein). Browserless&#39;s shared fleet is US West,
+London and Amsterdam; if EU-only matters to you legally, we&#39;re
+single-region by design.</li>
+</ul>
+<h2>Billing differences that will actually surprise you</h2>
+<p>Browserless bills in <strong>units</strong>: 1 unit per 30 seconds of browser time,
+<strong>rounded up</strong> — a 31-second session costs 2 units. CAPTCHA solves cost 10
+units each, and their built-in proxies cost 6 units/MB residential or 2
+units/MB datacenter. (Third-party proxies you connect yourself don&#39;t
+consume units there, same as here.)</p>
+<p>We bill <strong>browser-seconds</strong>, floored at 10 seconds per session, plus
+separate monthly allowances for <code>/v1/fetch</code>, <code>/v1/search</code>, <code>/v1/extract</code>
+and CAPTCHA solves. Proxy traffic is the one thing that stays on your
+provider&#39;s bill rather than ours.</p>
+<p>The practical consequences:</p>
+<ul>
+<li><strong>Short sessions get much cheaper.</strong> Rounding up to 30 seconds means a
+3-second session bills as 30. Ours bills as 10 seconds. If your workload
+is many short sessions, this is the single biggest difference in the
+whole migration.</li>
+<li><strong>CAPTCHA stops being a unit charge.</strong> Browserless bills 10 units per
+solve; ours draws on a monthly plan allowance, so a solve doesn&#39;t eat
+browser-time budget.</li>
+<li><strong>Your proxy bill becomes visible.</strong> Their bundled proxies stop being
+units on one invoice and become a line item from your proxy provider.
+Usually cheaper at wholesale, but always more work to set up.</li>
+<li><strong>Parked stable sessions bill while parked.</strong> Same as Browserbase, and
+worth knowing before you leave one open overnight.</li>
+</ul>
+<h2>Concurrency</h2>
+<p>Browserless sells concurrency by plan; so do we, but at the limit we
+<strong>queue</strong> for about 20 seconds before returning 429, where a hard cap
+would reject immediately. Retry logic written against a strict cap still
+works — it&#39;ll just fire less often.</p>
+<p>Concurrency by tier: Free 3, Hobby 10, Startup 25, Scale 50.</p>
+<p>There are two limits, and they return different codes:</p>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Meaning</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Your tier&#39;s concurrency</td>
+<td>You&#39;re at your own ceiling</td>
+<td><code>429</code> after queueing</td>
+</tr>
+<tr>
+<td>Fleet capacity</td>
+<td>The whole box is full</td>
+<td><code>503</code> + <code>Retry-After</code></td>
+</tr>
+</tbody></table>
+<p>The <code>503</code> is rare and not your fault — it means every customer&#39;s traffic
+together exceeded the hardware. Treat it as retryable. We&#39;d rather return
+it than keep spawning browsers until the box runs out of memory and takes
+down sessions that were well inside their limits.</p>
+<h2>A realistic migration</h2>
+<ol>
+<li>Point one non-critical script at <code>connect.runbrowser.dev</code> and run it.</li>
+<li>Grep your codebase for <code>browserless.io</code> — that finds the REST calls
+you&#39;d forgotten.</li>
+<li>Check the &quot;don&#39;t have&quot; table above against those hits.</li>
+<li>Move the rest, keeping your Browserless account alive for a week.</li>
+</ol>
+<p>Most people are done in an afternoon. If you&#39;re not, the thing blocking
+you is almost certainly on that list.</p>
+
+    <hr>
+    <p class="foot">
+      Something wrong or missing here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+  </main>
+</div>
+</body>
+</html>

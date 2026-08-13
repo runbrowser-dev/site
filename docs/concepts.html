@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concepts — runbrowser docs</title>
+<meta name="description" content="Concepts — runbrowser documentation.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser</span>
+  </a>
+  <a class="back" href="/">&larr; back to site</a>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Docs</span>
+    <div class="nav-links">
+        <a class="" href="/docs/quickstart.html">Quickstart</a>
+        <a class="active" href="/docs/concepts.html">Concepts</a>
+        <a class="" href="/docs/api-reference.html">API reference</a>
+        <a class="" href="/docs/mcp.html">MCP server</a>
+        <a class="" href="/docs/migrating-from-browserless.html">From Browserless</a>
+        <a class="" href="/docs/migrating-from-browserbase.html">From Browserbase</a>
+    </div>
+  </nav>
+  <main class="prose">
+<h1>Concepts</h1>
+<h2>Sessions</h2>
+<p>A session is one browser. It begins when you connect and ends when you
+disconnect; the container is then destroyed, never reused. Chromium state
+isn&#39;t safe to recycle between tenants, so every customer gets a browser
+that has never seen anyone else&#39;s traffic.</p>
+<p>We keep a few browsers pre-warmed, so a connect usually costs ~16ms rather
+than the ~350ms a cold spawn takes. Pre-warmed browsers are rotated out
+after 15 minutes so you never receive one that has been sitting idle for
+hours.</p>
+<h2>Browser-time billing</h2>
+<p>You&#39;re billed for the seconds a browser exists, not for the number of
+sessions you open. Per-session duration is floored at 10 seconds.</p>
+<p>This is deliberate and it&#39;s the main thing that differs from
+session-count pricing. Under per-session billing, the cheapest thing you
+can do is cram work into fewer, longer sessions — which is the opposite of
+what makes a fleet efficient. Under browser-time, short focused sessions
+are cheap, and the incentive points the same way our capacity does.</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Price</th>
+<th>Concurrent</th>
+<th>Browser hours/mo</th>
+<th>Max session</th>
+<th>/fetch</th>
+<th>/search</th>
+<th>/extract</th>
+<th>CAPTCHAs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Free</td>
+<td>€0</td>
+<td>3</td>
+<td>1</td>
+<td>15 min</td>
+<td>1,000</td>
+<td>1,000</td>
+<td>25</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Hobby</td>
+<td>€19/mo</td>
+<td>10</td>
+<td>150</td>
+<td>60 min</td>
+<td>5,000</td>
+<td>5,000</td>
+<td>100</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Startup</td>
+<td>€99/mo</td>
+<td>25</td>
+<td>600</td>
+<td>180 min</td>
+<td>25,000</td>
+<td>25,000</td>
+<td>600</td>
+<td>1,000</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>€499/mo</td>
+<td>50</td>
+<td>2,500</td>
+<td>360 min</td>
+<td>100,000</td>
+<td>100,000</td>
+<td>3,000</td>
+<td>10,000</td>
+</tr>
+</tbody></table>
+<p><code>/extract</code> has its own allowance because it costs twice — browser-time to
+render the page, plus LLM tokens to read it. The numbers are sized against
+worst-case content (a full 200k-char page); typical pages are a fraction of
+that, so real usage goes considerably further than the figure suggests.</p>
+<p>Concurrency is a ceiling, not a reservation, and the fleet has a hard cap
+underneath it — see <a href="#concurrency-and-queueing">Concurrency and queueing</a>
+for what that means when the box is busy.</p>
+<h2>Concurrency and queueing</h2>
+<p>Two separate limits apply, and they mean different things.</p>
+<p><strong>Your tier&#39;s concurrency</strong> — Free 3, Hobby 10, Startup 25, Scale 50 — is
+your own ceiling. At it, new requests <strong>wait</strong> for a slot rather than
+failing immediately: up to about 20 seconds, then a <code>429</code>. A burst of
+parallel jobs against a small tier usually resolves itself in a second or
+two, and that&#39;s a better experience than a wall of errors your retry
+logic has to absorb.</p>
+<p>If you&#39;re being queued regularly, that&#39;s a signal to move up a tier, and
+it&#39;s visible to us in metrics before you complain.</p>
+<p><strong>Fleet capacity</strong> is the whole box, shared by everyone. Tier ceilings are
+ceilings rather than reservations, so in principle the sum of what every
+customer may use exceeds what the hardware runs. When that actually
+happens you get a <code>503</code> with <code>Retry-After</code> after a short queue. It isn&#39;t
+your fault and it isn&#39;t your limit — it&#39;s ours, and it&#39;s deliberately a
+clean refusal: the alternative is spawning browsers past the box&#39;s memory
+and killing live sessions that were well inside their limits.</p>
+<p>Operationally the <code>503</code> is the signal to add capacity, and it&#39;s alarmed on
+our side (<code>agentbrowser_fleet_rejections_total</code>) rather than left for you
+to report.</p>
+<h2>Stable sessions</h2>
+<p>Normally the browser dies when you disconnect. A stable session doesn&#39;t:</p>
+<pre><code class="language-ts">const res = await fetch(`https://connect.${domain}/v1/sessions`, {
+  method: &#39;POST&#39;,
+  headers: { Authorization: `Bearer ${key}`, &#39;Content-Type&#39;: &#39;application/json&#39; },
+  body: JSON.stringify({ keepAlive: true, maxIdleSeconds: 600 }),
+});
+const { sessionId, connectUrl } = await res.json();
+
+const browser = await chromium.connectOverCDP(connectUrl);
+// ... log in, do work, disconnect ...
+// later, from a different process:
+const again = await chromium.connectOverCDP(connectUrl);
+</code></pre>
+<p>Everything survives: cookies, localStorage, in-memory SPA state, open
+tabs, in-flight requests, scroll position. We park the container rather
+than snapshotting state, which is why the coverage is total instead of
+&quot;cookies and localStorage&quot;.</p>
+<p><strong>The meter runs while it&#39;s parked.</strong> You&#39;re holding a browser; nobody
+else can use it. Close it when you&#39;re done:</p>
+<pre><code class="language-ts">await fetch(`https://connect.${domain}/v1/sessions/${sessionId}/close`, {
+  method: &#39;POST&#39;,
+  headers: { Authorization: `Bearer ${key}` },
+});
+</code></pre>
+<p>Two ceilings apply, whichever comes first: idle timeout (default 10 min)
+and total session duration (per tier, above).</p>
+<p>Parked sessions <strong>survive a gateway restart</strong>, including a redeploy. The
+browser container keeps running while the gateway is down and is adopted
+back on startup, so a reattach afterwards returns the same browser with
+its page state intact — not a fresh one.</p>
+<p>The clocks keep running while we&#39;re down. A session whose idle timeout or
+maximum duration elapses during a restart is expired, not resumable: a
+redeploy doesn&#39;t quietly extend anything you&#39;re being billed for.</p>
+<p><strong>What doesn&#39;t survive:</strong> a restart of the <em>machine</em>. Containers die with
+the host, so a reboot or host failure loses parked sessions. Reattaching
+then returns &quot;not found&quot;, and that&#39;s the case worth writing a retry for.</p>
+<h2>Live viewer</h2>
+<p>Watch a session in real time, or hand someone a link:</p>
+<pre><code class="language-ts">const res = await fetch(`https://connect.${domain}/v1/sessions/${id}/viewer-token`, {
+  method: &#39;POST&#39;,
+  headers: { Authorization: `Bearer ${key}`, &#39;Content-Type&#39;: &#39;application/json&#39; },
+  body: JSON.stringify({ ttlSeconds: 3600 }),
+});
+const { webUrl } = await res.json();   // signed, expiring, no API key inside
+</code></pre>
+<p>The URL is HMAC-signed and expires (1h default, 24h max). Anyone holding
+it can watch until then — no bearer token rides in the URL, so it&#39;s safe
+to paste into a ticket. The page is built to be iframed: no chrome, no
+controls, <code>?fit=cover|fill|contain</code> for sizing, <code>?debug=1</code> for a
+diagnostic pill, and <code>postMessage</code> events to the parent frame.</p>
+<p>Read-only in v1. Mouse and keyboard back through CDP is a v1.5 feature
+waiting on someone asking for it.</p>
+<h2>Stealth</h2>
+<p>Our stealth is deliberately <strong>not</strong> a fingerprint injector.</p>
+<p>We built nine iterations of one — an 883-line JS injector, a 50-profile
+pool, a content-script extension — and measured them against both CreepJS
+and real commercial targets. CreepJS scores climbed steadily. Real-world
+outcomes got <em>worse</em>: more spoofing meant more detectable inconsistency,
+and it got us reCAPTCHA&#39;d on Google for four consecutive iterations.
+Xvfb + headed Chromium measurably worsened Google detection too, and was
+reverted.</p>
+<p>What ships is ~60 lines of Dockerfile and launch flags: Debian-packaged
+Chromium, no JS injection, no patches. On a 16-target harness of <em>painful</em>
+pages (search results and listings, not homepages) across Cloudflare,
+PerimeterX, Akamai and DataDome: 15 of 16 open. The exception is Walmart,
+whose PerimeterX threshold for price-scraping is set lower than anyone
+else&#39;s and which never offers a challenge to solve.</p>
+<p>If a target still blocks you, the lever is almost always a residential
+IP, not more JavaScript.</p>
+<h2>Proxies</h2>
+<p>Bring your own, per session:</p>
+<pre><code class="language-ts">await chromium.connectOverCDP(`https://connect.${domain}?token=${key}&amp;proxy=${encodeURIComponent(proxyUrl)}`);
+</code></pre>
+<p>Or keep the credentials out of the URL entirely by POSTing them to
+<code>/v1/sessions</code> and connecting with the opaque token you get back. Proxy
+URLs are validated against SSRF (RFC1918, loopback and link-local are
+refused; http/https/socks5 only) and never logged.</p>
+<p>Managed proxy pools are designed but not built — the trigger is a
+customer saying they&#39;d pay for it. Until then you get wholesale pricing
+from your own provider instead of our markup.</p>
+<h2>CAPTCHAs</h2>
+<p>Two ways, and the helper in <a href="/docs/">examples/captcha</a> does
+both:</p>
+<p><strong>Managed</strong> (<code>provider: &#39;managed&#39;</code>) solves on our provider account against
+a monthly allowance — 0 on Free, 100 on Hobby, 1,000 on Startup, 10,000 on
+Scale. No solver signup. Failed solves are refunded, because the provider
+doesn&#39;t charge us for challenges it can&#39;t clear.</p>
+<p><strong>Bring your own key</strong> (<code>provider: &#39;capsolver&#39; | &#39;2captcha&#39;</code>) talks to that
+provider directly. It costs us nothing, so it works on every tier including
+Free, and you pay wholesale (~$0.001/solve) instead of our allowance.</p>
+<p>Free tier deliberately gets no managed allowance. Every managed solve
+spends real money at the provider, and an unfunded tier that can spend it
+is an invitation.</p>
+<p>Invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren&#39;t solvable
+by anyone. They score your session rather than posing a question. A
+residential proxy is the answer there, and both paths tell you so instead
+of timing out.</p>
+<h2>Regions</h2>
+<p>EU only (Falkenstein) at launch. US is a post-revenue decision, not a
+roadmap promise.</p>
+
+    <hr>
+    <p class="foot">
+      Something wrong or missing here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API reference — runbrowser docs</title>
+<meta name="description" content="API reference — runbrowser documentation.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser</span>
+  </a>
+  <a class="back" href="/">&larr; back to site</a>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Docs</span>
+    <div class="nav-links">
+        <a class="" href="/docs/quickstart.html">Quickstart</a>
+        <a class="" href="/docs/concepts.html">Concepts</a>
+        <a class="active" href="/docs/api-reference.html">API reference</a>
+        <a class="" href="/docs/mcp.html">MCP server</a>
+        <a class="" href="/docs/migrating-from-browserless.html">From Browserless</a>
+        <a class="" href="/docs/migrating-from-browserbase.html">From Browserbase</a>
+    </div>
+  </nav>
+  <main class="prose">
+<h1>API reference</h1>
+<p>Three surfaces, three hostnames:</p>
+<table>
+<thead>
+<tr>
+<th>Host</th>
+<th>What lives there</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>connect.runbrowser.dev</code></td>
+<td>CDP, REST shortcuts, sessions, viewer, MCP</td>
+</tr>
+<tr>
+<td><code>api.runbrowser.dev</code></td>
+<td><code>/v1</code> primitives (fetch, search, extract)</td>
+</tr>
+<tr>
+<td><code>app.runbrowser.dev</code></td>
+<td>Dashboard, auth, keys, billing, usage</td>
+</tr>
+</tbody></table>
+<p>Auth everywhere is your API key, as <code>Authorization: Bearer ab_…</code> or
+<code>?token=ab_…</code> on connect URLs. The machine-readable spec for the <code>/v1</code>
+primitives is served at <code>GET https://api.runbrowser.dev/v1/openapi.yml</code>.</p>
+<hr>
+<h2>Connecting a browser</h2>
+<pre><code>wss://connect.runbrowser.dev?token=ab_…
+</code></pre>
+<p>Works with <code>chromium.connectOverCDP()</code> and <code>puppeteer.connect({browserWSEndpoint})</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Query param</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>token</code></td>
+<td>your API key</td>
+</tr>
+<tr>
+<td><code>proxy</code></td>
+<td>egress proxy URL, credentials embedded. Validated against SSRF.</td>
+</tr>
+<tr>
+<td><code>session</code></td>
+<td>reattach to a stable session (<code>ssn_…</code>) or redeem a one-use token (<code>tk_…</code>)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Sessions</h2>
+<h3><code>POST /v1/sessions</code></h3>
+<p>Create a session up front instead of connecting directly. Two reasons to
+bother: it keeps proxy credentials out of the connect URL, and it&#39;s how
+you get a stable session.</p>
+<pre><code class="language-json">{
+  &quot;keepAlive&quot;: true,
+  &quot;maxIdleSeconds&quot;: 600,
+  &quot;proxy&quot;: { &quot;type&quot;: &quot;external&quot;, &quot;url&quot;: &quot;http://user:pass@host:port&quot; }
+}
+</code></pre>
+<pre><code class="language-json">{
+  &quot;sessionId&quot;: &quot;ssn_…&quot;,
+  &quot;connectUrl&quot;: &quot;wss://connect.runbrowser.dev/connect?session=ssn_…&quot;,
+  &quot;expiresAt&quot;: &quot;2026-08-12T12:00:00Z&quot;,
+  &quot;maxIdleSeconds&quot;: 600,
+  &quot;maxDurationSeconds&quot;: 3600
+}
+</code></pre>
+<p>Without <code>keepAlive</code>, you get a short-lived one-use <code>tk_…</code> token instead —
+the credential-safe connect flow, with no parked browser and no idle
+billing.</p>
+<h3><code>GET /v1/sessions</code></h3>
+<p>Every session your org currently has running, newest first. Use it to find
+sessions you&#39;ve lost track of — a parked stable session keeps billing until
+it idles out, so this is how you see what you&#39;re paying for.</p>
+<pre><code class="language-json">{
+  &quot;count&quot;: 1,
+  &quot;sessions&quot;: [
+    {
+      &quot;sessionId&quot;: &quot;ssn_…&quot;,
+      &quot;startedAt&quot;: &quot;2026-08-12T22:03:04Z&quot;,
+      &quot;keepAlive&quot;: true,
+      &quot;parked&quot;: true,
+      &quot;parkedAt&quot;: &quot;2026-08-12T22:03:04Z&quot;,
+      &quot;idleExpiresAt&quot;: &quot;2026-08-12T22:08:04Z&quot;,
+      &quot;expiresAt&quot;: &quot;2026-08-12T22:18:04Z&quot;
+    }
+  ]
+}
+</code></pre>
+<p><code>parked</code> means no client is attached right now. <code>idleExpiresAt</code> is when the
+session releases itself if nobody reconnects; <code>expiresAt</code> is the absolute
+ceiling. Whichever comes first wins. Both are absent for a one-shot session.</p>
+<h3><code>POST /v1/sessions/{id}/close</code></h3>
+<p>Force-release. Stops the meter. Call it when you&#39;re done with a stable
+session.</p>
+<h3><code>POST /v1/sessions/{id}/viewer-token</code></h3>
+<pre><code class="language-json">{ &quot;ttlSeconds&quot;: 3600 }
+</code></pre>
+<pre><code class="language-json">{
+  &quot;sessionId&quot;: &quot;ssn_…&quot;,
+  &quot;viewerUrl&quot;: &quot;wss://connect.runbrowser.dev/view/active?session=…&amp;exp=…&amp;sig=…&quot;,
+  &quot;webUrl&quot;:    &quot;https://connect.runbrowser.dev/viewer?session=…&amp;exp=…&amp;sig=…&quot;,
+  &quot;expiresAt&quot;: &quot;2026-08-12T13:00:00Z&quot;
+}
+</code></pre>
+<p>Default TTL 1 hour, max 24. HMAC-signed; no API key in the URL.</p>
+<hr>
+<h2>REST shortcuts</h2>
+<p>Browserless-compatible body shapes, on <code>connect.runbrowser.dev</code>. Each one
+provisions a browser, does the work, and releases it.</p>
+<p>All four accept:</p>
+<pre><code class="language-json">{
+  &quot;url&quot;: &quot;https://example.com&quot;,
+  &quot;waitForTimeout&quot;: 5000,
+  &quot;cookies&quot;: [{ &quot;name&quot;: &quot;session&quot;, &quot;value&quot;: &quot;…&quot; }],
+  &quot;headers&quot;: { &quot;X-Custom&quot;: &quot;value&quot; }
+}
+</code></pre>
+<p><code>cookies</code> defaults its URL scope to the page you&#39;re loading, so
+<code>{name, value}</code> alone works for the common case — that&#39;s what gets you
+past consent walls and age gates in a single call.</p>
+<h3><code>POST /screenshot</code> → <code>image/png|jpeg|webp</code></h3>
+<pre><code class="language-json">{ &quot;url&quot;: &quot;…&quot;, &quot;options&quot;: { &quot;format&quot;: &quot;png&quot;, &quot;fullPage&quot;: true, &quot;quality&quot;: 80,
+                           &quot;selector&quot;: &quot;#chart&quot;,
+                           &quot;viewport&quot;: { &quot;width&quot;: 1280, &quot;height&quot;: 720 } } }
+</code></pre>
+<p><code>selector</code> clips the shot to the first matching element, including one below
+the fold, and takes precedence over <code>fullPage</code>. A selector that matches
+nothing returns <code>400</code> rather than quietly handing back the whole page.
+<code>quality</code> applies to <code>jpeg</code> and <code>webp</code> only.</p>
+<h3><code>POST /pdf</code> → <code>application/pdf</code></h3>
+<pre><code class="language-json">{ &quot;url&quot;: &quot;…&quot;, &quot;options&quot;: { &quot;format&quot;: &quot;A4&quot;, &quot;landscape&quot;: false, &quot;printBackground&quot;: true,
+                           &quot;marginTop&quot;: &quot;0.4in&quot;, &quot;marginBottom&quot;: &quot;0.4in&quot; } }
+</code></pre>
+<h3><code>POST /content</code> → <code>text/html</code></h3>
+<p>Post-JavaScript rendered DOM.</p>
+<h3><code>POST /scrape</code> → JSON</h3>
+<pre><code class="language-json">{ &quot;url&quot;: &quot;…&quot;, &quot;elements&quot;: [
+  { &quot;selector&quot;: &quot;h1&quot; },
+  { &quot;selector&quot;: &quot;a&quot;, &quot;result&quot;: &quot;attr&quot;, &quot;attribute&quot;: &quot;href&quot; }
+] }
+</code></pre>
+<hr>
+<h2>Primitives</h2>
+<p>On <code>api.runbrowser.dev</code>. These are the ones that make agent loops cheap.</p>
+<h3><code>POST /v1/fetch</code></h3>
+<p><strong>Plain HTTP — no browser, no JavaScript.</strong> Fast and billed against a
+separate allowance rather than browser-time. For pages that need
+rendering, use <code>/v1/extract</code> or a browser.</p>
+<pre><code class="language-json">{ &quot;url&quot;: &quot;…&quot;, &quot;format&quot;: &quot;markdown&quot;, &quot;method&quot;: &quot;GET&quot;,
+  &quot;headers&quot;: {}, &quot;timeoutMs&quot;: 30000, &quot;followRedirects&quot;: true }
+</code></pre>
+<p><code>format</code> is <code>html</code> (default), <code>text</code> or <code>markdown</code>. The response carries
+the body plus block detection — <code>blocked</code>, <code>blockProvider</code>, <code>blockReason</code>
+— so an agent can tell &quot;this page is a Cloudflare wall&quot; from &quot;this page is
+empty&quot; without guessing.</p>
+<h3><code>POST /v1/search</code></h3>
+<pre><code class="language-json">{ &quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 10, &quot;lang&quot;: &quot;en&quot;,
+  &quot;phrase&quot;: false, &quot;include_hosts&quot;: [&quot;example.com&quot;], &quot;exclude_hosts&quot;: [&quot;spam.example&quot;] }
+</code></pre>
+<p>Note the field names: <code>q</code> and <code>count</code>, not <code>query</code> and <code>limit</code>.
+<code>count</code> maxes at 20.</p>
+<h3><code>POST /v1/extract</code></h3>
+<p>Renders the page in a real browser, then asks an LLM for exactly the
+shape you asked for.</p>
+<pre><code class="language-json">{
+  &quot;url&quot;: &quot;…&quot;,
+  &quot;schema&quot;: { &quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: { … }, &quot;required&quot;: [ … ] },
+  &quot;instructions&quot;: &quot;only in-stock items&quot;,
+  &quot;contentFormat&quot;: &quot;markdown-full&quot;,
+  &quot;cookies&quot;: [ … ],
+  &quot;headers&quot;: { … },
+  &quot;waitForSelector&quot;: &quot;.results&quot;
+}
+</code></pre>
+<p><code>contentFormat</code> is worth knowing: <code>markdown</code> runs Readability first (right
+for articles), <code>markdown-full</code> skips it and converts the whole
+noise-stripped body (right for listings, grids and search results), <code>text</code>
+and <code>html</code> do what they say. It cuts token cost 5–10x and makes small
+models dramatically more accurate.</p>
+<p>Counts against a separate monthly <code>/extract</code> allowance (25 / 100 / 600 /
+3,000 by tier) on top of browser-time, because each call spends both a
+browser and LLM tokens.</p>
+<p>Returns <code>{data, usage, trace}</code>. Output is validated against your schema;
+on a mismatch we retry once with the validation errors fed back, then
+return 422 rather than handing you data that doesn&#39;t fit.</p>
+<h3><code>POST /v1/captcha/solve</code></h3>
+<p>Solve a CAPTCHA on our provider account — no solver signup, no key of your
+own.</p>
+<pre><code class="language-json">{ &quot;type&quot;: &quot;turnstile&quot;, &quot;websiteURL&quot;: &quot;https://example.com/login&quot;,
+  &quot;websiteKey&quot;: &quot;0x4AAA…&quot;, &quot;action&quot;: &quot;login&quot;, &quot;cdata&quot;: &quot;…&quot; }
+</code></pre>
+<pre><code class="language-json">{ &quot;token&quot;: &quot;…&quot;, &quot;type&quot;: &quot;turnstile&quot;, &quot;durationMs&quot;: 14320,
+  &quot;used&quot;: 41, &quot;limit&quot;: 1000, &quot;remaining&quot;: 959 }
+</code></pre>
+<p><code>type</code> is <code>recaptcha_v2</code>, <code>hcaptcha</code> or <code>turnstile</code>. <code>action</code> and <code>cdata</code>
+are Turnstile-only, read off the widget&#39;s data attributes. Inject the
+returned token into the page&#39;s response field <strong>and</strong> invoke the widget&#39;s
+<code>data-callback</code> — most forms submit from the callback, not a button. The
+<a href="/docs/">helper</a> does both for you.</p>
+<p>Counts against your plan&#39;s monthly allowance: 0 on Free, 100 on Hobby,
+1,000 on Startup, 10,000 on Scale. <strong>Failed solves are refunded</strong> — the
+provider doesn&#39;t charge us for challenges it can&#39;t clear, so we don&#39;t
+charge you.</p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>402</td>
+<td>Your plan includes no allowance (Free). Use your own key instead.</td>
+</tr>
+<tr>
+<td>422</td>
+<td>The provider couldn&#39;t solve this one.</td>
+</tr>
+<tr>
+<td>429</td>
+<td>Monthly allowance exhausted.</td>
+</tr>
+<tr>
+<td>503</td>
+<td>Managed solving isn&#39;t enabled on this deployment.</td>
+</tr>
+</tbody></table>
+<p>Not everything is solvable. reCAPTCHA v3, DataDome and PerimeterX score the
+session rather than posing a challenge; <code>type</code> rejects them with an
+explanation rather than taking your money for a request that can&#39;t succeed.</p>
+<hr>
+<h2>MCP</h2>
+<p><code>POST https://connect.runbrowser.dev/mcp</code> — Model Context Protocol over
+Streamable HTTP. Nine tools. See <a href="/docs/mcp.html">mcp.md</a>.</p>
+<hr>
+<h2>Metrics</h2>
+<p><code>GET /metrics</code> on the gateway and <code>/actuator/prometheus</code> on the control
+plane, both Prometheus format. Neither is routed publicly; they&#39;re for
+whoever operates the box. See <a href="/docs/deploy.html#monitoring">deploy.md</a>.</p>
+<hr>
+<h2>Errors</h2>
+<p><code>/v1</code> endpoints return a JSON envelope:</p>
+<pre><code class="language-json">{ &quot;error&quot;: &quot;invalid_request&quot;, &quot;fields&quot;: [&quot;q: must not be blank&quot;] }
+</code></pre>
+<p><code>error</code> is always present. <code>fields</code> appears on validation failures, one
+entry per offending field as <code>name: reason</code>. <code>message</code> appears when there
+is something to say beyond the code, and is omitted otherwise — so read
+<code>error</code> first and treat the other two as optional.</p>
+<p>Quota rejections carry the numbers:</p>
+<pre><code class="language-json">{ &quot;error&quot;: &quot;monthly_quota_exceeded&quot;, &quot;type&quot;: &quot;browser_seconds&quot;, &quot;used&quot;: 3600, &quot;limit&quot;: 3600 }
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>401</td>
+<td>Missing, malformed, or revoked key</td>
+</tr>
+<tr>
+<td>422</td>
+<td>Extraction couldn&#39;t produce data matching your schema</td>
+</tr>
+<tr>
+<td>429</td>
+<td>Concurrency limit (after waiting for a slot) or monthly quota</td>
+</tr>
+<tr>
+<td>502</td>
+<td>The browser or an upstream failed</td>
+</tr>
+<tr>
+<td>504</td>
+<td>The page never finished loading</td>
+</tr>
+</tbody></table>
+<p>Revoking a key takes effect in about 100–150ms across the fleet, not at
+the end of a cache TTL.</p>
+
+    <hr>
+    <p class="foot">
+      Something wrong or missing here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+  </main>
+</div>
+</body>
+</html>
