@@ -20,12 +20,12 @@
   <nav class="sidebar">
     <span class="nav-title">Docs</span>
     <div class="nav-links">
-        <a class="active" href="/docs/quickstart.html">Quickstart</a>
-        <a class="" href="/docs/concepts.html">Concepts</a>
-        <a class="" href="/docs/api-reference.html">API reference</a>
-        <a class="" href="/docs/mcp.html">MCP server</a>
-        <a class="" href="/docs/migrating-from-browserless.html">From Browserless</a>
-        <a class="" href="/docs/migrating-from-browserbase.html">From Browserbase</a>
+        <a class="active" href="/docs/quickstart">Quickstart</a>
+        <a class="" href="/docs/concepts">Concepts</a>
+        <a class="" href="/docs/api-reference">API reference</a>
+        <a class="" href="/docs/mcp">MCP server</a>
+        <a class="" href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="" href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
   </nav>
   <main class="prose">
@@ -96,7 +96,7 @@ curl -X POST https://api.runbrowser.dev/v1/extract \
 }
 </code></pre>
 <p>Nine tools appear: <code>fetch</code>, <code>search</code>, <code>extract</code>, and a <code>browser_*</code> family
-that drives one persistent browser across calls. See <a href="/docs/mcp.html">mcp.md</a>.</p>
+that drives one persistent browser across calls. See <a href="/docs/mcp">mcp.md</a>.</p>
 <h2>What you&#39;re billed for</h2>
 <p><strong>Browser-time, by the second</strong> — from the moment a browser is provisioned
 to the moment it&#39;s released. Not per session, so a script that opens one
@@ -106,15 +106,15 @@ each take a minute.</p>
 monthly allowance and consume no browser-time at all. <code>/v1/extract</code> uses a
 browser, so it does.</p>
 <p>The meter stops when your CDP connection closes — unless you asked for a
-<a href="/docs/concepts.html#stable-sessions">stable session</a>, which keeps the browser
+<a href="/docs/concepts#stable-sessions">stable session</a>, which keeps the browser
 parked and <em>keeps billing</em> until it&#39;s closed or idles out. That trade is
 the point of the feature, but know that you&#39;re making it.</p>
 <h2>Next</h2>
 <ul>
-<li><a href="/docs/concepts.html">Concepts</a> — sessions, quotas, stable sessions, the viewer</li>
-<li><a href="/docs/api-reference.html">API reference</a> — every endpoint</li>
-<li><a href="/docs/migrating-from-browserless.html">Migrating from Browserless</a></li>
-<li><a href="/docs/migrating-from-browserbase.html">Migrating from Browserbase</a></li>
+<li><a href="/docs/concepts">Concepts</a> — sessions, quotas, stable sessions, the viewer</li>
+<li><a href="/docs/api-reference">API reference</a> — every endpoint</li>
+<li><a href="/docs/migrating-from-browserless">Migrating from Browserless</a></li>
+<li><a href="/docs/migrating-from-browserbase">Migrating from Browserbase</a></li>
 </ul>
 
     <hr>
