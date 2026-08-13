@@ -48,7 +48,7 @@ Same two-step, no SDK required.
 | Session recording / replay | **No equivalent.** |
 | Stagehand | Works — it connects over CDP like anything else |
 | Advanced Stealth (premium tiers) | Always-on, no tier gate |
-| Bundled CAPTCHA solving | `POST /v1/captcha/solve`, allowance per paid plan. BYO key also works ([helper](../examples/captcha/)) |
+| Bundled CAPTCHA solving | **Not offered.** BYO solver key via the [helper](../examples/captcha/) — you pay wholesale |
 | Bundled proxies | BYO proxy, no markup |
 | Extensions, file uploads/downloads | Via CDP, no dedicated API |
 | Multiple regions | EU only (Falkenstein) |
@@ -92,10 +92,10 @@ differences:
 - **Stealth isn't a tier.** Free-tier browsers get the same stack as Scale.
   There's nothing to upgrade into, because our stealth is a handful of
   launch flags rather than a product SKU.
-- **CAPTCHA is included, proxies are yours to buy.** Managed solving comes
-  out of a plan allowance rather than a per-solve markup. Proxies stay BYO
-  at your provider's wholesale price — cheaper, but more setup. If you'd
-  rather the invoice be one line, we're the wrong choice today.
+- **CAPTCHAs and proxies are both yours to buy.** We don't solve CAPTCHAs
+  on your behalf and we don't resell proxies; you bring a key for each and
+  pay wholesale. Cheaper, but more setup. If you'd rather the invoice be
+  one line, we're the wrong choice today.
 
 We deliberately don't publish a "cheaper by X%" claim: their pricing moves,
 and per-tier comparisons depend on your mix of browser-hours, solves and
@@ -114,7 +114,7 @@ browsers, they have the fleet for it today and we don't.
   a platform; we're deliberately staying infrastructure. If you want the
   agent runtime bundled with the browser, that's them, not us.
 - One region.
-- No bundled proxy (CAPTCHA solving *is* included — see Pricing).
+- No bundled proxy and no bundled CAPTCHA solving — both are BYO.
 - Lower concurrency ceiling.
 
 If your product depends on any of those, stay. If you're paying premium

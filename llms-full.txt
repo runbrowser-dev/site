@@ -227,42 +227,12 @@ Returns `{data, usage, trace}`. Output is validated against your schema;
 on a mismatch we retry once with the validation errors fed back, then
 return 422 rather than handing you data that doesn't fit.
 
-### `POST /v1/captcha/solve`
+### CAPTCHAs
 
-Solve a CAPTCHA on our provider account — no solver signup, no key of your
-own.
-
-```json
-{ "type": "turnstile", "websiteURL": "https://example.com/login",
-  "websiteKey": "0x4AAA…", "action": "login", "cdata": "…" }
-```
-
-```json
-{ "token": "…", "type": "turnstile", "durationMs": 14320,
-  "used": 41, "limit": 1000, "remaining": 959 }
-```
-
-`type` is `recaptcha_v2`, `hcaptcha` or `turnstile`. `action` and `cdata`
-are Turnstile-only, read off the widget's data attributes. Inject the
-returned token into the page's response field **and** invoke the widget's
-`data-callback` — most forms submit from the callback, not a button. The
-[helper](../examples/captcha/) does both for you.
-
-Counts against your plan's monthly allowance: 0 on Free, 100 on Hobby,
-1,000 on Startup, 10,000 on Scale. **Failed solves are refunded** — the
-provider doesn't charge us for challenges it can't clear, so we don't
-charge you.
-
-| Status | Means |
-|---|---|
-| 402 | Your plan includes no allowance (Free). Use your own key instead. |
-| 422 | The provider couldn't solve this one. |
-| 429 | Monthly allowance exhausted. |
-| 503 | Managed solving isn't enabled on this deployment. |
-
-Not everything is solvable. reCAPTCHA v3, DataDome and PerimeterX score the
-session rather than posing a challenge; `type` rejects them with an
-explanation rather than taking your money for a request that can't succeed.
+There is no CAPTCHA endpoint. We don't solve them on your behalf — you use
+your own solver key via the [helper](../examples/captcha/), which talks to
+CapSolver or 2Captcha directly from your process. See
+[Concepts](concepts.md#captchas) for why.
 
 ---
 
@@ -303,7 +273,7 @@ from both will fail to parse the error it was trying to report. See
 |---|---|
 | 401 | Missing, malformed, or revoked key |
 | 402 | Your plan doesn't include this |
-| 422 | Extraction couldn't match your schema, or a CAPTCHA couldn't be solved |
+| 422 | Extraction couldn't produce data matching your schema |
 | 429 | Concurrency limit (after waiting for a slot) or monthly quota |
 | 502 | The browser or an upstream failed |
 | 503 | The fleet is full — retry after 30s (`Retry-After` is set) |
@@ -339,12 +309,12 @@ can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.
 
-| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract | CAPTCHAs |
-|---|---|---|---|---|---|---|---|---|
-| Free | €0 | 3 | 1 | 15 min | 1,000 | 1,000 | 25 | 0 |
-| Hobby | €19/mo | 10 | 150 | 60 min | 5,000 | 5,000 | 100 | 100 |
-| Startup | €99/mo | 25 | 600 | 180 min | 25,000 | 25,000 | 600 | 1,000 |
-| Scale | €499/mo | 50 | 2,500 | 360 min | 100,000 | 100,000 | 3,000 | 10,000 |
+| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract |
+|---|---|---|---|---|---|---|---|
+| Free | €0 | 3 | 1 | 15 min | 1,000 | 1,000 | 25 |
+| Hobby | €19/mo | 10 | 150 | 60 min | 5,000 | 5,000 | 100 |
+| Startup | €99/mo | 25 | 600 | 180 min | 25,000 | 25,000 | 600 |
+| Scale | €499/mo | 50 | 2,500 | 360 min | 100,000 | 100,000 | 3,000 |
 
 `/extract` has its own allowance because it costs twice — browser-time to
 render the page, plus LLM tokens to read it. The numbers are sized against
@@ -493,21 +463,25 @@ from your own provider instead of our markup.
 
 ## CAPTCHAs
 
-Two ways, and the helper in [examples/captcha](../examples/captcha/) does
-both:
+**We don't solve CAPTCHAs for you.** You bring your own solver key, and the
+helper in [examples/captcha](../examples/captcha/) wires it up:
 
-**Managed** (`provider: 'managed'`) solves on our provider account against
-a monthly allowance — 0 on Free, 100 on Hobby, 1,000 on Startup, 10,000 on
-Scale. No solver signup. Failed solves are refunded, because the provider
-doesn't charge us for challenges it can't clear.
+```ts
+await solveCaptcha(page, {
+  provider: 'capsolver',            // or '2captcha'
+  apiKey: process.env.CAPSOLVER_KEY!,
+});
+```
 
-**Bring your own key** (`provider: 'capsolver' | '2captcha'`) talks to that
-provider directly. It costs us nothing, so it works on every tier including
-Free, and you pay wholesale (~\$0.001/solve) instead of our allowance.
+It talks to that provider directly from your process. Your key never
+reaches us. Because it costs us nothing, it works on every tier including
+Free, and you pay wholesale (~\$0.001/solve) rather than a marked-up
+allowance — competitors bundle this at roughly \$0.02–0.05 per solve.
 
-Free tier deliberately gets no managed allowance. Every managed solve
-spends real money at the provider, and an unfunded tier that can spend it
-is an invitation.
+We used to offer managed solving on our own account and removed it. Doing
+the solve ourselves and selling it as a plan feature makes us a participant
+in circumventing an access control rather than neutral infrastructure. You
+hold the provider account and make that call; we are only the browser.
 
 Invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren't solvable
 by anyone. They score your session rather than posing a question. A
@@ -536,7 +510,7 @@ status you got instead of guessing.
 
 `connect.runbrowser.dev` (browsers, sessions, the REST shortcuts, MCP)
 answers with **plain text**. `api.runbrowser.dev` (`/v1/fetch`,
-`/v1/search`, `/v1/extract`, `/v1/captcha/solve`) answers with **JSON**.
+`/v1/search`, `/v1/extract`) answers with **JSON**.
 
 If you write one error handler that assumes JSON everywhere, it will throw
 a parse error on the exact request that was already failing, and you'll
@@ -590,10 +564,9 @@ The short version, before the exhaustive tables.
 |---|---|---|
 | 400, 403, 413, 415 | **No** | Your request is wrong. Retrying sends the same wrong request |
 | 401 | **No** | Fix the key |
-| 402 | **No** | Your plan doesn't include this. Upgrade |
 | 404 | **No** | The session is gone. Create a new one |
 | 409 | Yes | Something else holds the session. Retry after closing it |
-| 422 | Sometimes | Model output or CAPTCHA solve failed. A retry may succeed; two won't |
+| 422 | Sometimes | The model couldn't match your schema. A retry may succeed; two won't |
 | 429 | **Yes, with backoff** — unless it's a monthly quota, which won't clear until you upgrade or the month rolls over |
 | 502, 504 | Yes, with backoff | Something upstream failed or was too slow |
 | 503 | **Yes, after 30s** | We're full. `Retry-After: 30` is on the response |
@@ -751,21 +724,6 @@ so this is the clearest case for branching on `error` rather than status.
 but the result didn't fit the shape you asked for. That is usually a
 schema problem, not a page problem. Loosen the required fields first.
 
-## /v1/captcha/solve
-
-| Status | `error` | Cause | What to do |
-|---|---|---|---|
-| 400 | `validation_failed` | Unsupported `type` | Use `recaptcha_v2`, `hcaptcha`, or `turnstile` |
-| **402** | `captcha_not_included` | **Your plan includes zero managed solves** — this is the Free tier | Upgrade, or pass your own solver key |
-| 429 | `monthly_quota_exceeded` | You had an allowance and used it | Upgrade or wait |
-| 503 | `captcha_not_configured` | Managed solving isn't enabled here | Use your own solver key |
-| **422** | `captcha_timeout` | The solver didn't finish in its window | Retry |
-| **422** | `captcha_unsolvable` | The solver couldn't clear this challenge | Try again from a residential proxy |
-| 502 | `captcha_provider_unreachable`, `captcha_provider_error` | The solving provider failed | Retry |
-
-**Failed solves are refunded** to your monthly allowance. You are not
-billed for a CAPTCHA we didn't solve.
-
 ## MCP server
 
 Two layers, and they fail differently.
@@ -882,7 +840,6 @@ timezone, not your billing date.
 | Concurrent sessions | Requests **wait ~20 seconds** for a free slot, then `429`. A short burst usually resolves itself |
 | Monthly browser-seconds | `429 monthly_quota_exceeded` with `used_seconds`/`limit_seconds` |
 | Monthly fetches, searches, extracts | `429 monthly_quota_exceeded` with `type`/`used`/`limit` |
-| Monthly CAPTCHAs | `429` if you had an allowance; `402 captcha_not_included` if your plan has none |
 | Fleet capacity | `503` with `Retry-After: 30` |
 
 The difference between `429` and `503` is worth keeping straight: `429`
@@ -895,7 +852,7 @@ both exist.
 Retry the transient things, fail fast on the rest, and always cap it.
 
 ```ts tab=TypeScript
-const TRANSIENT = new Set([408, 409, 502, 503, 504]);
+const TRANSIENT = new Set([409, 502, 503, 504]);
 
 async function call(path: string, body: unknown, attempt = 0): Promise<any> {
   const res = await fetch(`https://api.runbrowser.dev${path}`, {
@@ -930,7 +887,7 @@ async function call(path: string, body: unknown, attempt = 0): Promise<any> {
 ```python tab=Python
 import os, random, time, requests
 
-TRANSIENT = {408, 409, 502, 503, 504}
+TRANSIENT = {409, 502, 503, 504}
 API = "https://api.runbrowser.dev"
 
 
@@ -1154,7 +1111,7 @@ Same two-step, no SDK required.
 | Session recording / replay | **No equivalent.** |
 | Stagehand | Works — it connects over CDP like anything else |
 | Advanced Stealth (premium tiers) | Always-on, no tier gate |
-| Bundled CAPTCHA solving | `POST /v1/captcha/solve`, allowance per paid plan. BYO key also works ([helper](../examples/captcha/)) |
+| Bundled CAPTCHA solving | **Not offered.** BYO solver key via the [helper](../examples/captcha/) — you pay wholesale |
 | Bundled proxies | BYO proxy, no markup |
 | Extensions, file uploads/downloads | Via CDP, no dedicated API |
 | Multiple regions | EU only (Falkenstein) |
@@ -1198,10 +1155,10 @@ differences:
 - **Stealth isn't a tier.** Free-tier browsers get the same stack as Scale.
   There's nothing to upgrade into, because our stealth is a handful of
   launch flags rather than a product SKU.
-- **CAPTCHA is included, proxies are yours to buy.** Managed solving comes
-  out of a plan allowance rather than a per-solve markup. Proxies stay BYO
-  at your provider's wholesale price — cheaper, but more setup. If you'd
-  rather the invoice be one line, we're the wrong choice today.
+- **CAPTCHAs and proxies are both yours to buy.** We don't solve CAPTCHAs
+  on your behalf and we don't resell proxies; you bring a key for each and
+  pay wholesale. Cheaper, but more setup. If you'd rather the invoice be
+  one line, we're the wrong choice today.
 
 We deliberately don't publish a "cheaper by X%" claim: their pricing moves,
 and per-tier comparisons depend on your mix of browser-hours, solves and
@@ -1220,7 +1177,7 @@ browsers, they have the fleet for it today and we don't.
   a platform; we're deliberately staying infrastructure. If you want the
   agent runtime bundled with the browser, that's them, not us.
 - One region.
-- No bundled proxy (CAPTCHA solving *is* included — see Pricing).
+- No bundled proxy and no bundled CAPTCHA solving — both are BYO.
 - Lower concurrency ceiling.
 
 If your product depends on any of those, stay. If you're paying premium
@@ -1300,10 +1257,6 @@ should budget real work — or stay where you are.
 - **`/v1/extract`** — URL plus JSON Schema in, validated structured JSON out.
 - **An MCP server**, so any MCP-aware agent gets browser tools with no
   integration code. [Details](mcp.md).
-- **Managed CAPTCHA solving** — `POST /v1/captcha/solve`, with a monthly
-  allowance on every paid plan and no per-solve markup. Browserless bills
-  10 units per solve; ours comes out of your plan. You can still bring your
-  own solver key if you'd rather ([helper](../examples/captcha/)).
 - **Live viewer with signed shareable URLs** that are safe to paste into a
   ticket — no API key inside.
 - **EU residency** (Falkenstein). Browserless's shared fleet is US West,
@@ -1319,9 +1272,9 @@ units/MB datacenter. (Third-party proxies you connect yourself don't
 consume units there, same as here.)
 
 We bill **browser-seconds**, floored at 10 seconds per session, plus
-separate monthly allowances for `/v1/fetch`, `/v1/search`, `/v1/extract`
-and CAPTCHA solves. Proxy traffic is the one thing that stays on your
-provider's bill rather than ours.
+separate monthly allowances for `/v1/fetch`, `/v1/search` and
+`/v1/extract`. Proxy traffic and CAPTCHA solving stay on your providers'
+bills rather than ours.
 
 The practical consequences:
 
@@ -1329,9 +1282,10 @@ The practical consequences:
   3-second session bills as 30. Ours bills as 10 seconds. If your workload
   is many short sessions, this is the single biggest difference in the
   whole migration.
-- **CAPTCHA stops being a unit charge.** Browserless bills 10 units per
-  solve; ours draws on a monthly plan allowance, so a solve doesn't eat
-  browser-time budget.
+- **CAPTCHA solving moves to your own account.** Browserless bills 10
+  units per solve. We don't offer it — you bring a CapSolver or 2Captcha
+  key ([helper](../examples/captcha/)) and pay them roughly $0.001 a solve
+  directly. Cheaper, but it's a signup you didn't have before.
 - **Your proxy bill becomes visible.** Their bundled proxies stop being
   units on one invoice and become a line item from your proxy provider.
   Usually cheaper at wholesale, but always more work to set up.

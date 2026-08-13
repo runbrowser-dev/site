@@ -227,42 +227,12 @@ Returns `{data, usage, trace}`. Output is validated against your schema;
 on a mismatch we retry once with the validation errors fed back, then
 return 422 rather than handing you data that doesn't fit.
 
-### `POST /v1/captcha/solve`
+### CAPTCHAs
 
-Solve a CAPTCHA on our provider account — no solver signup, no key of your
-own.
-
-```json
-{ "type": "turnstile", "websiteURL": "https://example.com/login",
-  "websiteKey": "0x4AAA…", "action": "login", "cdata": "…" }
-```
-
-```json
-{ "token": "…", "type": "turnstile", "durationMs": 14320,
-  "used": 41, "limit": 1000, "remaining": 959 }
-```
-
-`type` is `recaptcha_v2`, `hcaptcha` or `turnstile`. `action` and `cdata`
-are Turnstile-only, read off the widget's data attributes. Inject the
-returned token into the page's response field **and** invoke the widget's
-`data-callback` — most forms submit from the callback, not a button. The
-[helper](../examples/captcha/) does both for you.
-
-Counts against your plan's monthly allowance: 0 on Free, 100 on Hobby,
-1,000 on Startup, 10,000 on Scale. **Failed solves are refunded** — the
-provider doesn't charge us for challenges it can't clear, so we don't
-charge you.
-
-| Status | Means |
-|---|---|
-| 402 | Your plan includes no allowance (Free). Use your own key instead. |
-| 422 | The provider couldn't solve this one. |
-| 429 | Monthly allowance exhausted. |
-| 503 | Managed solving isn't enabled on this deployment. |
-
-Not everything is solvable. reCAPTCHA v3, DataDome and PerimeterX score the
-session rather than posing a challenge; `type` rejects them with an
-explanation rather than taking your money for a request that can't succeed.
+There is no CAPTCHA endpoint. We don't solve them on your behalf — you use
+your own solver key via the [helper](../examples/captcha/), which talks to
+CapSolver or 2Captcha directly from your process. See
+[Concepts](concepts.md#captchas) for why.
 
 ---
 
@@ -303,7 +273,7 @@ from both will fail to parse the error it was trying to report. See
 |---|---|
 | 401 | Missing, malformed, or revoked key |
 | 402 | Your plan doesn't include this |
-| 422 | Extraction couldn't match your schema, or a CAPTCHA couldn't be solved |
+| 422 | Extraction couldn't produce data matching your schema |
 | 429 | Concurrency limit (after waiting for a slot) or monthly quota |
 | 502 | The browser or an upstream failed |
 | 503 | The fleet is full — retry after 30s (`Retry-After` is set) |

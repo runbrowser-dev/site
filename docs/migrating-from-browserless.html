@@ -151,10 +151,6 @@ SPA state and open tabs, not just cookies. <a href="/docs/concepts#stable-sessio
 <li><strong><code>/v1/extract</code></strong> — URL plus JSON Schema in, validated structured JSON out.</li>
 <li><strong>An MCP server</strong>, so any MCP-aware agent gets browser tools with no
 integration code. <a href="/docs/mcp">Details</a>.</li>
-<li><strong>Managed CAPTCHA solving</strong> — <code>POST /v1/captcha/solve</code>, with a monthly
-allowance on every paid plan and no per-solve markup. Browserless bills
-10 units per solve; ours comes out of your plan. You can still bring your
-own solver key if you&#39;d rather (<a href="/docs/">helper</a>).</li>
 <li><strong>Live viewer with signed shareable URLs</strong> that are safe to paste into a
 ticket — no API key inside.</li>
 <li><strong>EU residency</strong> (Falkenstein). Browserless&#39;s shared fleet is US West,
@@ -168,18 +164,19 @@ units each, and their built-in proxies cost 6 units/MB residential or 2
 units/MB datacenter. (Third-party proxies you connect yourself don&#39;t
 consume units there, same as here.)</p>
 <p>We bill <strong>browser-seconds</strong>, floored at 10 seconds per session, plus
-separate monthly allowances for <code>/v1/fetch</code>, <code>/v1/search</code>, <code>/v1/extract</code>
-and CAPTCHA solves. Proxy traffic is the one thing that stays on your
-provider&#39;s bill rather than ours.</p>
+separate monthly allowances for <code>/v1/fetch</code>, <code>/v1/search</code> and
+<code>/v1/extract</code>. Proxy traffic and CAPTCHA solving stay on your providers&#39;
+bills rather than ours.</p>
 <p>The practical consequences:</p>
 <ul>
 <li><strong>Short sessions get much cheaper.</strong> Rounding up to 30 seconds means a
 3-second session bills as 30. Ours bills as 10 seconds. If your workload
 is many short sessions, this is the single biggest difference in the
 whole migration.</li>
-<li><strong>CAPTCHA stops being a unit charge.</strong> Browserless bills 10 units per
-solve; ours draws on a monthly plan allowance, so a solve doesn&#39;t eat
-browser-time budget.</li>
+<li><strong>CAPTCHA solving moves to your own account.</strong> Browserless bills 10
+units per solve. We don&#39;t offer it — you bring a CapSolver or 2Captcha
+key (<a href="/docs/">helper</a>) and pay them roughly $0.001 a solve
+directly. Cheaper, but it&#39;s a signup you didn&#39;t have before.</li>
 <li><strong>Your proxy bill becomes visible.</strong> Their bundled proxies stop being
 units on one invoice and become a line item from your proxy provider.
 Usually cheaper at wholesale, but always more work to set up.</li>

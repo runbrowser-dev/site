@@ -51,10 +51,6 @@ should budget real work — or stay where you are.
 - **`/v1/extract`** — URL plus JSON Schema in, validated structured JSON out.
 - **An MCP server**, so any MCP-aware agent gets browser tools with no
   integration code. [Details](mcp.md).
-- **Managed CAPTCHA solving** — `POST /v1/captcha/solve`, with a monthly
-  allowance on every paid plan and no per-solve markup. Browserless bills
-  10 units per solve; ours comes out of your plan. You can still bring your
-  own solver key if you'd rather ([helper](../examples/captcha/)).
 - **Live viewer with signed shareable URLs** that are safe to paste into a
   ticket — no API key inside.
 - **EU residency** (Falkenstein). Browserless's shared fleet is US West,
@@ -70,9 +66,9 @@ units/MB datacenter. (Third-party proxies you connect yourself don't
 consume units there, same as here.)
 
 We bill **browser-seconds**, floored at 10 seconds per session, plus
-separate monthly allowances for `/v1/fetch`, `/v1/search`, `/v1/extract`
-and CAPTCHA solves. Proxy traffic is the one thing that stays on your
-provider's bill rather than ours.
+separate monthly allowances for `/v1/fetch`, `/v1/search` and
+`/v1/extract`. Proxy traffic and CAPTCHA solving stay on your providers'
+bills rather than ours.
 
 The practical consequences:
 
@@ -80,9 +76,10 @@ The practical consequences:
   3-second session bills as 30. Ours bills as 10 seconds. If your workload
   is many short sessions, this is the single biggest difference in the
   whole migration.
-- **CAPTCHA stops being a unit charge.** Browserless bills 10 units per
-  solve; ours draws on a monthly plan allowance, so a solve doesn't eat
-  browser-time budget.
+- **CAPTCHA solving moves to your own account.** Browserless bills 10
+  units per solve. We don't offer it — you bring a CapSolver or 2Captcha
+  key ([helper](../examples/captcha/)) and pay them roughly $0.001 a solve
+  directly. Cheaper, but it's a signup you didn't have before.
 - **Your proxy bill becomes visible.** Their bundled proxies stop being
   units on one invoice and become a line item from your proxy provider.
   Usually cheaper at wholesale, but always more work to set up.

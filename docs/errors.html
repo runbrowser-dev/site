@@ -58,7 +58,7 @@ status you got instead of guessing.</p>
 <p><strong>Two services answer you, and their error bodies are not the same shape.</strong></p>
 <p><code>connect.runbrowser.dev</code> (browsers, sessions, the REST shortcuts, MCP)
 answers with <strong>plain text</strong>. <code>api.runbrowser.dev</code> (<code>/v1/fetch</code>,
-<code>/v1/search</code>, <code>/v1/extract</code>, <code>/v1/captcha/solve</code>) answers with <strong>JSON</strong>.</p>
+<code>/v1/search</code>, <code>/v1/extract</code>) answers with <strong>JSON</strong>.</p>
 <p>If you write one error handler that assumes JSON everywhere, it will throw
 a parse error on the exact request that was already failing, and you&#39;ll
 debug the wrong thing. Branch on the host, or on the response&#39;s
@@ -131,11 +131,6 @@ as all potentially absent.</p>
 <td>Fix the key</td>
 </tr>
 <tr>
-<td>402</td>
-<td><strong>No</strong></td>
-<td>Your plan doesn&#39;t include this. Upgrade</td>
-</tr>
-<tr>
 <td>404</td>
 <td><strong>No</strong></td>
 <td>The session is gone. Create a new one</td>
@@ -148,7 +143,7 @@ as all potentially absent.</p>
 <tr>
 <td>422</td>
 <td>Sometimes</td>
-<td>Model output or CAPTCHA solve failed. A retry may succeed; two won&#39;t</td>
+<td>The model couldn&#39;t match your schema. A retry may succeed; two won&#39;t</td>
 </tr>
 <tr>
 <td>429</td>
@@ -654,61 +649,6 @@ so this is the clearest case for branching on <code>error</code> rather than sta
 </div><p><code>422</code> is worth internalising: it means we reached the page and read it,
 but the result didn&#39;t fit the shape you asked for. That is usually a
 schema problem, not a page problem. Loosen the required fields first.</p>
-<h2 id="v1captchasolve">/v1/captcha/solve<a class="anchor" href="#v1captchasolve" aria-label="Link to this section">#</a></h2>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Status</th>
-<th><code>error</code></th>
-<th>Cause</th>
-<th>What to do</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>400</td>
-<td><code>validation_failed</code></td>
-<td>Unsupported <code>type</code></td>
-<td>Use <code>recaptcha_v2</code>, <code>hcaptcha</code>, or <code>turnstile</code></td>
-</tr>
-<tr>
-<td><strong>402</strong></td>
-<td><code>captcha_not_included</code></td>
-<td><strong>Your plan includes zero managed solves</strong> — this is the Free tier</td>
-<td>Upgrade, or pass your own solver key</td>
-</tr>
-<tr>
-<td>429</td>
-<td><code>monthly_quota_exceeded</code></td>
-<td>You had an allowance and used it</td>
-<td>Upgrade or wait</td>
-</tr>
-<tr>
-<td>503</td>
-<td><code>captcha_not_configured</code></td>
-<td>Managed solving isn&#39;t enabled here</td>
-<td>Use your own solver key</td>
-</tr>
-<tr>
-<td><strong>422</strong></td>
-<td><code>captcha_timeout</code></td>
-<td>The solver didn&#39;t finish in its window</td>
-<td>Retry</td>
-</tr>
-<tr>
-<td><strong>422</strong></td>
-<td><code>captcha_unsolvable</code></td>
-<td>The solver couldn&#39;t clear this challenge</td>
-<td>Try again from a residential proxy</td>
-</tr>
-<tr>
-<td>502</td>
-<td><code>captcha_provider_unreachable</code>, <code>captcha_provider_error</code></td>
-<td>The solving provider failed</td>
-<td>Retry</td>
-</tr>
-</tbody></table>
-</div><p><strong>Failed solves are refunded</strong> to your monthly allowance. You are not
-billed for a CAPTCHA we didn&#39;t solve.</p>
 <h2 id="mcp-server">MCP server<a class="anchor" href="#mcp-server" aria-label="Link to this section">#</a></h2>
 <p>Two layers, and they fail differently.</p>
 <p><strong>HTTP layer</strong> — plain text:</p>
@@ -921,10 +861,6 @@ timezone, not your billing date.</p>
 <td><code>429 monthly_quota_exceeded</code> with <code>type</code>/<code>used</code>/<code>limit</code></td>
 </tr>
 <tr>
-<td>Monthly CAPTCHAs</td>
-<td><code>429</code> if you had an allowance; <code>402 captcha_not_included</code> if your plan has none</td>
-</tr>
-<tr>
 <td>Fleet capacity</td>
 <td><code>503</code> with <code>Retry-After: 30</code></td>
 </tr>
@@ -935,7 +871,7 @@ means <em>you</em> hit a limit, <code>503</code> means <em>we</em> did. See
 both exist.</p>
 <h2 id="a-retry-policy-that-works">A retry policy that works<a class="anchor" href="#a-retry-policy-that-works" aria-label="Link to this section">#</a></h2>
 <p>Retry the transient things, fail fast on the rest, and always cap it.</p>
-<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="const TRANSIENT = new Set([408, 409, 502, 503, 504]);
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="const TRANSIENT = new Set([409, 502, 503, 504]);
 
 async function call(path: string, body: unknown, attempt = 0): Promise&lt;any&gt; {
   const res = await fetch(`https://api.runbrowser.dev${path}`, {
@@ -964,7 +900,7 @@ async function call(path: string, body: unknown, attempt = 0): Promise&lt;any&gt
   const delay = after ? after * 1000 : 2 ** attempt * 500 + Math.random() * 250;
   await new Promise((r) =&gt; setTimeout(r, delay));
   return call(path, body, attempt + 1);
-}">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="const TRANSIENT = new Set([408, 409, 502, 503, 504]);
+}">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="const TRANSIENT = new Set([409, 502, 503, 504]);
 
 async function call(path: string, body: unknown, attempt = 0): Promise&lt;any&gt; {
   const res = await fetch(`https://api.runbrowser.dev${path}`, {
@@ -993,7 +929,7 @@ async function call(path: string, body: unknown, attempt = 0): Promise&lt;any&gt
   const delay = after ? after * 1000 : 2 ** attempt * 500 + Math.random() * 250;
   await new Promise((r) =&gt; setTimeout(r, delay));
   return call(path, body, attempt + 1);
-}"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">const</span> <span class="token constant">TRANSIENT</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">408</span><span class="token punctuation">,</span> <span class="token number">409</span><span class="token punctuation">,</span> <span class="token number">502</span><span class="token punctuation">,</span> <span class="token number">503</span><span class="token punctuation">,</span> <span class="token number">504</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+}"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">const</span> <span class="token constant">TRANSIENT</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">409</span><span class="token punctuation">,</span> <span class="token number">502</span><span class="token punctuation">,</span> <span class="token number">503</span><span class="token punctuation">,</span> <span class="token number">504</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">call</span><span class="token punctuation">(</span>path<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> attempt <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span> <span class="token punctuation">{</span>
   <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://api.runbrowser.dev</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>path<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
@@ -1024,7 +960,7 @@ async function call(path: string, body: unknown, attempt = 0): Promise&lt;any&gt
   <span class="token keyword">return</span> <span class="token function">call</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> body<span class="token punctuation">,</span> attempt <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="import os, random, time, requests
 
-TRANSIENT = {408, 409, 502, 503, 504}
+TRANSIENT = {409, 502, 503, 504}
 API = &quot;https://api.runbrowser.dev&quot;
 
 
@@ -1049,7 +985,7 @@ def call(path, body, attempts=5):
         after = res.headers.get(&quot;retry-after&quot;)
         time.sleep(int(after) if after else 2**attempt * 0.5 + random.random() * 0.25)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">import</span> os<span class="token punctuation">,</span> random<span class="token punctuation">,</span> time<span class="token punctuation">,</span> requests
 
-TRANSIENT <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token number">408</span><span class="token punctuation">,</span> <span class="token number">409</span><span class="token punctuation">,</span> <span class="token number">502</span><span class="token punctuation">,</span> <span class="token number">503</span><span class="token punctuation">,</span> <span class="token number">504</span><span class="token punctuation">}</span>
+TRANSIENT <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token number">409</span><span class="token punctuation">,</span> <span class="token number">502</span><span class="token punctuation">,</span> <span class="token number">503</span><span class="token punctuation">,</span> <span class="token number">504</span><span class="token punctuation">}</span>
 API <span class="token operator">=</span> <span class="token string">"https://api.runbrowser.dev"</span>
 
 
@@ -1110,7 +1046,6 @@ code, and roughly when it happened, and we&#39;ll look at the actual logs.</p>
     <a class="toc-2" href="#v1fetch">/v1/fetch</a>
     <a class="toc-2" href="#v1search">/v1/search</a>
     <a class="toc-2" href="#v1extract">/v1/extract</a>
-    <a class="toc-2" href="#v1captchasolve">/v1/captcha/solve</a>
     <a class="toc-2" href="#mcp-server">MCP server</a>
     <a class="toc-2" href="#live-viewer">Live viewer</a>
     <a class="toc-2" href="#blocked-not-broken">Blocked, not broken</a>

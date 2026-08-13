@@ -260,49 +260,11 @@ browser and LLM tokens.</p>
 <p>Returns <code>{data, usage, trace}</code>. Output is validated against your schema;
 on a mismatch we retry once with the validation errors fed back, then
 return 422 rather than handing you data that doesn&#39;t fit.</p>
-<h3 id="post-v1captchasolve"><code>POST /v1/captcha/solve</code><a class="anchor" href="#post-v1captchasolve" aria-label="Link to this section">#</a></h3>
-<p>Solve a CAPTCHA on our provider account — no solver signup, no key of your
-own.</p>
-<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;type&quot;: &quot;turnstile&quot;, &quot;websiteURL&quot;: &quot;https://example.com/login&quot;,
-  &quot;websiteKey&quot;: &quot;0x4AAA…&quot;, &quot;action&quot;: &quot;login&quot;, &quot;cdata&quot;: &quot;…&quot; }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"turnstile"</span><span class="token punctuation">,</span> <span class="token property">"websiteURL"</span><span class="token operator">:</span> <span class="token string">"https://example.com/login"</span><span class="token punctuation">,</span>
-  <span class="token property">"websiteKey"</span><span class="token operator">:</span> <span class="token string">"0x4AAA…"</span><span class="token punctuation">,</span> <span class="token property">"action"</span><span class="token operator">:</span> <span class="token string">"login"</span><span class="token punctuation">,</span> <span class="token property">"cdata"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;token&quot;: &quot;…&quot;, &quot;type&quot;: &quot;turnstile&quot;, &quot;durationMs&quot;: 14320,
-  &quot;used&quot;: 41, &quot;limit&quot;: 1000, &quot;remaining&quot;: 959 }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"token"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"turnstile"</span><span class="token punctuation">,</span> <span class="token property">"durationMs"</span><span class="token operator">:</span> <span class="token number">14320</span><span class="token punctuation">,</span>
-  <span class="token property">"used"</span><span class="token operator">:</span> <span class="token number">41</span><span class="token punctuation">,</span> <span class="token property">"limit"</span><span class="token operator">:</span> <span class="token number">1000</span><span class="token punctuation">,</span> <span class="token property">"remaining"</span><span class="token operator">:</span> <span class="token number">959</span> <span class="token punctuation">}</span></code></pre></div><p><code>type</code> is <code>recaptcha_v2</code>, <code>hcaptcha</code> or <code>turnstile</code>. <code>action</code> and <code>cdata</code>
-are Turnstile-only, read off the widget&#39;s data attributes. Inject the
-returned token into the page&#39;s response field <strong>and</strong> invoke the widget&#39;s
-<code>data-callback</code> — most forms submit from the callback, not a button. The
-<a href="/docs/">helper</a> does both for you.</p>
-<p>Counts against your plan&#39;s monthly allowance: 0 on Free, 100 on Hobby,
-1,000 on Startup, 10,000 on Scale. <strong>Failed solves are refunded</strong> — the
-provider doesn&#39;t charge us for challenges it can&#39;t clear, so we don&#39;t
-charge you.</p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Status</th>
-<th>Means</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>402</td>
-<td>Your plan includes no allowance (Free). Use your own key instead.</td>
-</tr>
-<tr>
-<td>422</td>
-<td>The provider couldn&#39;t solve this one.</td>
-</tr>
-<tr>
-<td>429</td>
-<td>Monthly allowance exhausted.</td>
-</tr>
-<tr>
-<td>503</td>
-<td>Managed solving isn&#39;t enabled on this deployment.</td>
-</tr>
-</tbody></table>
-</div><p>Not everything is solvable. reCAPTCHA v3, DataDome and PerimeterX score the
-session rather than posing a challenge; <code>type</code> rejects them with an
-explanation rather than taking your money for a request that can&#39;t succeed.</p>
+<h3 id="captchas">CAPTCHAs<a class="anchor" href="#captchas" aria-label="Link to this section">#</a></h3>
+<p>There is no CAPTCHA endpoint. We don&#39;t solve them on your behalf — you use
+your own solver key via the <a href="/docs/">helper</a>, which talks to
+CapSolver or 2Captcha directly from your process. See
+<a href="/docs/concepts#captchas">Concepts</a> for why.</p>
 <hr>
 <h2 id="mcp">MCP<a class="anchor" href="#mcp" aria-label="Link to this section">#</a></h2>
 <p><code>POST https://connect.runbrowser.dev/mcp</code> — Model Context Protocol over
@@ -340,7 +302,7 @@ from both will fail to parse the error it was trying to report. See
 </tr>
 <tr>
 <td>422</td>
-<td>Extraction couldn&#39;t match your schema, or a CAPTCHA couldn&#39;t be solved</td>
+<td>Extraction couldn&#39;t produce data matching your schema</td>
 </tr>
 <tr>
 <td>429</td>
@@ -391,7 +353,7 @@ waiting out a cache TTL.</p>
     <a class="toc-3" href="#post-v1fetch">POST /v1/fetch</a>
     <a class="toc-3" href="#post-v1search">POST /v1/search</a>
     <a class="toc-3" href="#post-v1extract">POST /v1/extract</a>
-    <a class="toc-3" href="#post-v1captchasolve">POST /v1/captcha/solve</a>
+    <a class="toc-3" href="#captchas">CAPTCHAs</a>
     <a class="toc-2" href="#mcp">MCP</a>
     <a class="toc-2" href="#metrics">Metrics</a>
     <a class="toc-2" href="#errors">Errors</a>
