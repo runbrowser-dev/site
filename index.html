@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RunBrowser - browser infrastructure for developers</title>
-<meta name="description" content="Hosted Chromium for Playwright, Puppeteer, and AI agents. Drop-in compatible. Coming soon.">
+<meta name="description" content="Hosted Chromium for Playwright, Puppeteer and AI agents. Drop-in over CDP, per-second billing, stable sessions, EU-hosted. Free tier, no card.">
 <meta property="og:title" content="RunBrowser - browser infrastructure for developers">
-<meta property="og:description" content="Hosted Chromium for Playwright, Puppeteer, and AI agents. Drop-in compatible. Coming soon.">
+<meta property="og:description" content="Hosted Chromium for Playwright, Puppeteer and AI agents. Drop-in over CDP, per-second billing, stable sessions, EU-hosted. Free tier, no card.">
 <meta property="og:url" content="https://runbrowser.dev">
 <meta property="og:type" content="website">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
@@ -274,6 +274,68 @@
   }
   .btn:hover .arrow { transform: translateX(3px); }
 
+  /* Pricing */
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .plan {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 16px 20px;
+    background: var(--code-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .plan.featured { border-color: var(--border-strong); }
+  .plan .name {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .plan.featured .name { color: var(--accent); }
+  .plan .price {
+    font-family: var(--sans);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .plan .price span {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .plan ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--muted-2);
+    line-height: 1.5;
+  }
+  .plan ul b {
+    color: var(--fg);
+    font-weight: 500;
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+  .price-note {
+    margin: 1.5rem 0 0;
+    color: var(--muted);
+    font-size: 13.5px;
+    max-width: 66ch;
+    line-height: 1.6;
+  }
+  .price-note b { color: var(--muted-2); font-weight: 500; }
+
   /* Footer */
   footer {
     margin-top: 7rem;
@@ -298,6 +360,7 @@
     .lede { font-size: 16px; }
     header { margin-bottom: 3rem; }
     figure.code pre { font-size: 12.5px; padding: 14px 16px 16px; }
+    .plans { grid-template-columns: repeat(2, 1fr); }
     .code-header { padding: 10px 14px; }
     .code-header .endpoint { display: none; }
     footer { margin-top: 5rem; }
@@ -312,13 +375,13 @@
       <span class="mark"><img src="/assets/logo.svg" alt="" width="28" height="28"></span>
       <span>runbrowser</span>
     </a>
-    <span class="status" aria-label="Status: coming soon"><span class="dot"></span>Coming soon</span>
+    <span class="status" aria-label="Status: private beta"><span class="dot"></span>Private beta</span>
   </header>
 
   <section class="rise" style="animation-delay: 100ms">
     <h1>Browser infrastructure for <span class="accent">developers</span> and <span class="accent">agents</span>.</h1>
     <p class="lede">
-      Hosted Chromium you connect to over WebSocket. Drop-in for Playwright and Puppeteer. Stable sessions for AI agents. Built without the surprise bills.
+      Hosted Chromium you connect to over WebSocket. Drop-in for Playwright and Puppeteer. Stable sessions your agent can reconnect to. Billed per second, not per rounded-up half-minute.
     </p>
   </section>
 
@@ -327,7 +390,7 @@
     <figure class="code">
       <div class="code-header">
         <span>connect.ts</span>
-        <span class="endpoint">wss://api.runbrowser.dev</span>
+        <span class="endpoint">wss://connect.runbrowser.dev</span>
       </div>
 <pre><span class="c">// Same code, different endpoint.</span>
 <span class="c">// No fleet to run. No Chrome to babysit.</span>
@@ -335,7 +398,7 @@
 import { chromium } from <span class="a">'playwright'</span>
 
 const browser = await chromium.connectOverCDP(
-  <span class="a">'wss://api.runbrowser.dev?token=YOUR_TOKEN'</span>
+  <span class="a">'wss://connect.runbrowser.dev?token=YOUR_TOKEN'</span>
 )
 const page = await browser.newPage()
 await page.goto(<span class="a">'https://example.com'</span>)
@@ -345,35 +408,94 @@ await browser.close()</pre>
   </section>
 
   <section class="rise" style="animation-delay: 340ms">
-    <h2>What's coming</h2>
+    <h2>What you get</h2>
     <ul class="feats">
-      <li><span class="marker">01</span><span class="row"><span class="label">Drop-in for Playwright &amp; Puppeteer.</span><span class="desc">One-line endpoint change.</span></span></li>
-      <li><span class="marker">02</span><span class="row"><span class="label">Stable sessions for agents.</span><span class="desc">Reconnect across LangGraph nodes.</span></span></li>
-      <li><span class="marker">03</span><span class="row"><span class="label">Structured /extract endpoint.</span><span class="desc">URL + schema in, JSON out.</span></span></li>
-      <li><span class="marker">04</span><span class="row"><span class="label">Live session viewer.</span><span class="desc">Watch your agent debug itself.</span></span></li>
-      <li><span class="marker">05</span><span class="row"><span class="label">MCP server.</span><span class="desc">Native Claude Desktop / Cursor / OpenCode.</span></span></li>
-      <li><span class="marker">06</span><span class="row"><span class="label">Per-minute billing.</span><span class="desc">No unit math. No surprise hung-session bills.</span></span></li>
-      <li><span class="marker">07</span><span class="row"><span class="label">Open Chromium image.</span><span class="desc">MIT-licensed. Self-host if you ever want to.</span></span></li>
+      <li><span class="marker">01</span><span class="row"><span class="label">Drop-in for Playwright &amp; Puppeteer.</span><span class="desc">One-line endpoint change. Your selectors, waits and assertions are untouched.</span></span></li>
+      <li><span class="marker">02</span><span class="row"><span class="label">Stable sessions for agents.</span><span class="desc">The browser stays alive between connects — in-memory SPA state and open tabs, not just cookies. Survives our redeploys too.</span></span></li>
+      <li><span class="marker">03</span><span class="row"><span class="label">Structured /extract.</span><span class="desc">URL plus a JSON Schema in, validated JSON out.</span></span></li>
+      <li><span class="marker">04</span><span class="row"><span class="label">Live session viewer.</span><span class="desc">Watch a run in real time. Share a signed link that carries no API key.</span></span></li>
+      <li><span class="marker">05</span><span class="row"><span class="label">MCP server.</span><span class="desc">Browser tools for Claude, Cursor and anything else that speaks MCP. No integration code.</span></span></li>
+      <li><span class="marker">06</span><span class="row"><span class="label">CAPTCHA solving included.</span><span class="desc">An allowance on every paid plan, not a per-solve markup.</span></span></li>
+      <li><span class="marker">07</span><span class="row"><span class="label">Per-second billing.</span><span class="desc">Floored at 10 seconds. No unit maths, no rounding a 3-second job up to 30.</span></span></li>
+      <li><span class="marker">08</span><span class="row"><span class="label">EU-hosted, no lock-in on your code.</span><span class="desc">Falkenstein. You connect over standard CDP, so your Playwright and Puppeteer scripts stay portable — there's no proprietary SDK to rewrite if you ever move.</span></span></li>
     </ul>
   </section>
 
   <section class="rise" style="animation-delay: 460ms">
-    <h2>Today, while we build the hosted service</h2>
+    <h2>Pricing</h2>
+    <div class="plans">
+      <div class="plan">
+        <span class="name">Free</span>
+        <span class="price">&euro;0</span>
+        <ul>
+          <li><b>3</b> concurrent</li>
+          <li><b>1 hr</b> browser / mo</li>
+          <li>1,000 fetches &amp; searches</li>
+          <li>25 extracts</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <span class="name">Hobby</span>
+        <span class="price">&euro;19<span> /mo</span></span>
+        <ul>
+          <li><b>10</b> concurrent</li>
+          <li><b>150 hrs</b> browser / mo</li>
+          <li>5,000 fetches &amp; searches</li>
+          <li>100 extracts &middot; 100 CAPTCHAs</li>
+        </ul>
+      </div>
+      <div class="plan featured">
+        <span class="name">Startup</span>
+        <span class="price">&euro;99<span> /mo</span></span>
+        <ul>
+          <li><b>25</b> concurrent</li>
+          <li><b>600 hrs</b> browser / mo</li>
+          <li>25,000 fetches &amp; searches</li>
+          <li>600 extracts &middot; 1,000 CAPTCHAs</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <span class="name">Scale</span>
+        <span class="price">&euro;499<span> /mo</span></span>
+        <ul>
+          <li><b>50</b> concurrent</li>
+          <li><b>2,500 hrs</b> browser / mo</li>
+          <li>100,000 fetches &amp; searches</li>
+          <li>3,000 extracts &middot; 10,000 CAPTCHAs</li>
+        </ul>
+      </div>
+    </div>
+    <p class="price-note">
+      Browser time is billed <b>per second</b>, floored at 10 seconds per session —
+      about <b>$0.14&ndash;0.22 an effective browser-hour</b>, and a 3-second job
+      costs 10 seconds rather than a rounded-up half minute.
+      A stable session left parked keeps billing until it idles out — the dashboard
+      lists what's running so you can stop it. Proxies stay yours to buy at
+      wholesale; we don't mark them up.
+    </p>
+  </section>
+
+  <section class="rise" style="animation-delay: 560ms">
+    <h2>Start</h2>
     <p class="body-copy">
-      We've open-sourced our Chromium container setup - Dockerfile, scripts, the gotchas (DNS-rebind workarounds, /dev/shm sizing, font packs, init reaping). MIT-licensed. Use it commercially.
+      Free tier, no card. Create a key and point your existing Playwright or
+      Puppeteer code at a new endpoint — that's usually the whole migration.
     </p>
     <div class="cta">
-      <a class="btn" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">
-        github.com/runbrowser-dev/runbrowser <span class="arrow">→</span>
+      <a class="btn primary" href="https://app.runbrowser.dev">
+        Start free <span class="arrow">&rarr;</span>
       </a>
-      <a class="btn primary" href="mailto:hi@runbrowser.dev?subject=Early%20access%20-%20runbrowser">
-        Email for early access <span class="arrow">→</span>
+      <a class="btn" href="https://docs.runbrowser.dev/quickstart">
+        Read the docs <span class="arrow">&rarr;</span>
+      </a>
+      <a class="btn" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">
+        Our Chromium image <span class="arrow">&rarr;</span>
       </a>
     </div>
   </section>
 
   <footer>
-    <span>© 2026 runbrowser · Built in the EU · Coming soon</span>
+    <span>© 2026 runbrowser · Hosted in the EU · <a href="https://app.runbrowser.dev/legal/terms">Terms</a> · <a href="https://app.runbrowser.dev/legal/privacy">Privacy</a></span>
     <span><a href="mailto:hi@runbrowser.dev">hi@runbrowser.dev</a></span>
   </footer>
 </main>
