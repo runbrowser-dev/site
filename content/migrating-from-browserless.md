@@ -53,9 +53,9 @@ should budget real work — or stay where you are.
   integration code. [Details](mcp.md).
 - **Live viewer with signed shareable URLs** that are safe to paste into a
   ticket — no API key inside.
-- **EU residency** (Falkenstein). If EU-only matters to you legally, we're
-  single-region by design; check their current region list against your
-  own requirements.
+- **EU residency.** Sessions and session data stay inside the EU. If EU-only
+  matters to you legally, we're single-region by design; check their current
+  region list against your own requirements.
 
 ## Billing differences that will actually surprise you
 
