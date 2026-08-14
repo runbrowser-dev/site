@@ -579,6 +579,7 @@ The short version, before the exhaustive tables.
 |---|---|---|
 | 400, 403, 413, 415 | **No** | Your request is wrong. Retrying sends the same wrong request |
 | 401 | **No** | Fix the key |
+| 402 | **No** | A spend or plan ceiling. Nothing changes until the month rolls over or the ceiling is raised |
 | 404 | **No** | The session is gone. Create a new one |
 | 409 | Yes | Something else holds the session. Retry after closing it |
 | 422 | Sometimes | The model couldn't match your schema. A retry may succeed; two won't |
@@ -711,6 +712,7 @@ It is not an error.
 | Status | `error` | Cause | What to do |
 |---|---|---|---|
 | 400 | `validation_failed` | Bad `includeHosts`/`excludeHosts`. Max 50 entries, 200 chars each | See `message` for which |
+| **402** | `spend_cap_exceeded` | Your account has reached its monthly third-party spend ceiling | Wait for month rollover, or contact us to raise it |
 | 400 | `invalid_query` | Empty `q` | Supply a query |
 | **504** | `search_provider_timeout` | The search backend was too slow | Retry |
 | 502 | `search_provider_unavailable` | The backend failed or returned nonsense | Retry with backoff |
@@ -726,6 +728,7 @@ so this is the clearest case for branching on `error` rather than status.
 
 | Status | `error` | Cause | What to do |
 |---|---|---|---|
+| **402** | `spend_cap_exceeded` | **Your account has reached its monthly third-party spend ceiling.** Separate from the extract allowance: large pages cost more, so you can hit this while still inside your call allowance | Wait for the month to roll over, or contact us to raise it. `spentUsd` and `capUsd` are in the response |
 | 400 | `schema_invalid` | Your JSON Schema isn't valid | Fix the schema; `message` says how |
 | **422** | `schema_validation_failed` | **The model couldn't produce data matching your schema**, even after a retry | Simplify the schema, or add `instructions` telling it where to look |
 | 401 / 403 | `auth_failed` | Your key was rejected downstream | Fix the key |

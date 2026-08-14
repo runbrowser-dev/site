@@ -131,6 +131,11 @@ as all potentially absent.</p>
 <td>Fix the key</td>
 </tr>
 <tr>
+<td>402</td>
+<td><strong>No</strong></td>
+<td>A spend or plan ceiling. Nothing changes until the month rolls over or the ceiling is raised</td>
+</tr>
+<tr>
 <td>404</td>
 <td><strong>No</strong></td>
 <td>The session is gone. Create a new one</td>
@@ -554,6 +559,12 @@ It is not an error.</p>
 <td>See <code>message</code> for which</td>
 </tr>
 <tr>
+<td><strong>402</strong></td>
+<td><code>spend_cap_exceeded</code></td>
+<td>Your account has reached its monthly third-party spend ceiling</td>
+<td>Wait for month rollover, or contact us to raise it</td>
+</tr>
+<tr>
 <td>400</td>
 <td><code>invalid_query</code></td>
 <td>Empty <code>q</code></td>
@@ -598,6 +609,12 @@ so this is the clearest case for branching on <code>error</code> rather than sta
 </tr>
 </thead>
 <tbody><tr>
+<td><strong>402</strong></td>
+<td><code>spend_cap_exceeded</code></td>
+<td><strong>Your account has reached its monthly third-party spend ceiling.</strong> Separate from the extract allowance: large pages cost more, so you can hit this while still inside your call allowance</td>
+<td>Wait for the month to roll over, or contact us to raise it. <code>spentUsd</code> and <code>capUsd</code> are in the response</td>
+</tr>
+<tr>
 <td>400</td>
 <td><code>schema_invalid</code></td>
 <td>Your JSON Schema isn&#39;t valid</td>
