@@ -120,7 +120,11 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>3,000</td>
 </tr>
 </tbody></table>
-</div><p><code>/extract</code> has its own allowance because it costs twice — browser-time to
+</div><p>Browser time is metered <strong>while the session runs</strong>, not only when it ends, so
+your usage and your remaining allowance reflect what you are burning right
+now. A session that runs past your monthly allowance is stopped during the
+session rather than after you disconnect.</p>
+<p><code>/extract</code> has its own allowance because it costs twice — browser-time to
 render the page, plus LLM tokens to read it. The numbers are sized against
 worst-case content (a full 200k-char page); typical pages are a fraction of
 that, so real usage goes considerably further than the figure suggests.</p>
