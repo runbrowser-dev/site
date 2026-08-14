@@ -30,6 +30,11 @@ are cheap, and the incentive points the same way our capacity does.
 | Startup | €99/mo | 25 | 600 | 180 min | 25,000 | 25,000 | 600 |
 | Scale | €499/mo | 50 | 2,500 | 360 min | 100,000 | 100,000 | 3,000 |
 
+Browser time is metered **while the session runs**, not only when it ends, so
+your usage and your remaining allowance reflect what you are burning right
+now. A session that runs past your monthly allowance is stopped during the
+session rather than after you disconnect.
+
 `/extract` has its own allowance because it costs twice — browser-time to
 render the page, plus LLM tokens to read it. The numbers are sized against
 worst-case content (a full 200k-char page); typical pages are a fraction of
