@@ -5,17 +5,21 @@
    ship a JS docs framework — 129 script tags on one of them — so being static
    and instant is a feature we get for free by not doing that. */
 :root {
-  --bg: #0a0a0a;
-  --fg: #ebeae6;
-  --muted: #6b6b6b;
-  --muted-2: #9d9d9d;
+  /* Refined to match the homepage "console" palette: a near-black ground with
+     a faint green bias, warmer off-white text, green-grey muted, so the docs
+     read as the same product rather than a bolted-on wiki. */
+  --bg: #08090b;
+  --fg: #e7eae6;
+  --muted: #626a64;
+  --muted-2: #99a09a;
   --accent: #00d26a;
-  --border: #1b1b1b;
-  --border-strong: #262626;
-  --code-bg: #0e0e0e;
-  --panel: #111;
+  --accent-line: rgba(0, 210, 106, 0.30);
+  --border: #1c2127;
+  --border-strong: #2b323b;
+  --code-bg: #0b0d10;
+  --panel: #0d0f12;
   --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -26,6 +30,19 @@ html, body {
   background: var(--bg); color: var(--fg);
   font-family: var(--sans); font-size: 16px; line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+}
+/* Faint console grid, same as the homepage, dialled almost to nothing so it
+   never competes with the prose. */
+body {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 46px 46px, 46px 46px;
+  background-attachment: fixed;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(120% 80% at 50% 0%, transparent 38%, var(--bg) 80%);
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -152,12 +169,14 @@ kbd {
 /* ------------------------------------------------------------------- prose */
 
 .prose { min-width: 0; }
-.prose h1 { font-size: 34px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 20px; }
+/* Mono headings pick up the homepage's terminal voice so the two surfaces
+   read as one product. Body stays sans for long-form readability. */
+.prose h1 { font-family: var(--mono); font-size: 32px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 20px; }
 .prose h2 {
-  font-size: 22px; font-weight: 500; letter-spacing: -0.01em;
+  font-family: var(--mono); font-size: 21px; font-weight: 600; letter-spacing: -0.01em;
   margin: 48px 0 14px; padding-top: 20px; border-top: 1px solid var(--border);
 }
-.prose h3 { font-size: 17px; font-weight: 600; margin: 32px 0 10px; }
+.prose h3 { font-family: var(--mono); font-size: 16px; font-weight: 600; margin: 32px 0 10px; }
 .prose h4 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
 .prose p, .prose li { color: var(--muted-2); }
 .prose li { margin: 4px 0; }
