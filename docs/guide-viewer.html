@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The live viewer — runbrowser docs</title>
+<meta name="description" content="Watch a session as it runs. Not a recording played back later, not a log — the actual browser, streamed live, that you can open in a tab or hand to a teamm">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
+  </a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
+</header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Get started</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/quickstart">Quickstart</a>
+        <a class="nav-link " href="/docs/concepts">Concepts</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
+        <a class="nav-link active" href="/docs/guide-viewer">The live viewer</a>
+        <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
+        <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
+        <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
+        <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
+        <a class="nav-link " href="/docs/guide-stealth">Stealth &amp; fingerprinting</a>
+    </div>
+
+    <details class="nav-group" >
+      <summary class="nav-title nav-title-spaced">API reference</summary>
+      <div class="nav-api">
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#connecting-a-browser">Connecting a browser</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#sessions">Sessions</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#rest-shortcuts">REST shortcuts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-screenshot-imagepngjpegwebp"><span class="m m-post">POST</span><span class="ep-path">/screenshot</span></a>
+            <a class="ep" href="/docs/api-reference#post-pdf-applicationpdf"><span class="m m-post">POST</span><span class="ep-path">/pdf</span></a>
+            <a class="ep" href="/docs/api-reference#post-content-texthtml"><span class="m m-post">POST</span><span class="ep-path">/content</span></a>
+            <a class="ep" href="/docs/api-reference#post-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-function-json"><span class="m m-post">POST</span><span class="ep-path">/function</span></a>
+            <a class="ep" href="/docs/api-reference#post-export-the-resource-as-is"><span class="m m-post">POST</span><span class="ep-path">/export</span></a>
+            <a class="ep" href="/docs/api-reference#post-smart-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/smart-scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
+            <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
+            <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#mcp">MCP</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#metrics">Metrics</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#errors">Errors</a>
+          
+        </div>
+      </div>
+    </details>
+
+    <span class="nav-title nav-title-spaced">Integrations</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/mcp">MCP server</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Migrating</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/errors">Errors</a>
+        <a class="nav-link" href="/#pricing">Pricing</a>
+        <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
+  </nav>
+  <main class="prose">
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>The live viewer</span></div>
+<h1 id="the-live-viewer">The live viewer</h1>
+<p>Watch a session as it runs. Not a recording played back later, not a log —
+the actual browser, streamed live, that you can open in a tab or hand to a
+teammate. It&#39;s the fastest way to answer &quot;what is my agent actually doing?&quot;
+and the thing neither Browserless nor Browserbase puts on the front page.</p>
+<h2 id="get-a-viewer-link">Get a viewer link<a class="anchor" href="#get-a-viewer-link" aria-label="Link to this section">#</a></h2>
+<p>Mint a signed, expiring URL for a running session. It carries no API key, so
+it&#39;s safe to paste into a ticket or embed in your own dashboard.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="cURL">cURL</button></div><button class="copy tabs-copy" type="button" data-code="const res = await fetch(
+  `https://connect.runbrowser.dev/v1/sessions/${sessionId}/viewer-token`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ ttlSeconds: 3600 }),   // 1h default, 24h max
+  },
+)
+const { webUrl } = await res.json()
+// https://connect.runbrowser.dev/viewer?...  — signed, expiring, no token inside">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="const res = await fetch(
+  `https://connect.runbrowser.dev/v1/sessions/${sessionId}/viewer-token`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ ttlSeconds: 3600 }),   // 1h default, 24h max
+  },
+)
+const { webUrl } = await res.json()
+// https://connect.runbrowser.dev/viewer?...  — signed, expiring, no token inside"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>
+  <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.runbrowser.dev/v1/sessions/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>sessionId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/viewer-token</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+    method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
+    headers<span class="token operator">:</span> <span class="token punctuation">{</span>
+      Authorization<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Bearer </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+      <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json'</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ttlSeconds<span class="token operator">:</span> <span class="token number">3600</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>   <span class="token comment">// 1h default, 24h max</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> webUrl <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment">// https://connect.runbrowser.dev/viewer?...  — signed, expiring, no token inside</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="cURL" data-code="curl -X POST \
+  https://connect.runbrowser.dev/v1/sessions/$SESSION_ID/viewer-token \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{ &quot;ttlSeconds&quot;: 3600 }'"><span class="code-lang panel-lang">cURL</span><pre class="language-bash"><code><span class="token function">curl</span> <span class="token parameter variable">-X</span> POST <span class="token punctuation">\</span>
+  https://connect.runbrowser.dev/v1/sessions/<span class="token variable">$SESSION_ID</span>/viewer-token <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Content-Type: application/json"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{ "ttlSeconds": 3600 }'</span></code></pre></div></div><p>Open <code>webUrl</code> in any browser. Anyone holding it can watch until it expires;
+because there&#39;s no bearer token in the URL, sharing the link never shares your
+key.</p>
+<h2 id="embed-it">Embed it<a class="anchor" href="#embed-it" aria-label="Link to this section">#</a></h2>
+<p>The viewer page is built to be put in an <code>&lt;iframe&gt;</code> — no chrome, no controls of
+its own, so it drops cleanly into your product.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">html</span><button class="copy" type="button" data-code="&lt;iframe
+  src=&quot;https://connect.runbrowser.dev/viewer?...&amp;fit=cover&quot;
+  style=&quot;width: 100%; aspect-ratio: 16/10; border: 0; border-radius: 12px&quot;
+  allow=&quot;clipboard-read&quot;
+&gt;&lt;/iframe&gt;">Copy</button></div><pre class="language-html"><code><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>iframe</span>
+  <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://connect.runbrowser.dev/viewer?...&amp;fit=cover<span class="token punctuation">"</span></span>
+  <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">width</span><span class="token punctuation">:</span> 100%<span class="token punctuation">;</span> <span class="token property">aspect-ratio</span><span class="token punctuation">:</span> 16/10<span class="token punctuation">;</span> <span class="token property">border</span><span class="token punctuation">:</span> 0<span class="token punctuation">;</span> <span class="token property">border-radius</span><span class="token punctuation">:</span> 12px</span><span class="token punctuation">"</span></span></span>
+  <span class="token attr-name">allow</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>clipboard-read<span class="token punctuation">"</span></span>
+<span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>iframe</span><span class="token punctuation">></span></span></code></pre></div><p><strong>Query options</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Values</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>fit</code></td>
+<td><code>cover</code> | <code>contain</code> | <code>fill</code></td>
+<td>How the stream sizes into the frame</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td><code>1</code></td>
+<td>Show a small diagnostic pill (fps, connection state)</td>
+</tr>
+</tbody></table>
+</div><p>The page also posts <code>postMessage</code> events to the parent frame as the session
+connects, streams and ends, so you can react to state in your own UI.</p>
+<h2 id="a-watched-run-end-to-end">A watched run, end to end<a class="anchor" href="#a-watched-run-end-to-end" aria-label="Link to this section">#</a></h2>
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="// 1. Start a stable session so it's alive to watch.
+const { sessionId, connectUrl } = await (await fetch(
+  'https://connect.runbrowser.dev/v1/sessions',
+  { method: 'POST', headers: auth, body: JSON.stringify({ keepAlive: true }) },
+)).json()
+
+// 2. Mint a viewer link and print it before you start driving.
+const { webUrl } = await (await fetch(
+  `https://connect.runbrowser.dev/v1/sessions/${sessionId}/viewer-token`,
+  { method: 'POST', headers: auth, body: JSON.stringify({ ttlSeconds: 900 }) },
+)).json()
+console.log('Watch it here →', webUrl)
+
+// 3. Drive. Whoever opened the link sees every step as it happens.
+const browser = await chromium.connectOverCDP(connectUrl)
+const page = await browser.newPage()
+await page.goto('https://example.com')">Copy</button></div><pre class="language-typescript"><code><span class="token comment">// 1. Start a stable session so it's alive to watch.</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> sessionId<span class="token punctuation">,</span> connectUrl <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>
+  <span class="token string">'https://connect.runbrowser.dev/v1/sessions'</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span> headers<span class="token operator">:</span> auth<span class="token punctuation">,</span> body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> keepAlive<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// 2. Mint a viewer link and print it before you start driving.</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> webUrl <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>
+  <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.runbrowser.dev/v1/sessions/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>sessionId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/viewer-token</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span> headers<span class="token operator">:</span> auth<span class="token punctuation">,</span> body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ttlSeconds<span class="token operator">:</span> <span class="token number">900</span> <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Watch it here →'</span><span class="token punctuation">,</span> webUrl<span class="token punctuation">)</span>
+
+<span class="token comment">// 3. Drive. Whoever opened the link sees every step as it happens.</span>
+<span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>connectUrl<span class="token punctuation">)</span>
+<span class="token keyword">const</span> page <span class="token operator">=</span> <span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">newPage</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://example.com'</span><span class="token punctuation">)</span></code></pre></div><h2 id="notes">Notes<a class="anchor" href="#notes" aria-label="Link to this section">#</a></h2>
+<ul>
+<li>The stream is <strong>not recorded</strong> and nothing from it is written to disk. When
+the link expires or the session ends, it&#39;s gone.</li>
+<li>Streaming a session costs the normal browser-time it&#39;s already running; the
+viewer itself adds no separate charge.</li>
+<li>Available on <strong>every plan</strong>, including Free — it isn&#39;t gated to a higher tier.</li>
+</ul>
+<p>See also: <a href="/docs/guide-sessions">Sessions</a> for creating something to watch, and
+the <a href="/docs/api-reference#sessions">API reference</a> for the token fields.</p>
+
+    <nav class="pager">
+      <a class="prev" href="/docs/guide-sessions"><span>Previous</span>Sessions &amp; stable sessions</a>
+      <a class="next" href="/docs/guide-extract"><span>Next</span>Structured extraction</a>
+    </nav>
+    <hr>
+    <p class="foot">
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20The%20live%20viewer">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+    <p class="updated">Last updated 2026-08-15</p>
+  </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#get-a-viewer-link">Get a viewer link</a>
+    <a class="toc-2" href="#embed-it">Embed it</a>
+    <a class="toc-2" href="#a-watched-run-end-to-end">A watched run, end to end</a>
+    <a class="toc-2" href="#notes">Notes</a>
+  </aside>
+</div>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>

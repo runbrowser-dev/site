@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proxies &amp; geo-targeting — runbrowser docs</title>
+<meta name="description" content="Route a session's traffic through a proxy — bring your own, or select a managed pool by name and country. When you pick a country, the browser's timezone a">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
+  </a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
+</header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Get started</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/quickstart">Quickstart</a>
+        <a class="nav-link " href="/docs/concepts">Concepts</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
+        <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
+        <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
+        <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
+        <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
+        <a class="nav-link active" href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
+        <a class="nav-link " href="/docs/guide-stealth">Stealth &amp; fingerprinting</a>
+    </div>
+
+    <details class="nav-group" >
+      <summary class="nav-title nav-title-spaced">API reference</summary>
+      <div class="nav-api">
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#connecting-a-browser">Connecting a browser</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#sessions">Sessions</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#rest-shortcuts">REST shortcuts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-screenshot-imagepngjpegwebp"><span class="m m-post">POST</span><span class="ep-path">/screenshot</span></a>
+            <a class="ep" href="/docs/api-reference#post-pdf-applicationpdf"><span class="m m-post">POST</span><span class="ep-path">/pdf</span></a>
+            <a class="ep" href="/docs/api-reference#post-content-texthtml"><span class="m m-post">POST</span><span class="ep-path">/content</span></a>
+            <a class="ep" href="/docs/api-reference#post-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-function-json"><span class="m m-post">POST</span><span class="ep-path">/function</span></a>
+            <a class="ep" href="/docs/api-reference#post-export-the-resource-as-is"><span class="m m-post">POST</span><span class="ep-path">/export</span></a>
+            <a class="ep" href="/docs/api-reference#post-smart-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/smart-scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
+            <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
+            <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#mcp">MCP</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#metrics">Metrics</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#errors">Errors</a>
+          
+        </div>
+      </div>
+    </details>
+
+    <span class="nav-title nav-title-spaced">Integrations</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/mcp">MCP server</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Migrating</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/errors">Errors</a>
+        <a class="nav-link" href="/#pricing">Pricing</a>
+        <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
+  </nav>
+  <main class="prose">
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Proxies &amp; geo-targeting</span></div>
+<h1 id="proxies-geo-targeting">Proxies &amp; geo-targeting</h1>
+<p>Route a session&#39;s traffic through a proxy — bring your own, or select a managed
+pool by name and country. When you pick a country, the browser&#39;s timezone and
+<code>Accept-Language</code> follow the exit IP, so you don&#39;t hand a site a New York clock
+on a Frankfurt address.</p>
+<h2 id="bring-your-own">Bring your own<a class="anchor" href="#bring-your-own" aria-label="Link to this section">#</a></h2>
+<p>Pass a full proxy URL, credentials embedded. It&#39;s validated against SSRF and
+never logged.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="const proxy = encodeURIComponent('http://user:pass@proxy.example.com:8080')
+const browser = await chromium.connectOverCDP(
+  `wss://connect.runbrowser.dev?token=${TOKEN}&amp;proxy=${proxy}`,
+)">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">const</span> proxy <span class="token operator">=</span> <span class="token function">encodeURIComponent</span><span class="token punctuation">(</span><span class="token string">'http://user:pass@proxy.example.com:8080'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>
+  <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">wss://connect.runbrowser.dev?token=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&amp;proxy=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>proxy<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span></code></pre></div><p>Prefer to keep the credentials off the connect URL entirely? Put them in a
+<a href="/docs/guide-sessions">session</a> instead and connect with the opaque id it
+returns. BYO proxies carry <strong>no markup</strong> — you pay your provider&#39;s wholesale
+price and nothing to us.</p>
+<h2 id="managed-pools">Managed pools<a class="anchor" href="#managed-pools" aria-label="Link to this section">#</a></h2>
+<p>Where your operator has configured them, select a pool by name and, for
+geo-targeting, a country. Credentials stay on our side; you never see them.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="cURL">cURL</button></div><button class="copy tabs-copy" type="button" data-code="const browser = await chromium.connectOverCDP(
+  `wss://connect.runbrowser.dev?token=${TOKEN}&amp;proxy=residential&amp;country=de`,
+)">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="const browser = await chromium.connectOverCDP(
+  `wss://connect.runbrowser.dev?token=${TOKEN}&amp;proxy=residential&amp;country=de`,
+)"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>
+  <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">wss://connect.runbrowser.dev?token=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&amp;proxy=residential&amp;country=de</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="cURL" data-code="# The same selection works on the REST endpoints, as query params.
+curl -X POST &quot;https://connect.runbrowser.dev/screenshot?proxy=residential&amp;country=de&quot; \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{ &quot;url&quot;: &quot;https://example.com&quot; }' --output shot.png"><span class="code-lang panel-lang">cURL</span><pre class="language-bash"><code><span class="token comment"># The same selection works on the REST endpoints, as query params.</span>
+<span class="token function">curl</span> <span class="token parameter variable">-X</span> POST <span class="token string">"https://connect.runbrowser.dev/screenshot?proxy=residential&amp;country=de"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Content-Type: application/json"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{ "url": "https://example.com" }'</span> <span class="token parameter variable">--output</span> shot.png</code></pre></div></div><p>Each session gets its own <strong>sticky exit IP</strong>, so a multi-step flow doesn&#39;t
+change address halfway through — which, to the site you&#39;re visiting, looks like
+account sharing.</p>
+<h3 id="geo-sets-more-than-the-ip">Geo sets more than the IP<a class="anchor" href="#geo-sets-more-than-the-ip" aria-label="Link to this section">#</a></h3>
+<p>Asking for <code>country=de</code> also sets the browser&#39;s timezone to <code>Europe/Berlin</code> and
+its <code>Accept-Language</code> to <code>de-DE</code>. That coupling is the point: an IP in one place
+paired with a clock from another is a contradiction any site can check for free,
+and geo-targeting that only changes the address gives a site a <em>better</em> signal
+than it removes.</p>
+<p>A country a pool doesn&#39;t carry is <strong>refused, with the list of what&#39;s
+available</strong> — you find out immediately, not after your data comes back from the
+wrong region.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="// GET a pool that doesn't offer that country →
+{ &quot;error&quot;: &quot;pool \&quot;residential\&quot; does not offer country \&quot;br\&quot;; available: de, gb, jp&quot; }">Copy</button></div><pre class="language-json"><code><span class="token comment">// GET a pool that doesn't offer that country →</span>
+<span class="token punctuation">{</span> <span class="token property">"error"</span><span class="token operator">:</span> <span class="token string">"pool \"residential\" does not offer country \"br\"; available: de, gb, jp"</span> <span class="token punctuation">}</span></code></pre></div><h2 id="which-to-use">Which to use<a class="anchor" href="#which-to-use" aria-label="Link to this section">#</a></h2>
+<ul>
+<li><strong>BYO</strong> — you already have a proxy provider and want wholesale pricing.</li>
+<li><strong>Managed pool</strong> — you want geo-targeting without sourcing IPs, and you want
+the locale kept coherent automatically.</li>
+</ul>
+<p>See also: <a href="/docs/guide-stealth">Stealth &amp; fingerprinting</a> for what the browser
+presents beyond the IP, and the
+<a href="/docs/api-reference#connecting-a-browser">proxy query params</a>.</p>
+
+    <nav class="pager">
+      <a class="prev" href="/docs/guide-capture"><span>Previous</span>Screenshots &amp; PDFs</a>
+      <a class="next" href="/docs/guide-stealth"><span>Next</span>Stealth &amp; fingerprinting</a>
+    </nav>
+    <hr>
+    <p class="foot">
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Proxies%20%26%20geo-targeting">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+    <p class="updated">Last updated 2026-08-15</p>
+  </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#bring-your-own">Bring your own</a>
+    <a class="toc-2" href="#managed-pools">Managed pools</a>
+    <a class="toc-3" href="#geo-sets-more-than-the-ip">Geo sets more than the IP</a>
+    <a class="toc-2" href="#which-to-use">Which to use</a>
+  </aside>
+</div>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>

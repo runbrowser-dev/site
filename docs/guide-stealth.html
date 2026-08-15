@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Documentation — runbrowser docs</title>
-<meta name="description" content="Hosted Chromium you drive over CDP. Quickstart, API reference and migration guides.">
+<title>Stealth &amp; fingerprinting — runbrowser docs</title>
+<meta name="description" content="Every browser we hand you already carries a coherent device profile — a consistent, per-session identity rather than the obvious tells of a headless Chromi">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="stylesheet" href="/assets/docs.css">
 </head>
@@ -44,7 +44,7 @@
         <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
         <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
         <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
-        <a class="nav-link " href="/docs/guide-stealth">Stealth &amp; fingerprinting</a>
+        <a class="nav-link active" href="/docs/guide-stealth">Stealth &amp; fingerprinting</a>
     </div>
 
     <details class="nav-group" >
@@ -120,72 +120,72 @@
     </div>
   </nav>
   <main class="prose">
-    
-    <h1>Documentation</h1>
-    <p class="lede-doc">Hosted Chromium you drive over CDP with Playwright, Puppeteer or
-    anything else that speaks it. For most people the migration is one line.</p>
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Stealth &amp; fingerprinting</span></div>
+<h1 id="stealth-fingerprinting">Stealth &amp; fingerprinting</h1>
+<p>Every browser we hand you already carries a coherent device profile — a
+consistent, per-session identity rather than the obvious tells of a headless
+Chromium in a datacenter. There&#39;s nothing to turn on; it&#39;s the default.</p>
+<p>This page is about what that means, and — just as importantly — what it
+doesn&#39;t, so you can set expectations before you point it at a hard target.</p>
+<h2 id="whats-handled-for-you">What&#39;s handled for you<a class="anchor" href="#whats-handled-for-you" aria-label="Link to this section">#</a></h2>
+<ul>
+<li><strong>No automation tells.</strong> <code>navigator.webdriver</code> is false, the plugin and
+language sets look real, <code>window.chrome</code> is present. The launch never passes
+<code>--enable-automation</code>.</li>
+<li><strong>A coherent OS persona.</strong> The user agent, <code>navigator.platform</code>, the
+client-hint headers, the WebGL renderer string and the worker-thread realm all
+agree with each other. A mismatch between any two of those is the cheapest
+possible bot check, and this closes them.</li>
+<li><strong>Per-tenant isolation.</strong> The canvas and audio fingerprints are seeded per
+container, so no two customers share one identity. One abusive user can&#39;t get
+the whole fleet blocked — and your sessions aren&#39;t clustered with anyone
+else&#39;s.</li>
+<li><strong>Coherent locale.</strong> When you select a <a href="/docs/guide-proxies">proxy country</a>,
+the timezone and <code>Accept-Language</code> move with the exit IP.</li>
+</ul>
+<h2 id="what-it-is-not">What it is not<a class="anchor" href="#what-it-is-not" aria-label="Link to this section">#</a></h2>
+<p>We flag bot walls; we don&#39;t pretend they aren&#39;t there, and we don&#39;t sell
+guaranteed evasion.</p>
+<ul>
+<li><strong>A page behind a CAPTCHA still needs solving.</strong> Fingerprint quality gets you
+past <em>detection</em>; it does nothing about a challenge you&#39;re explicitly asked to
+complete. See <a href="/docs/concepts#captchas">CAPTCHAs</a> — solving is bring-your-own
+solver key, at your provider&#39;s wholesale price.</li>
+<li><strong>IP reputation is separate.</strong> Many sites decide at the edge, on the address,
+before a line of JavaScript runs. No amount of fingerprint work changes that —
+<a href="/docs/guide-proxies">a proxy</a> does.</li>
+<li><strong>The GPU is real software rendering.</strong> The reported strings are coherent, but
+a timing or behavioural WebGL probe can still tell it&#39;s not a discrete GPU.</li>
+</ul>
+<h2 id="knowing-when-youre-blocked">Knowing when you&#39;re blocked<a class="anchor" href="#knowing-when-youre-blocked" aria-label="Link to this section">#</a></h2>
+<p>The primitives don&#39;t hand you a bot wall dressed up as content. <code>/v1/fetch</code> and
+<code>/smart-scrape</code> return a block signal so you can react instead of parsing a
+CAPTCHA page as if it were data.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="// A blocked fetch reports it rather than returning the wall as the body.
+{ &quot;status&quot;: 403, &quot;blocked&quot;: true, &quot;blockProvider&quot;: &quot;cloudflare&quot;, &quot;body&quot;: &quot;…&quot; }">Copy</button></div><pre class="language-json"><code><span class="token comment">// A blocked fetch reports it rather than returning the wall as the body.</span>
+<span class="token punctuation">{</span> <span class="token property">"status"</span><span class="token operator">:</span> <span class="token number">403</span><span class="token punctuation">,</span> <span class="token property">"blocked"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"blockProvider"</span><span class="token operator">:</span> <span class="token string">"cloudflare"</span><span class="token punctuation">,</span> <span class="token property">"body"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span></code></pre></div><p>That honesty is the point: you find out a target is defended in the response,
+not three steps later when your extracted &quot;data&quot; turns out to be an interstitial.</p>
+<p>See also: <a href="/docs/guide-proxies">Proxies &amp; geo-targeting</a> for the IP half of the
+problem, which is usually the half that matters.</p>
 
-    <div class="code-block">
-      <div class="code-bar"><span class="code-lang">typescript</span><button class="copy" type="button" data-code="import { chromium } from 'playwright'
-
-const browser = await chromium.connectOverCDP(
-  'wss://connect.runbrowser.dev?token=' + process.env.RUNBROWSER_TOKEN,
-)
-const page = await browser.newPage()
-await page.goto('https://example.com')">Copy</button></div>
-      <pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> chromium <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'playwright'</span>
-
-<span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>
-  <span class="token string">'wss://connect.runbrowser.dev?token='</span> <span class="token operator">+</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token punctuation">,</span>
-<span class="token punctuation">)</span>
-<span class="token keyword">const</span> page <span class="token operator">=</span> <span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">newPage</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://example.com'</span><span class="token punctuation">)</span></code></pre>
-    </div>
-
-    <div class="cards">
-      <a class="card" href="/docs/quickstart">
-        <span class="card-title">Quickstart</span>
-        <span class="card-blurb">Change one line and run your existing script on our browsers.</span>
-      </a>
-      <a class="card" href="/docs/guide-sessions">
-        <span class="card-title">Sessions &amp; stable sessions</span>
-        <span class="card-blurb">One browser, yours while connected — and how to keep it alive between connects.</span>
-      </a>
-      <a class="card" href="/docs/guide-viewer">
-        <span class="card-title">The live viewer</span>
-        <span class="card-blurb">Watch a run in real time, or hand someone a signed link that carries no key.</span>
-      </a>
-      <a class="card" href="/docs/guide-extract">
-        <span class="card-title">Structured extraction</span>
-        <span class="card-blurb">A URL and a JSON Schema in, validated JSON out — on JavaScript sites too.</span>
-      </a>
-      <a class="card" href="/docs/guide-crawling">
-        <span class="card-title">Crawling a site</span>
-        <span class="card-blurb">Smart-scrape, map and crawl — cheapest-first, and honest about what they did.</span>
-      </a>
-      <a class="card" href="/docs/api-reference">
-        <span class="card-title">API reference</span>
-        <span class="card-blurb">Every endpoint, categorised, with request and response shapes.</span>
-      </a>
-      <a class="card" href="/docs/mcp">
-        <span class="card-title">MCP server</span>
-        <span class="card-blurb">Browser tools for Claude, Cursor, or anything that speaks MCP.</span>
-      </a>
-      <a class="card" href="/docs/errors">
-        <span class="card-title">Errors</span>
-        <span class="card-blurb">Every status code we return, what causes it, and what to do about it.</span>
-      </a>
-    </div>
-    
+    <nav class="pager">
+      <a class="prev" href="/docs/guide-proxies"><span>Previous</span>Proxies &amp; geo-targeting</a>
+      <a class="next" href="/docs/api-reference"><span>Next</span>API reference</a>
+    </nav>
     <hr>
     <p class="foot">
       Something wrong, missing, or just annoying here?
-      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Documentation">Tell us</a> —
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Stealth%20%26%20fingerprinting">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
-    
+    <p class="updated">Last updated 2026-08-15</p>
   </main>
-  <aside class="toc"></aside>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#whats-handled-for-you">What's handled for you</a>
+    <a class="toc-2" href="#what-it-is-not">What it is not</a>
+    <a class="toc-2" href="#knowing-when-youre-blocked">Knowing when you're blocked</a>
+  </aside>
 </div>
 <script src="/assets/docs.js" defer></script>
 </body>

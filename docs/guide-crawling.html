@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crawling a site — runbrowser docs</title>
+<meta name="description" content="Three endpoints that build on each other: `/smart-scrape` reads one page the cheapest way that works, `/map` discovers what's on a site, and `/crawl` walks">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
+  </a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
+</header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Get started</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/quickstart">Quickstart</a>
+        <a class="nav-link " href="/docs/concepts">Concepts</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
+        <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
+        <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
+        <a class="nav-link active" href="/docs/guide-crawling">Crawling a site</a>
+        <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
+        <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
+        <a class="nav-link " href="/docs/guide-stealth">Stealth &amp; fingerprinting</a>
+    </div>
+
+    <details class="nav-group" >
+      <summary class="nav-title nav-title-spaced">API reference</summary>
+      <div class="nav-api">
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#connecting-a-browser">Connecting a browser</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#sessions">Sessions</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#rest-shortcuts">REST shortcuts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-screenshot-imagepngjpegwebp"><span class="m m-post">POST</span><span class="ep-path">/screenshot</span></a>
+            <a class="ep" href="/docs/api-reference#post-pdf-applicationpdf"><span class="m m-post">POST</span><span class="ep-path">/pdf</span></a>
+            <a class="ep" href="/docs/api-reference#post-content-texthtml"><span class="m m-post">POST</span><span class="ep-path">/content</span></a>
+            <a class="ep" href="/docs/api-reference#post-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-function-json"><span class="m m-post">POST</span><span class="ep-path">/function</span></a>
+            <a class="ep" href="/docs/api-reference#post-export-the-resource-as-is"><span class="m m-post">POST</span><span class="ep-path">/export</span></a>
+            <a class="ep" href="/docs/api-reference#post-smart-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/smart-scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
+            <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
+            <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#mcp">MCP</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#metrics">Metrics</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#errors">Errors</a>
+          
+        </div>
+      </div>
+    </details>
+
+    <span class="nav-title nav-title-spaced">Integrations</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/mcp">MCP server</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Migrating</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/errors">Errors</a>
+        <a class="nav-link" href="/#pricing">Pricing</a>
+        <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
+  </nav>
+  <main class="prose">
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Crawling a site</span></div>
+<h1 id="crawling-a-site">Crawling a site</h1>
+<p>Three endpoints that build on each other: <code>/smart-scrape</code> reads one page the
+cheapest way that works, <code>/map</code> discovers what&#39;s on a site, and <code>/crawl</code> walks
+it. All three keep the browser cost down and tell you what they did.</p>
+<h2 id="one-page-cheapest-first-smart-scrape">One page, cheapest-first: <code>/smart-scrape</code><a class="anchor" href="#one-page-cheapest-first-smart-scrape" aria-label="Link to this section">#</a></h2>
+<p>The expensive part of this platform is the browser. Plain HTTP has none — so
+<code>/smart-scrape</code> tries that first and only pays for a render when the page comes
+back blocked, empty, or client-rendered. It tells you which path it took.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">Shell</span><button class="copy" type="button" data-code="curl -X POST https://connect.runbrowser.dev/smart-scrape \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{ &quot;url&quot;: &quot;https://example.com&quot;, &quot;format&quot;: &quot;markdown-full&quot; }'">Copy</button></div><pre class="language-bash"><code><span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://connect.runbrowser.dev/smart-scrape <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Content-Type: application/json"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{ "url": "https://example.com", "format": "markdown-full" }'</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="// A server-rendered page — no browser was used.
+{ &quot;url&quot;: &quot;…&quot;, &quot;method&quot;: &quot;http&quot;, &quot;status&quot;: 200, &quot;content&quot;: &quot;…&quot; }
+
+// A JavaScript app — it escalated and rendered.
+{ &quot;url&quot;: &quot;…&quot;, &quot;method&quot;: &quot;browser&quot;, &quot;escalationReason&quot;: &quot;thin_body_probably_js_rendered&quot;, &quot;content&quot;: &quot;…&quot; }">Copy</button></div><pre class="language-json"><code><span class="token comment">// A server-rendered page — no browser was used.</span>
+<span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"method"</span><span class="token operator">:</span> <span class="token string">"http"</span><span class="token punctuation">,</span> <span class="token property">"status"</span><span class="token operator">:</span> <span class="token number">200</span><span class="token punctuation">,</span> <span class="token property">"content"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// A JavaScript app — it escalated and rendered.</span>
+<span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"method"</span><span class="token operator">:</span> <span class="token string">"browser"</span><span class="token punctuation">,</span> <span class="token property">"escalationReason"</span><span class="token operator">:</span> <span class="token string">"thin_body_probably_js_rendered"</span><span class="token punctuation">,</span> <span class="token property">"content"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span></code></pre></div><p><code>escalationReason</code> is worth reading: <code>anti_bot_cloudflare</code> and
+<code>thin_body_probably_js_rendered</code> are different facts about a target, and both
+are worth knowing before you build a job around it.</p>
+<h2 id="whats-on-the-site-map">What&#39;s on the site: <code>/map</code><a class="anchor" href="#whats-on-the-site-map" aria-label="Link to this section">#</a></h2>
+<p>Discover URLs from two sources at once — the sitemap (authoritative, often
+absent) and the on-page links (always present, one page&#39;s worth). It reports
+them separately so you can tell a 40,000-URL sitemap from forty footer links.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">Shell</span><button class="copy" type="button" data-code="curl -X POST https://connect.runbrowser.dev/map \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{ &quot;url&quot;: &quot;https://example.com&quot;, &quot;limit&quot;: 500 }'">Copy</button></div><pre class="language-bash"><code><span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://connect.runbrowser.dev/map <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Content-Type: application/json"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{ "url": "https://example.com", "limit": 500 }'</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;total&quot;: 128, &quot;sources&quot;: { &quot;sitemap&quot;: 96, &quot;page&quot;: 41 }, &quot;urls&quot;: [&quot;…&quot;] }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"total"</span><span class="token operator">:</span> <span class="token number">128</span><span class="token punctuation">,</span> <span class="token property">"sources"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"sitemap"</span><span class="token operator">:</span> <span class="token number">96</span><span class="token punctuation">,</span> <span class="token property">"page"</span><span class="token operator">:</span> <span class="token number">41</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token property">"urls"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"…"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span></code></pre></div><p>Same-origin only unless you pass <code>includeExternal</code>. Discovery runs inside the
+page, so a sitemap behind a login is reachable for the same reason the page is.</p>
+<h2 id="walk-it-crawl">Walk it: <code>/crawl</code><a class="anchor" href="#walk-it-crawl" aria-label="Link to this section">#</a></h2>
+<p>Follow links from a seed, breadth-first, up to <code>maxPages</code> and <code>maxDepth</code> — all
+inside <strong>one browser lease</strong> rather than a cold start per page. It always tells
+you why it stopped.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">Shell</span><button class="copy" type="button" data-code="curl -X POST https://connect.runbrowser.dev/crawl \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{ &quot;url&quot;: &quot;https://example.com&quot;, &quot;maxPages&quot;: 20, &quot;maxDepth&quot;: 2 }'">Copy</button></div><pre class="language-bash"><code><span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://connect.runbrowser.dev/crawl <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Content-Type: application/json"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{ "url": "https://example.com", "maxPages": 20, "maxDepth": 2 }'</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;total&quot;: 20,
+  &quot;stoppedBecause&quot;: &quot;maxPages&quot;,
+  &quot;queuedButNotVisited&quot;: 43,
+  &quot;pages&quot;: [ { &quot;url&quot;: &quot;…&quot;, &quot;depth&quot;: 0, &quot;chars&quot;: 1713, &quot;content&quot;: &quot;…&quot; } ]
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"total"</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+  <span class="token property">"stoppedBecause"</span><span class="token operator">:</span> <span class="token string">"maxPages"</span><span class="token punctuation">,</span>
+  <span class="token property">"queuedButNotVisited"</span><span class="token operator">:</span> <span class="token number">43</span><span class="token punctuation">,</span>
+  <span class="token property">"pages"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"depth"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token property">"chars"</span><span class="token operator">:</span> <span class="token number">1713</span><span class="token punctuation">,</span> <span class="token property">"content"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span> <span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre></div><p><code>stoppedBecause</code> is <code>exhausted</code>, <code>maxPages</code>, <code>maxDepth</code> or <code>deadline</code> — the
+first question worth asking of a crawl, and the expensive one to get wrong. A
+page that fails to load is recorded with an <code>error</code> and stepped over rather than
+ending the run.</p>
+<h2 id="putting-them-together">Putting them together<a class="anchor" href="#putting-them-together" aria-label="Link to this section">#</a></h2>
+<p>A typical pipeline: <code>/map</code> to find the pages, then <code>/v1/extract</code> on each to get
+structured data, or <code>/crawl</code> when the link graph matters more than the sitemap.</p>
+<p>See also: <a href="/docs/guide-extract">Structured extraction</a> to type the results, and
+the reference for <a href="/docs/api-reference#post-smart-scrape-json"><code>/smart-scrape</code></a>,
+<a href="/docs/api-reference#post-map-json"><code>/map</code></a> and
+<a href="/docs/api-reference#post-crawl-json"><code>/crawl</code></a>.</p>
+
+    <nav class="pager">
+      <a class="prev" href="/docs/guide-extract"><span>Previous</span>Structured extraction</a>
+      <a class="next" href="/docs/guide-capture"><span>Next</span>Screenshots &amp; PDFs</a>
+    </nav>
+    <hr>
+    <p class="foot">
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Crawling%20a%20site">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+    <p class="updated">Last updated 2026-08-15</p>
+  </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#one-page-cheapest-first-smart-scrape">One page, cheapest-first: /smart-scrape</a>
+    <a class="toc-2" href="#whats-on-the-site-map">What's on the site: /map</a>
+    <a class="toc-2" href="#walk-it-crawl">Walk it: /crawl</a>
+    <a class="toc-2" href="#putting-them-together">Putting them together</a>
+  </aside>
+</div>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>
