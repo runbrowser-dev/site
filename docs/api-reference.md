@@ -415,6 +415,13 @@ The `cookies` are the point of the call: they come back in the same shape every
 other endpoint accepts as `cookies`, so the clearance carries straight into the
 session that does the real work.
 
+A cookie banner is declined on the way in — reject only, never accept — and
+reported when one was there:
+
+```json
+{ "consent": { "found": true, "dismissed": true, "method": "onetrust" } }
+```
+
 **It tells you which wall you hit,** because the walls need different answers:
 
 | `type` | What it is | What clears it |

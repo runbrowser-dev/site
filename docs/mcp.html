@@ -203,12 +203,27 @@ same header.</p>
 <tr>
 <td><code>browser_wait_for</code></td>
 <td>yes</td>
-<td>Wait for a selector to appear, be attached, or go away.</td>
+<td>Wait for a selector — or, with no selector, for the page to stop changing.</td>
+</tr>
+<tr>
+<td><code>browser_snapshot</code></td>
+<td>yes</td>
+<td>List the visible interactive elements, each with a selector you can reuse.</td>
 </tr>
 <tr>
 <td><code>browser_get_content</code></td>
 <td>yes</td>
-<td>Read the current page as text or HTML.</td>
+<td>Read the page, or one region of it, as text or HTML.</td>
+</tr>
+<tr>
+<td><code>browser_evaluate</code></td>
+<td>yes</td>
+<td>Run your own JavaScript in the page and get JSON back.</td>
+</tr>
+<tr>
+<td><code>browser_dismiss_consent</code></td>
+<td>yes</td>
+<td>Decline a cookie banner. Never accepts one.</td>
 </tr>
 <tr>
 <td><code>browser_screenshot</code></td>
@@ -233,6 +248,49 @@ a JS-heavy SPA, get an empty shell back, and conclude the site is broken.</p>
 navigation. That is right for prose and wrong for crawling: a listing page
 comes back without its pagination links. Pass <code>format: &quot;markdown-full&quot;</code> when
 you intend to follow links.</p>
+<h3 id="landing-on-a-page-youve-never-seen">Landing on a page you&#39;ve never seen<a class="anchor" href="#landing-on-a-page-youve-never-seen" aria-label="Link to this section">#</a></h3>
+<p>The awkward moment in browser automation is the first one: you are on a page,
+you do not know its structure, and every tool wants a CSS selector you do not
+have. Three tools exist for exactly that.</p>
+<p><strong>Wait without naming anything.</strong> <code>browser_wait_for</code> with no selector waits
+for the page to stop changing — the DOM to settle and in-flight fetch/XHR to
+finish. Use it when you cannot name an element to wait for, which on an
+unfamiliar SPA is always. (<code>readyState</code> is no help: it goes <code>complete</code> before
+the request that fills the page has even started.)</p>
+<p><strong>Then look at what&#39;s there.</strong> <code>browser_snapshot</code> lists the visible,
+interactive elements with a ready-made selector for each:</p>
+<div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="12 interactive elements:
+  [button] Flights
+      selector: #\37
+  [input/text] Where from?
+      selector: input[aria-label=&quot;Where from?&quot;]">Copy</button></div><pre class="language-"><code>12 interactive elements:
+  [button] Flights
+      selector: #\37
+  [input/text] Where from?
+      selector: input[aria-label=&quot;Where from?&quot;]</code></pre></div><p>Hand those selectors straight to <code>browser_click</code> or <code>browser_type</code>. It is far
+cheaper than reading the HTML and guessing.</p>
+<p><strong>Read only what you need.</strong> <code>browser_get_content</code> takes a <code>selector</code>, so you
+can pull one region instead of the whole document. On a real app that is the
+difference between 1,400 characters and 120,000 — and the large number is
+context you no longer have for reasoning.</p>
+<p><strong>And when none of that fits, write the code.</strong> <code>browser_evaluate</code> runs your
+own JavaScript in the page and returns JSON:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JavaScript</span><button class="copy" type="button" data-code="return [...document.querySelectorAll('li')]
+  .filter(li =&gt; li.innerText.includes('CHQ'))
+  .map(li =&gt; li.innerText.match(/€[\d,]+/)?.[0])">Copy</button></div><pre class="language-javascript"><code><span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token operator">...</span>document<span class="token punctuation">.</span><span class="token function">querySelectorAll</span><span class="token punctuation">(</span><span class="token string">'li'</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+  <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span><span class="token parameter">li</span> <span class="token operator">=></span> li<span class="token punctuation">.</span>innerText<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'CHQ'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">li</span> <span class="token operator">=></span> li<span class="token punctuation">.</span>innerText<span class="token punctuation">.</span><span class="token function">match</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">€[\d,]+</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token operator">?.</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span></code></pre></div><p>It is the escape hatch for anything the other tools do not cover. A DOM node
+or other unserialisable value is reported as such rather than silently
+arriving as <code>{}</code>.</p>
+<h3 id="cookie-banners">Cookie banners<a class="anchor" href="#cookie-banners" aria-label="Link to this section">#</a></h3>
+<p><code>browser_navigate</code> declines consent banners automatically, so they stop
+covering the page. It only ever chooses reject/decline — <strong>never accept</strong> —
+because declining needs no authority from anyone, while agreeing to data
+processing on your behalf is not ours to do.</p>
+<p>A banner offering no way to say no is left alone and reported:</p>
+<div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="(a consent dialog is present and offers no decline option; it was left alone)">Copy</button></div><pre class="language-"><code>(a consent dialog is present and offers no decline option; it was left alone)</code></pre></div><p>The same applies when refusal is hidden behind a settings page: that path
+leaves the page you asked for, so it is named rather than followed. Call
+<code>browser_dismiss_consent</code> directly if a banner appears later in a flow.</p>
 <h3 id="multi-step-flows">Multi-step flows<a class="anchor" href="#multi-step-flows" aria-label="Link to this section">#</a></h3>
 <p>Anything that loads content asynchronously needs <code>browser_wait_for</code> between
 the action and the read — otherwise you are reading whatever happened to be
@@ -308,6 +366,8 @@ teardown.</p>
     <span class="toc-title">On this page</span>
     <a class="toc-2" href="#connecting">Connecting</a>
     <a class="toc-2" href="#tools">Tools</a>
+    <a class="toc-3" href="#landing-on-a-page-youve-never-seen">Landing on a page you've never seen</a>
+    <a class="toc-3" href="#cookie-banners">Cookie banners</a>
     <a class="toc-3" href="#multi-step-flows">Multi-step flows</a>
     <a class="toc-2" href="#how-sessions-work">How sessions work</a>
     <a class="toc-2" href="#errors">Errors</a>

@@ -545,7 +545,9 @@ and hand back the clearance cookies.</p>
 <span class="token punctuation">}</span></code></pre></div><p>The <code>cookies</code> are the point of the call: they come back in the same shape every
 other endpoint accepts as <code>cookies</code>, so the clearance carries straight into the
 session that does the real work.</p>
-<p><strong>It tells you which wall you hit,</strong> because the walls need different answers:</p>
+<p>A cookie banner is declined on the way in — reject only, never accept — and
+reported when one was there:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;consent&quot;: { &quot;found&quot;: true, &quot;dismissed&quot;: true, &quot;method&quot;: &quot;onetrust&quot; } }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"consent"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"found"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"dismissed"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"method"</span><span class="token operator">:</span> <span class="token string">"onetrust"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span></code></pre></div><p><strong>It tells you which wall you hit,</strong> because the walls need different answers:</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>

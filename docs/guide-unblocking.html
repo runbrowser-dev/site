@@ -166,6 +166,11 @@ looking at. The check passes instantly, the script grabs the interstitial&#39;s
 markup, and it gets parsed as though it were the content. <code>/unblock</code> waits on
 the wall actually going away instead — and that single distinction is most of
 what this endpoint is for.</p>
+<h2 id="cookie-banners-go-first">Cookie banners go first<a class="anchor" href="#cookie-banners-go-first" aria-label="Link to this section">#</a></h2>
+<p>Before anything else, a consent banner is declined — it is far more common than
+a CAPTCHA and it covers the content just as effectively. Only reject/decline is
+ever clicked; accepting would agree to data processing on your behalf, which is
+not ours to do. A banner with no way to say no is reported and left alone.</p>
 <h2 id="it-names-which-wall-you-hit">It names which wall you hit<a class="anchor" href="#it-names-which-wall-you-hit" aria-label="Link to this section">#</a></h2>
 <p>The three kinds need completely different answers, so you&#39;re told which one is
 in front of you rather than being left to guess.</p>
@@ -300,6 +305,7 @@ browser hits fewer walls in the first place.</p>
   <aside class="toc">
     <span class="toc-title">On this page</span>
     <a class="toc-2" href="#the-part-that-isnt-solving-anything">The part that isn't solving anything</a>
+    <a class="toc-2" href="#cookie-banners-go-first">Cookie banners go first</a>
     <a class="toc-2" href="#it-names-which-wall-you-hit">It names which wall you hit</a>
     <a class="toc-2" href="#carrying-the-clearance-forward">Carrying the clearance forward</a>
     <a class="toc-2" href="#when-a-challenge-does-pose-a-question">When a challenge does pose a question</a>

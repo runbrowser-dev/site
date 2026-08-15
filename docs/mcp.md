@@ -48,8 +48,11 @@ Locally, against the dev stack, the endpoint is `http://localhost:3000/mcp`.
 | `browser_navigate` | yes | Open a URL in this session's persistent browser. |
 | `browser_click` | yes | Click the first element matching a CSS selector. |
 | `browser_type` | yes | Type into an element, optionally pressing Enter. Reports whether the page actually navigated. |
-| `browser_wait_for` | yes | Wait for a selector to appear, be attached, or go away. |
-| `browser_get_content` | yes | Read the current page as text or HTML. |
+| `browser_wait_for` | yes | Wait for a selector — or, with no selector, for the page to stop changing. |
+| `browser_snapshot` | yes | List the visible interactive elements, each with a selector you can reuse. |
+| `browser_get_content` | yes | Read the page, or one region of it, as text or HTML. |
+| `browser_evaluate` | yes | Run your own JavaScript in the page and get JSON back. |
+| `browser_dismiss_consent` | yes | Decline a cookie banner. Never accepts one. |
 | `browser_screenshot` | yes | PNG of the current page. |
 | `browser_close` | yes | Release the browser and stop the meter. |
 
@@ -67,6 +70,67 @@ a JS-heavy SPA, get an empty shell back, and conclude the site is broken.
 navigation. That is right for prose and wrong for crawling: a listing page
 comes back without its pagination links. Pass `format: "markdown-full"` when
 you intend to follow links.
+
+### Landing on a page you've never seen
+
+The awkward moment in browser automation is the first one: you are on a page,
+you do not know its structure, and every tool wants a CSS selector you do not
+have. Three tools exist for exactly that.
+
+**Wait without naming anything.** `browser_wait_for` with no selector waits
+for the page to stop changing — the DOM to settle and in-flight fetch/XHR to
+finish. Use it when you cannot name an element to wait for, which on an
+unfamiliar SPA is always. (`readyState` is no help: it goes `complete` before
+the request that fills the page has even started.)
+
+**Then look at what's there.** `browser_snapshot` lists the visible,
+interactive elements with a ready-made selector for each:
+
+```
+12 interactive elements:
+  [button] Flights
+      selector: #\37
+  [input/text] Where from?
+      selector: input[aria-label="Where from?"]
+```
+
+Hand those selectors straight to `browser_click` or `browser_type`. It is far
+cheaper than reading the HTML and guessing.
+
+**Read only what you need.** `browser_get_content` takes a `selector`, so you
+can pull one region instead of the whole document. On a real app that is the
+difference between 1,400 characters and 120,000 — and the large number is
+context you no longer have for reasoning.
+
+**And when none of that fits, write the code.** `browser_evaluate` runs your
+own JavaScript in the page and returns JSON:
+
+```js
+return [...document.querySelectorAll('li')]
+  .filter(li => li.innerText.includes('CHQ'))
+  .map(li => li.innerText.match(/€[\d,]+/)?.[0])
+```
+
+It is the escape hatch for anything the other tools do not cover. A DOM node
+or other unserialisable value is reported as such rather than silently
+arriving as `{}`.
+
+### Cookie banners
+
+`browser_navigate` declines consent banners automatically, so they stop
+covering the page. It only ever chooses reject/decline — **never accept** —
+because declining needs no authority from anyone, while agreeing to data
+processing on your behalf is not ours to do.
+
+A banner offering no way to say no is left alone and reported:
+
+```
+(a consent dialog is present and offers no decline option; it was left alone)
+```
+
+The same applies when refusal is hidden behind a settings page: that path
+leaves the page you asked for, so it is named rather than followed. Call
+`browser_dismiss_consent` directly if a banner appears later in a flow.
 
 ### Multi-step flows
 

@@ -38,6 +38,13 @@ markup, and it gets parsed as though it were the content. `/unblock` waits on
 the wall actually going away instead — and that single distinction is most of
 what this endpoint is for.
 
+## Cookie banners go first
+
+Before anything else, a consent banner is declined — it is far more common than
+a CAPTCHA and it covers the content just as effectively. Only reject/decline is
+ever clicked; accepting would agree to data processing on your behalf, which is
+not ours to do. A banner with no way to say no is reported and left alone.
+
 ## It names which wall you hit
 
 The three kinds need completely different answers, so you're told which one is
