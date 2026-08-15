@@ -255,14 +255,89 @@ function lastUpdated(file) {
   return new Date().toISOString().slice(0, 10)
 }
 
+// Endpoints parsed from the API reference in pass 1, grouped by category, so
+// the sidebar can list every endpoint under its section. Populated before any
+// page is written.
+let API_ENDPOINTS = []
+
+// An H3 like "POST /screenshot → image/png|jpeg|webp" → { method, path, id }.
+function parseEndpoint(headingText, id) {
+  const m = headingText.match(/^(GET|POST|PUT|PATCH|DELETE)\s+(\S+)/)
+  if (!m) return null
+  return { method: m[1], path: m[2], id }
+}
+
+/**
+ * The sidebar. A flat page list buries a 16-endpoint reference behind one
+ * link; developers want to see the whole surface and jump straight to the
+ * call they need. So the API reference expands inline into its categories,
+ * with every endpoint a labelled row that deep-links to its section.
+ */
+function sidebarHtml(currentSlug) {
+  const link = (s, label) =>
+    `<a class="nav-link ${s === currentSlug ? 'active' : ''}" href="/docs/${s}">${escapeHtml(label)}</a>`
+
+  // Group the parsed endpoints under their category heading, preserving order.
+  const byCategory = []
+  let bucket = null
+  for (const h of API_ENDPOINTS) {
+    if (h.type === 'category') {
+      bucket = { title: h.text, id: h.id, items: [] }
+      byCategory.push(bucket)
+    } else if (h.type === 'endpoint' && bucket) {
+      bucket.items.push(h)
+    }
+  }
+
+  const apiTree = byCategory
+    .map((cat) => {
+      const rows = cat.items
+        .map(
+          (e) =>
+            `<a class="ep" href="/docs/api-reference#${e.id}"><span class="m m-${e.method.toLowerCase()}">${e.method}</span><span class="ep-path">${escapeHtml(e.path)}</span></a>`,
+        )
+        .join('\n            ')
+      return `<div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#${cat.id}">${escapeHtml(cat.title)}</a>
+          ${rows ? `<div class="nav-eps">\n            ${rows}\n          </div>` : ''}
+        </div>`
+    })
+    .join('\n        ')
+
+  const apiOpen = currentSlug === 'api-reference'
+  return `
+    <span class="nav-title">Get started</span>
+    <div class="nav-links">
+        ${link('quickstart', 'Quickstart')}
+        ${link('concepts', 'Concepts')}
+    </div>
+
+    <details class="nav-group" ${apiOpen ? 'open' : ''}>
+      <summary class="nav-title nav-title-spaced">API reference</summary>
+      <div class="nav-api">
+        ${apiTree}
+      </div>
+    </details>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        ${link('errors', 'Errors')}
+        ${link('mcp', 'MCP server')}
+        ${link('migrating-from-browserless', 'From Browserless')}
+        ${link('migrating-from-browserbase', 'From Browserbase')}
+    </div>
+
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a class="nav-link" href="/#pricing">Pricing</a>
+        <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>`
+}
+
 function layout({ title, body, slug, toc, description, updated }) {
   const idx = NAV.findIndex(([s]) => s === slug)
   const prev = idx > 0 ? NAV[idx - 1] : null
   const next = idx >= 0 && idx < NAV.length - 1 ? NAV[idx + 1] : null
-
-  const nav = NAV.map(
-    ([s, label]) => `<a class="${s === slug ? 'active' : ''}" href="/docs/${s}">${escapeHtml(label)}</a>`,
-  ).join('\n        ')
 
   const tocHtml = toc.length
     ? `<aside class="toc">
@@ -310,16 +385,7 @@ function layout({ title, body, slug, toc, description, updated }) {
 </div>
 
 <div class="layout">
-  <nav class="sidebar">
-    <span class="nav-title">Documentation</span>
-    <div class="nav-links">
-        ${nav}
-    </div>
-    <span class="nav-title nav-title-spaced">More</span>
-    <div class="nav-links">
-        <a href="/#pricing">Pricing</a>
-        <a href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
-    </div>
+  <nav class="sidebar">${sidebarHtml(slug)}
   </nav>
   <main class="prose">
     ${slug ? `<div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>${escapeHtml(title)}</span></div>` : ''}
@@ -347,6 +413,10 @@ const searchIndex = []
 const files = readdirSync(CONTENT).filter((f) => f.endsWith('.md'))
 let count = 0
 
+// Pass 1: render every page and collect its headings. Writing is deferred to
+// pass 2 so the sidebar, built from the API reference's endpoints, is complete
+// before the first file is written.
+const rendered = []
 for (const file of files) {
   const slug = basename(file, '.md')
   const md = readFileSync(join(CONTENT, file), 'utf8')
@@ -381,17 +451,33 @@ for (const file of files) {
     .map((s) => s.trim())
     .find((s) => s && !s.startsWith('#') && !s.startsWith('```') && !s.startsWith('|'))
 
-  writeFileSync(
-    join(OUT, `${slug}.html`),
-    layout({
-      title,
-      body: html,
-      slug,
-      toc: headings,
-      description: firstPara?.replace(/\s+/g, ' ').slice(0, 155),
-      updated: lastUpdated(join(CONTENT, file)),
-    }),
-  )
+  rendered.push({
+    slug, title, html,
+    toc: headings.slice(),
+    description: firstPara?.replace(/\s+/g, ' ').slice(0, 155),
+    updated: lastUpdated(join(CONTENT, file)),
+  })
+}
+
+// Build the endpoint tree from the API reference: each H2 is a category, each
+// H3 that starts with an HTTP method is an endpoint under it.
+{
+  const api = rendered.find((p) => p.slug === 'api-reference')
+  if (api) {
+    for (const h of api.toc) {
+      if (h.depth === 2) {
+        API_ENDPOINTS.push({ type: 'category', text: h.text, id: h.id })
+      } else if (h.depth === 3) {
+        const ep = parseEndpoint(h.text, h.id)
+        if (ep) API_ENDPOINTS.push({ type: 'endpoint', ...ep })
+      }
+    }
+  }
+}
+
+// Pass 2: write every page with the finished sidebar.
+for (const p of rendered) {
+  writeFileSync(join(OUT, `${p.slug}.html`), layout({ title: p.title, body: p.html, slug: p.slug, toc: p.toc, description: p.description, updated: p.updated }))
   count++
 }
 

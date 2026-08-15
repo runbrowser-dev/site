@@ -176,9 +176,32 @@ Or keep the credentials out of the URL entirely by POSTing them to
 URLs are validated against SSRF (RFC1918, loopback and link-local are
 refused; http/https/socks5 only) and never logged.
 
-Managed proxy pools are designed but not built — the trigger is a
-customer saying they'd pay for it. Until then you get wholesale pricing
-from your own provider instead of our markup.
+### Managed pools
+
+Where the operator has configured them, select one by name instead of
+supplying a URL:
+
+```ts
+await chromium.connectOverCDP(
+  `https://connect.${domain}?token=${key}&proxy=residential&country=de`);
+```
+
+Credentials stay on our side. Each session gets its own sticky exit IP, so a
+multi-step flow doesn't change address halfway through — which, to the site
+you're visiting, looks like account sharing.
+
+**Asking for a country also sets the browser's timezone and
+`Accept-Language`.** That coupling is the point rather than a convenience: an
+IP in Tokyo paired with a New York clock is a contradiction any site can check
+for free, and geo-targeting that only changes the address hands over a better
+signal than it removes.
+
+A country the pool doesn't carry is refused, and the error lists what is
+available. Silently serving you from somewhere else would mean discovering the
+substitution only once your data was already wrong.
+
+Bring-your-own stays free of any markup, and remains the right choice if you
+already have wholesale pricing.
 
 ## CAPTCHAs
 

@@ -47,7 +47,8 @@ Locally, against the dev stack, the endpoint is `http://localhost:3000/mcp`.
 | `extract` | no | URL + JSON Schema → structured JSON. Renders the page first, so it handles JS-heavy sites. |
 | `browser_navigate` | yes | Open a URL in this session's persistent browser. |
 | `browser_click` | yes | Click the first element matching a CSS selector. |
-| `browser_type` | yes | Type into an element, optionally pressing Enter. |
+| `browser_type` | yes | Type into an element, optionally pressing Enter. Reports whether the page actually navigated. |
+| `browser_wait_for` | yes | Wait for a selector to appear, be attached, or go away. |
 | `browser_get_content` | yes | Read the current page as text or HTML. |
 | `browser_screenshot` | yes | PNG of the current page. |
 | `browser_close` | yes | Release the browser and stop the meter. |
@@ -61,6 +62,20 @@ Note the split inside that group: `fetch` is plain HTTP and runs no
 JavaScript, while `extract` renders the page in a real browser before
 handing it to the model. A model told otherwise will reach for `fetch` on
 a JS-heavy SPA, get an empty shell back, and conclude the site is broken.
+
+`fetch` defaults to `markdown`, which keeps the main article and drops site
+navigation. That is right for prose and wrong for crawling: a listing page
+comes back without its pagination links. Pass `format: "markdown-full"` when
+you intend to follow links.
+
+### Multi-step flows
+
+Anything that loads content asynchronously needs `browser_wait_for` between
+the action and the read — otherwise you are reading whatever happened to be
+on screen when the call landed. `browser_type` with `submit: true` tells you
+whether the page actually navigated and names the URL it reached; if it
+reports that nothing moved, the form most likely needs its submit button
+clicked instead.
 
 ## How sessions work
 

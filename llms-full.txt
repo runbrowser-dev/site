@@ -25,7 +25,8 @@ Works with `chromium.connectOverCDP()` and `puppeteer.connect({browserWSEndpoint
 | Query param | |
 |---|---|
 | `token` | your API key |
-| `proxy` | egress proxy URL, credentials embedded. Validated against SSRF. |
+| `proxy` | egress proxy URL with credentials embedded (validated against SSRF), **or** the name of an operator-configured pool such as `residential` |
+| `country` | ISO-3166 alpha-2, with a named pool. Also sets the browser's timezone and `Accept-Language` to match the exit country |
 | `session` | reattach to a stable session (`ssn_…`) or redeem a one-use token (`tk_…`) |
 
 ---
@@ -116,6 +117,16 @@ Default TTL 1 hour, max 24. HMAC-signed; no API key in the URL.
 Browserless-compatible body shapes, on `connect.runbrowser.dev`. Each one
 provisions a browser, does the work, and releases it.
 
+All four take **either** a `url` to load **or** `html` to render directly —
+one or the other, not both. `html` is what you want for documents you
+generated yourself: an invoice, a report, an OG image. Publishing a
+customer's billing details to a public URL just to turn them into a PDF is
+not a step anyone should have to take.
+
+```json
+{ "html": "<h1>Invoice INV-2026-0001</h1>…", "options": { "printBackground": true } }
+```
+
 All four accept:
 
 ```json
@@ -133,36 +144,242 @@ past consent walls and age gates in a single call.
 
 ### `POST /screenshot` → `image/png|jpeg|webp`
 
-```json
-{ "url": "…", "options": { "format": "png", "fullPage": true, "quality": 80,
-                           "selector": "#chart",
-                           "viewport": { "width": 1280, "height": 720 } } }
+Capture the rendered page — or one element of it — as an image. The response
+body is the image bytes with the matching `Content-Type`; there is no JSON
+envelope to unwrap.
+
+**Options**
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `format` | `png` \| `jpeg` \| `webp` | `png` | `Content-Type` follows this |
+| `fullPage` | boolean | `false` | The whole scrollable page, not just the viewport |
+| `selector` | string | — | Clip to the first match, even below the fold. Takes precedence over `fullPage` |
+| `quality` | 1–100 | 80 | `jpeg` and `webp` only; ignored for `png` |
+| `viewport` | `{width,height}` | 1280×720 | The emulated screen size |
+
+**Request**
+
+```bash
+curl -X POST https://connect.runbrowser.dev/screenshot \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://example.com", "options": { "fullPage": true } }' \
+  --output page.png
 ```
 
-`selector` clips the shot to the first matching element, including one below
-the fold, and takes precedence over `fullPage`. A selector that matches
-nothing returns `400` rather than quietly handing back the whole page.
-`quality` applies to `jpeg` and `webp` only.
+A `selector` that matches nothing returns `400` rather than quietly handing
+back the whole page.
 
 ### `POST /pdf` → `application/pdf`
 
-```json
-{ "url": "…", "options": { "format": "A4", "landscape": false, "printBackground": true,
-                           "marginTop": "0.4in", "marginBottom": "0.4in" } }
+Render the page to a PDF. The response body is the PDF bytes.
+
+**Options**
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `format` | `A4` \| `Letter` \| … | `Letter` | Paper size |
+| `landscape` | boolean | `false` | |
+| `printBackground` | boolean | `false` | **See the warning below** |
+| `marginTop` / `marginBottom` / `marginLeft` / `marginRight` | CSS length | `0` | e.g. `"0.4in"` |
+
+**Request**
+
+```bash
+curl -X POST https://connect.runbrowser.dev/pdf \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "html": "<h1>Invoice INV-2026-0001</h1>", "options": { "printBackground": true } }' \
+  --output invoice.pdf
 ```
+
+**Set `printBackground` unless you mean not to.** It defaults to `false`,
+matching Chrome, which means every background colour in your document is
+dropped: header blocks, table shading, status badges. You get a valid PDF
+with no error and no warning — and white text on a coloured block becomes
+white text on white. It is the most common way a generated document is
+silently wrong.
 
 ### `POST /content` → `text/html`
 
-Post-JavaScript rendered DOM.
+The page's HTML **after JavaScript has run** — `document.documentElement.outerHTML`,
+not the raw server response. Use it when you want the fully-hydrated DOM to
+parse yourself; use [`/v1/fetch`](#post-v1fetch) instead if you want it
+cleaned into markdown or text.
+
+**Request**
+
+```bash
+curl -X POST https://connect.runbrowser.dev/content \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://example.com", "waitForTimeout": 3000 }'
+```
+
+The response is the raw HTML string with `Content-Type: text/html`.
 
 ### `POST /scrape` → JSON
 
+Pull specific values out of the page by CSS selector, in one call, without
+shipping your own extraction code.
+
+**Request**
+
 ```json
-{ "url": "…", "elements": [
+{ "url": "https://example.com", "elements": [
   { "selector": "h1" },
   { "selector": "a", "result": "attr", "attribute": "href" }
 ] }
 ```
+
+`result` is `text` (default, `innerText`), `html` (`innerHTML`), or `attr`
+(the named `attribute`).
+
+**Response** — one entry per selector, each with every match:
+
+```json
+{
+  "data": [
+    { "selector": "h1", "results": ["Example Domain"] },
+    { "selector": "a", "results": ["https://www.iana.org/domains/example"] }
+  ]
+}
+```
+
+A selector that matches nothing returns an **empty** `results` array, not an
+error — a missing element is a normal result when you're scraping.
+
+### `POST /function` → JSON
+
+Run your own JavaScript against the rendered page, in one call.
+
+```json
+{ "url": "…", "code": "return { title: document.title, n: args.n * 2 }", "args": { "n": 21 } }
+```
+
+`code` is the body of an async function receiving `args`. `await` freely and
+`return` a JSON-serialisable value.
+
+The code runs **in the page**, not in a server-side Puppeteer — there is no
+`page` object and no filesystem, but there is the DOM, `fetch`, and the page's
+own session. It grants nothing you couldn't already do over CDP; it removes
+having to open and close a session to do it.
+
+Two failures are reported as `400` rather than disguised. If your code throws
+you get its message and stack back, because a stack from your own code is what
+makes it debuggable. And if you return something that cannot be JSON — a DOM
+node, a function — you get told so, rather than a `200` containing `{}`. Return
+`el.textContent`, not `el`.
+
+### `POST /export` → the resource, as-is
+
+Pull a non-HTML resource out through the browser's session: a PDF behind a
+login, an image, a CSV an application only serves to an authenticated user.
+
+```json
+{ "url": "https://example.com/private/invoice.pdf", "cookies": [ … ] }
+```
+
+The response is the file itself with its own content type — not JSON, not
+base64. The upstream status is passed through, so a `404` arrives as a `404`.
+
+It navigates to the URL's **origin** and fetches the target from inside that
+page. Navigating straight at a PDF hands it to Chrome's viewer, where there is
+no script context to read the bytes back from; from the origin the fetch is
+same-origin, carries the session, and works for any content type.
+
+### `POST /smart-scrape` → JSON
+
+Get the page without deciding first whether it needs a browser.
+
+```json
+{ "url": "…", "format": "markdown-full", "forceBrowser": false }
+```
+
+It tries `/v1/fetch` — plain HTTP, no browser, a fraction of the cost — and
+escalates to a real render only when that comes back blocked, empty, or
+client-rendered. The response tells you which path it took:
+
+```json
+{ "url": "…", "method": "http", "status": 200, "content": "…" }
+{ "url": "…", "method": "browser", "escalationReason": "thin_body_probably_js_rendered", "content": "…" }
+```
+
+`escalationReason` is worth reading rather than ignoring. `anti_bot_cloudflare`
+and `thin_body_probably_js_rendered` are different facts about a target, and
+both are worth knowing before you build a job around it. Set `forceBrowser`
+when you already know.
+
+### `POST /map` → JSON
+
+What is on this site.
+
+```json
+{ "url": "…", "limit": 500, "includeExternal": false }
+```
+
+Two sources, reported separately, because neither is sufficient alone. The
+sitemap is authoritative and often absent or stale; on-page links are always
+there and only cover one page's worth. `sources.sitemap` versus `sources.page`
+tells you which you got — a 40,000-URL sitemap and forty footer links are very
+different starting points.
+
+```json
+{ "total": 47, "sources": { "sitemap": 0, "page": 53 }, "urls": [ … ] }
+```
+
+Same-origin only unless you ask otherwise, since a crawl seeded with every
+outbound link is not a crawl of that site. Discovery runs inside the page, so
+a sitemap behind a login is readable for the same reason the page was.
+
+### `POST /crawl` → JSON
+
+Walk a site and get every page back in one call.
+
+```json
+{ "url": "…", "maxPages": 10, "maxDepth": 2, "includeExternal": false }
+```
+
+The whole walk happens **inside one browser**. The obvious alternative — a loop
+around `/content` — acquires and releases a browser per page, so a 25-page
+crawl pays 25 cold starts. Here the browser is leased once and navigated
+repeatedly, which is both cheaper and session-like: a cookie set on page one
+still applies on page twelve.
+
+It is synchronous and bounded (50 pages, depth 5, 150s), and it always tells
+you why it stopped:
+
+```json
+{ "total": 6, "stoppedBecause": "maxPages", "queuedButNotVisited": 43, "pages": [ … ] }
+```
+
+`stoppedBecause` is `exhausted`, `maxPages`, `maxDepth` or `deadline`. *"Did I
+get everything?"* is the first question worth asking of a crawl and the
+expensive one to get wrong, so it is never omitted. A page that fails to load
+is recorded with an `error` and stepped over rather than ending the run.
+
+### `POST /download` → the file, as-is
+
+Get a file a page links to, through that page's session.
+
+```json
+{ "url": "…", "selector": "a.report-download" }
+{ "url": "…", "code": "return document.querySelector('a').href" }
+```
+
+Give it a selector whose `href`/`src` points at the file, or code that computes
+the URL. The response is the bytes with their own content type, the server's
+`Content-Disposition` when it sent one, and an `X-Runbrowser-Source-Url` header
+naming what was actually fetched.
+
+Cross-origin links work: it moves to the file's origin first, and follows any
+redirect that origin performs — a link to `iana.org` that redirects to
+`www.iana.org` is fetched from where it landed rather than failing CORS.
+
+**One thing it cannot do:** a download built entirely in JavaScript, with no
+URL to point at — a blob assembled in the page — is out of reach, and you get
+a clear `404` saying so rather than an empty file.
 
 ---
 
@@ -181,10 +398,21 @@ rendering, use `/v1/extract` or a browser.
   "headers": {}, "timeoutMs": 30000, "followRedirects": true }
 ```
 
-`format` is `html` (default), `text` or `markdown`. The response carries
-the body plus block detection — `blocked`, `blockProvider`, `blockReason`
-— so an agent can tell "this page is a Cloudflare wall" from "this page is
-empty" without guessing.
+`format` is `html` (default), `text`, `markdown` or `markdown-full`.
+
+`markdown` runs Readability first: you get the main article and none of the
+site chrome, which is what you want for prose. That also means navigation
+is stripped — including pagination links — so a listing page comes back
+without the `Next` link you would need to keep crawling.
+
+`markdown-full` skips Readability and converts the whole page. Use it for
+listings, product grids, search results, and anything you intend to walk.
+
+The response carries the body plus `status`, `headers`, and block detection
+— `blocked`, `blockProvider`, `blockReason` — so an agent can tell "this
+page is a Cloudflare wall" from "this page is empty" from "this page is a
+404" without guessing. Check `status`: an error page is still a page, and
+its body reads like ordinary content.
 
 ### `POST /v1/search`
 
@@ -226,6 +454,24 @@ browser and LLM tokens.
 Returns `{data, usage, trace}`. Output is validated against your schema;
 on a mismatch we retry once with the validation errors fed back, then
 return 422 rather than handing you data that doesn't fit.
+
+**`trace.screenshot_url` is `null`, and that is deliberate.** We don't keep
+a picture of your page. Capturing one would mean loading the page a second
+time — the extraction itself works from the text — so it would cost you an
+extra page load, show you something the model never actually read, and, on
+anything dynamic, potentially show different content than what you got
+back. We'd rather not hold that, and you'd rather not pay for it.
+
+If you need to see what the extractor saw, ask for it in your schema: a
+field for the page title, a heading, the raw text of a section. That comes
+from the same content the model read, so it actually answers the question
+a screenshot only appears to.
+
+Self-hosted operators can turn capture on with
+`EXTRACT_ARTIFACTS_RETENTION_DAYS`. Retention is bounded by construction —
+there is no "keep forever" — and on object storage it is enforced as a
+bucket lifecycle rule, with capture disabling itself if the rule can't be
+installed.
 
 ### CAPTCHAs
 
@@ -462,9 +708,32 @@ Or keep the credentials out of the URL entirely by POSTing them to
 URLs are validated against SSRF (RFC1918, loopback and link-local are
 refused; http/https/socks5 only) and never logged.
 
-Managed proxy pools are designed but not built — the trigger is a
-customer saying they'd pay for it. Until then you get wholesale pricing
-from your own provider instead of our markup.
+### Managed pools
+
+Where the operator has configured them, select one by name instead of
+supplying a URL:
+
+```ts
+await chromium.connectOverCDP(
+  `https://connect.${domain}?token=${key}&proxy=residential&country=de`);
+```
+
+Credentials stay on our side. Each session gets its own sticky exit IP, so a
+multi-step flow doesn't change address halfway through — which, to the site
+you're visiting, looks like account sharing.
+
+**Asking for a country also sets the browser's timezone and
+`Accept-Language`.** That coupling is the point rather than a convenience: an
+IP in Tokyo paired with a New York clock is a contradiction any site can check
+for free, and geo-targeting that only changes the address hands over a better
+signal than it removes.
+
+A country the pool doesn't carry is refused, and the error lists what is
+available. Silently serving you from somewhere else would mean discovering the
+substitution only once your data was already wrong.
+
+Bring-your-own stays free of any markup, and remains the right choice if you
+already have wholesale pricing.
 
 ## CAPTCHAs
 
@@ -1008,7 +1277,8 @@ Locally, against the dev stack, the endpoint is `http://localhost:3000/mcp`.
 | `extract` | no | URL + JSON Schema → structured JSON. Renders the page first, so it handles JS-heavy sites. |
 | `browser_navigate` | yes | Open a URL in this session's persistent browser. |
 | `browser_click` | yes | Click the first element matching a CSS selector. |
-| `browser_type` | yes | Type into an element, optionally pressing Enter. |
+| `browser_type` | yes | Type into an element, optionally pressing Enter. Reports whether the page actually navigated. |
+| `browser_wait_for` | yes | Wait for a selector to appear, be attached, or go away. |
 | `browser_get_content` | yes | Read the current page as text or HTML. |
 | `browser_screenshot` | yes | PNG of the current page. |
 | `browser_close` | yes | Release the browser and stop the meter. |
@@ -1022,6 +1292,20 @@ Note the split inside that group: `fetch` is plain HTTP and runs no
 JavaScript, while `extract` renders the page in a real browser before
 handing it to the model. A model told otherwise will reach for `fetch` on
 a JS-heavy SPA, get an empty shell back, and conclude the site is broken.
+
+`fetch` defaults to `markdown`, which keeps the main article and drops site
+navigation. That is right for prose and wrong for crawling: a listing page
+comes back without its pagination links. Pass `format: "markdown-full"` when
+you intend to follow links.
+
+### Multi-step flows
+
+Anything that loads content asynchronously needs `browser_wait_for` between
+the action and the read — otherwise you are reading whatever happened to be
+on screen when the call landed. `browser_type` with `submit: true` tells you
+whether the page actually navigated and names the URL it reached; if it
+reports that nothing moved, the form most likely needs its submit button
+clicked instead.
 
 ## How sessions work
 
