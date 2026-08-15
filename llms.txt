@@ -14,11 +14,14 @@
 - [Screenshots & PDFs](https://runbrowser.dev/docs/guide-capture.md): Screenshots & PDFs
 - [Proxies & geo-targeting](https://runbrowser.dev/docs/guide-proxies.md): Proxies & geo-targeting
 - [Device profiles](https://runbrowser.dev/docs/guide-device-profile.md): Device profiles
+- [Getting through walls](https://runbrowser.dev/docs/guide-unblocking.md): Getting through walls
 
 ## Reference
 
 - [API reference](https://runbrowser.dev/docs/api-reference.md): Every endpoint: the CDP WebSocket, sessions, fetch, search and extract, with request and response shapes.
 - [Errors](https://runbrowser.dev/docs/errors.md): Every status code and error code the API returns, with cause, fix, and whether it is worth retrying.
+- [SDKs](https://runbrowser.dev/docs/guide-sdk.md): SDKs
+- [Integrations](https://runbrowser.dev/docs/guide-integrations.md): Integrations
 
 ## Integrations
 

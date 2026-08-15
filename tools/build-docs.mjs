@@ -41,8 +41,11 @@ const NAV = [
   ['guide-capture', 'Screenshots & PDFs'],
   ['guide-proxies', 'Proxies & geo-targeting'],
   ['guide-device-profile', 'Device profiles'],
+  ['guide-unblocking', 'Getting through walls'],
   ['api-reference', 'API reference'],
   ['errors', 'Errors'],
+  ['guide-sdk', 'SDKs'],
+  ['guide-integrations', 'Integrations'],
   ['mcp', 'MCP server'],
   ['migrating-from-browserless', 'From Browserless'],
   ['migrating-from-browserbase', 'From Browserbase'],
@@ -57,6 +60,7 @@ const GUIDES = [
   ['guide-capture', 'Screenshots & PDFs'],
   ['guide-proxies', 'Proxies & geo-targeting'],
   ['guide-device-profile', 'Device profiles'],
+  ['guide-unblocking', 'Getting through walls'],
 ]
 
 /**
@@ -345,6 +349,8 @@ function sidebarHtml(currentSlug) {
 
     <span class="nav-title nav-title-spaced">Integrations</span>
     <div class="nav-links">
+        ${link('guide-sdk', 'SDKs')}
+        ${link('guide-integrations', 'LangChain & n8n')}
         ${link('mcp', 'MCP server')}
     </div>
 

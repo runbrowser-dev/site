@@ -45,6 +45,7 @@
         <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
         <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
         <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
+        <a class="nav-link " href="/docs/guide-unblocking">Getting through walls</a>
     </div>
 
     <details class="nav-group" open>
@@ -76,6 +77,7 @@
             <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
             <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
             <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+            <a class="ep" href="/docs/api-reference#post-unblock-json"><span class="m m-post">POST</span><span class="ep-path">/unblock</span></a>
           </div>
         </div>
         <div class="nav-cat">
@@ -103,6 +105,8 @@
 
     <span class="nav-title nav-title-spaced">Integrations</span>
     <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sdk">SDKs</a>
+        <a class="nav-link " href="/docs/guide-integrations">LangChain &amp; n8n</a>
         <a class="nav-link " href="/docs/mcp">MCP server</a>
     </div>
 
@@ -489,6 +493,91 @@ redirect that origin performs — a link to <code>iana.org</code> that redirects
 <p><strong>One thing it cannot do:</strong> a download built entirely in JavaScript, with no
 URL to point at — a blob assembled in the page — is out of reach, and you get
 a clear <code>404</code> saying so rather than an empty file.</p>
+<h3 id="post-unblock-json"><code>POST /unblock</code> → JSON<a class="anchor" href="#post-unblock-json" aria-label="Link to this section">#</a></h3>
+<p>Land on a page that puts up a wall, wait out the interstitial if there is one,
+and hand back the clearance cookies.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;https://example.com&quot; }
+{ &quot;url&quot;: &quot;…&quot;, &quot;waitMs&quot;: 30000, &quot;content&quot;: true }
+{ &quot;url&quot;: &quot;…&quot;, &quot;solver&quot;: { &quot;provider&quot;: &quot;capsolver&quot;, &quot;apiKey&quot;: &quot;…&quot; } }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"https://example.com"</span> <span class="token punctuation">}</span>
+<span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"waitMs"</span><span class="token operator">:</span> <span class="token number">30000</span><span class="token punctuation">,</span> <span class="token property">"content"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span>
+<span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"solver"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"provider"</span><span class="token operator">:</span> <span class="token string">"capsolver"</span><span class="token punctuation">,</span> <span class="token property">"apiKey"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span></code></pre></div><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>waitMs</code></td>
+<td><code>20000</code></td>
+<td>How long to wait for a passive interstitial to clear (max 60s)</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td><code>false</code></td>
+<td>Include the page markup in the response</td>
+</tr>
+<tr>
+<td><code>solve</code></td>
+<td><code>true</code></td>
+<td>Set <code>false</code> for the wait only, never a solve</td>
+</tr>
+<tr>
+<td><code>solver</code></td>
+<td>—</td>
+<td>Your own solving credential; used for this call and never stored</td>
+</tr>
+</tbody></table>
+</div><p><strong>Response</strong></p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;url&quot;: &quot;https://example.com/&quot;,
+  &quot;unblocked&quot;: true,
+  &quot;challenge&quot;: { &quot;type&quot;: &quot;interstitial&quot;, &quot;provider&quot;: &quot;cloudflare&quot;,
+                 &quot;interactive&quot;: false, &quot;wall&quot;: true, &quot;solved&quot;: false, &quot;waitedMs&quot;: 4200 },
+  &quot;cookies&quot;: [ { &quot;name&quot;: &quot;cf_clearance&quot;, &quot;value&quot;: &quot;…&quot;, &quot;domain&quot;: &quot;…&quot; } ]
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"https://example.com/"</span><span class="token punctuation">,</span>
+  <span class="token property">"unblocked"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"challenge"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"interstitial"</span><span class="token punctuation">,</span> <span class="token property">"provider"</span><span class="token operator">:</span> <span class="token string">"cloudflare"</span><span class="token punctuation">,</span>
+                 <span class="token property">"interactive"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token property">"wall"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"solved"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token property">"waitedMs"</span><span class="token operator">:</span> <span class="token number">4200</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"cookies"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"cf_clearance"</span><span class="token punctuation">,</span> <span class="token property">"value"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"domain"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span> <span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre></div><p>The <code>cookies</code> are the point of the call: they come back in the same shape every
+other endpoint accepts as <code>cookies</code>, so the clearance carries straight into the
+session that does the real work.</p>
+<p><strong>It tells you which wall you hit,</strong> because the walls need different answers:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><code>type</code></th>
+<th>What it is</th>
+<th>What clears it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>interstitial</code></td>
+<td>A passive JS challenge — &quot;Just a moment…&quot;</td>
+<td>Waiting. Handled for you</td>
+</tr>
+<tr>
+<td><code>turnstile</code>, <code>recaptcha_v2</code>, <code>hcaptcha</code></td>
+<td>A question with a sitekey</td>
+<td>A solver, if you supply a key</td>
+</tr>
+<tr>
+<td><code>scoring</code></td>
+<td>reCAPTCHA v3, DataDome, PerimeterX</td>
+<td>Nothing solvable — a residential exit IP</td>
+</tr>
+</tbody></table>
+</div><p>A <code>scoring</code> result comes back in milliseconds rather than after a two-minute
+timeout, with <code>advice</code> naming the exit IP as the actual lever. That honesty is
+the feature: the alternative is billing you for a wait that was never going to
+work.</p>
+<p><strong><code>wall</code> tells you whether the widget was actually gating anything.</strong> A login
+modal on a page you can already read matches every CAPTCHA selector, so a naive
+check would tell you to spend a solve on a page that was never blocked. When
+the content is accessible you get <code>unblocked: true</code> and no solve is spent.</p>
 <hr>
 <h2 id="primitives">Primitives<a class="anchor" href="#primitives" aria-label="Link to this section">#</a></h2>
 <p>On <code>api.runbrowser.dev</code>. These are the ones that make agent loops cheap.</p>
@@ -561,10 +650,13 @@ there is no &quot;keep forever&quot; — and on object storage it is enforced as
 bucket lifecycle rule, with capture disabling itself if the rule can&#39;t be
 installed.</p>
 <h3 id="captchas">CAPTCHAs<a class="anchor" href="#captchas" aria-label="Link to this section">#</a></h3>
-<p>There is no CAPTCHA endpoint. We don&#39;t solve them on your behalf — you use
-your own solver key via the <a href="/docs/">helper</a>, which talks to
-CapSolver or 2Captcha directly from your process. See
-<a href="/docs/concepts#captchas">Concepts</a> for why.</p>
+<p><a href="#post-unblock--json"><code>/unblock</code></a> handles the wall for you, including the
+passive interstitials that need no solver at all. Where a challenge does pose a
+question, <strong>you hold the solving account</strong> — pass <code>solver.provider</code> and
+<code>solver.apiKey</code> and we orchestrate it, or keep using the
+<a href="/docs/">standalone helper</a> from your own process. Either way the
+key is yours, used for that call, and never stored. See
+<a href="/docs/concepts#captchas">Concepts</a> for why it works that way.</p>
 <hr>
 <h2 id="mcp">MCP<a class="anchor" href="#mcp" aria-label="Link to this section">#</a></h2>
 <p><code>POST https://connect.runbrowser.dev/mcp</code> — Model Context Protocol over
@@ -625,7 +717,7 @@ from both will fail to parse the error it was trying to report. See
 waiting out a cache TTL.</p>
 
     <nav class="pager">
-      <a class="prev" href="/docs/guide-device-profile"><span>Previous</span>Device profiles</a>
+      <a class="prev" href="/docs/guide-unblocking"><span>Previous</span>Getting through walls</a>
       <a class="next" href="/docs/errors"><span>Next</span>Errors</a>
     </nav>
     <hr>
@@ -655,6 +747,7 @@ waiting out a cache TTL.</p>
     <a class="toc-3" href="#post-map-json">POST /map → JSON</a>
     <a class="toc-3" href="#post-crawl-json">POST /crawl → JSON</a>
     <a class="toc-3" href="#post-download-the-file-as-is">POST /download → the file, as-is</a>
+    <a class="toc-3" href="#post-unblock-json">POST /unblock → JSON</a>
     <a class="toc-2" href="#primitives">Primitives</a>
     <a class="toc-3" href="#post-v1fetch">POST /v1/fetch</a>
     <a class="toc-3" href="#post-v1search">POST /v1/search</a>

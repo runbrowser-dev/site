@@ -381,6 +381,58 @@ redirect that origin performs — a link to `iana.org` that redirects to
 URL to point at — a blob assembled in the page — is out of reach, and you get
 a clear `404` saying so rather than an empty file.
 
+### `POST /unblock` → JSON
+
+Land on a page that puts up a wall, wait out the interstitial if there is one,
+and hand back the clearance cookies.
+
+```json
+{ "url": "https://example.com" }
+{ "url": "…", "waitMs": 30000, "content": true }
+{ "url": "…", "solver": { "provider": "capsolver", "apiKey": "…" } }
+```
+
+| Field | Default | Meaning |
+|---|---|---|
+| `waitMs` | `20000` | How long to wait for a passive interstitial to clear (max 60s) |
+| `content` | `false` | Include the page markup in the response |
+| `solve` | `true` | Set `false` for the wait only, never a solve |
+| `solver` | — | Your own solving credential; used for this call and never stored |
+
+**Response**
+
+```json
+{
+  "url": "https://example.com/",
+  "unblocked": true,
+  "challenge": { "type": "interstitial", "provider": "cloudflare",
+                 "interactive": false, "wall": true, "solved": false, "waitedMs": 4200 },
+  "cookies": [ { "name": "cf_clearance", "value": "…", "domain": "…" } ]
+}
+```
+
+The `cookies` are the point of the call: they come back in the same shape every
+other endpoint accepts as `cookies`, so the clearance carries straight into the
+session that does the real work.
+
+**It tells you which wall you hit,** because the walls need different answers:
+
+| `type` | What it is | What clears it |
+|---|---|---|
+| `interstitial` | A passive JS challenge — "Just a moment…" | Waiting. Handled for you |
+| `turnstile`, `recaptcha_v2`, `hcaptcha` | A question with a sitekey | A solver, if you supply a key |
+| `scoring` | reCAPTCHA v3, DataDome, PerimeterX | Nothing solvable — a residential exit IP |
+
+A `scoring` result comes back in milliseconds rather than after a two-minute
+timeout, with `advice` naming the exit IP as the actual lever. That honesty is
+the feature: the alternative is billing you for a wait that was never going to
+work.
+
+**`wall` tells you whether the widget was actually gating anything.** A login
+modal on a page you can already read matches every CAPTCHA selector, so a naive
+check would tell you to spend a solve on a page that was never blocked. When
+the content is accessible you get `unblocked: true` and no solve is spent.
+
 ---
 
 ## Primitives
@@ -475,10 +527,13 @@ installed.
 
 ### CAPTCHAs
 
-There is no CAPTCHA endpoint. We don't solve them on your behalf — you use
-your own solver key via the [helper](../examples/captcha/), which talks to
-CapSolver or 2Captcha directly from your process. See
-[Concepts](concepts.md#captchas) for why.
+[`/unblock`](#post-unblock--json) handles the wall for you, including the
+passive interstitials that need no solver at all. Where a challenge does pose a
+question, **you hold the solving account** — pass `solver.provider` and
+`solver.apiKey` and we orchestrate it, or keep using the
+[standalone helper](../examples/captcha/) from your own process. Either way the
+key is yours, used for that call, and never stored. See
+[Concepts](concepts.md#captchas) for why it works that way.
 
 ---
 
@@ -738,30 +793,35 @@ already have wholesale pricing.
 
 ## CAPTCHAs
 
-**We don't solve CAPTCHAs for you.** You bring your own solver key, and the
-helper in [examples/captcha](../examples/captcha/) wires it up:
+**You hold the solving account; we do the orchestration.**
+[`/unblock`](/docs/guide-unblocking) handles the wall end to end — but where a
+challenge poses an actual question, the provider credential is yours:
 
-```ts
-await solveCaptcha(page, {
-  provider: 'capsolver',            // or '2captcha'
-  apiKey: process.env.CAPSOLVER_KEY!,
-});
+```json
+{ "url": "…", "solver": { "provider": "capsolver", "apiKey": "…" } }
 ```
 
-It talks to that provider directly from your process. Your key never
-reaches us. Because it costs us nothing, it works on every tier including
-Free, and you pay wholesale (~\$0.001/solve) rather than a marked-up
-allowance — competitors bundle this at roughly \$0.02–0.05 per solve.
+The key is used for that one call, never stored and never logged. You can also
+keep driving it yourself from your own process with the
+[standalone helper](../examples/captcha/).
 
-We used to offer managed solving on our own account and removed it. Doing
-the solve ourselves and selling it as a plan feature makes us a participant
-in circumventing an access control rather than neutral infrastructure. You
-hold the provider account and make that call; we are only the browser.
+We do the hard part — detecting the widget, picking the right task type,
+delivering the token, and checking whether the page actually moved — without
+becoming the party that holds an account for answering other people's access
+controls. That split is deliberate, and it means you pay wholesale (~\$0.001
+per solve) rather than a bundled allowance marked up to \$0.02–0.05.
 
-Invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren't solvable
-by anyone. They score your session rather than posing a question. A
-residential proxy is the answer there, and both paths tell you so instead
-of timing out.
+Operators self-hosting can flip this: `CAPTCHA_SOLVER_KEY` plus
+`CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1` serves solves from a house account. It is
+off unless switched on deliberately, so the decision is always someone's
+explicit choice rather than a default.
+
+**Most walls need no solver at all.** A passive interstitial clears itself in a
+real browser given a few seconds; `/unblock` waits it out for you. And
+invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren't solvable by
+anyone, because they score your session rather than posing a question. A
+residential proxy is the answer there, and you're told so in milliseconds
+instead of timing out.
 
 ## Regions
 
@@ -1606,6 +1666,132 @@ whole site.
 
 ---
 
+# Integrations
+
+RunBrowser inside the tools you already use — agent frameworks, workflow
+automation, and MCP clients.
+
+## LangChain
+
+The tools ship inside the [SDKs](/docs/guide-sdk) rather than as separate
+packages, so there's one thing to install and one version to track. LangChain
+itself is an optional peer dependency: installing the SDK never drags an agent
+framework into a project that just wants a screenshot.
+
+```bash tab=Python
+pip install "runbrowser[langchain]"
+```
+
+```bash tab=JavaScript
+npm install runbrowser @langchain/core zod
+```
+
+```python tab=Python
+from runbrowser.langchain import get_runbrowser_tools
+from langgraph.prebuilt import create_react_agent
+
+tools = get_runbrowser_tools()          # reads RUNBROWSER_API_KEY
+agent = create_react_agent(llm, tools)
+
+agent.invoke({"messages": [("user", "What does example.com say?")]})
+```
+
+```ts tab=JavaScript
+import { getRunBrowserTools } from 'runbrowser/langchain'
+
+const tools = getRunBrowserTools()      // reads RUNBROWSER_API_KEY
+```
+
+**The tools**
+
+| Tool | What it's for |
+|---|---|
+| `browse_page` | Read a page as markdown, JavaScript rendered |
+| `extract_structured` | Get named fields as JSON matching a schema |
+| `unblock_page` | Get past a bot wall that refused a previous call |
+| `crawl_site` | Read several linked pages in one step |
+
+Pass `include=[...]` to narrow the set. Fewer, more distinct tools reliably
+improves a model's choices — if your agent only ever reads pages, give it only
+`browse_page`.
+
+### Written for the model, not the developer
+
+Two things make the difference between an agent that works and one that loops,
+and both are in the tool text rather than the API:
+
+**Each description says when to use a *different* tool.** `browse_page` tells
+the model to prefer `extract_structured` when it knows which fields it wants,
+and to reach for `unblock_page` if the page reports a wall. Tool descriptions
+are prompt text; vague ones are the main reason agents pick wrong.
+
+**Failures say what would fix them.** A model can't act on `HTTP 429`. It can
+act on this:
+
+```
+FAILED: the account is out of browser quota this month. Do not retry.
+```
+
+```
+BLOCKED by datadome: this page returned a bot wall rather than its content.
+Try the unblock_page tool on this URL.
+```
+
+```
+Still blocked (scoring, datadome). This site scores the session rather than
+posing a challenge, so no solver clears it; retry through a residential exit
+IP. This is an infrastructure limit, not something to retry — move on.
+```
+
+That last one matters most. Told the truth, an agent moves on; told "Error:
+403", it retries the same call until it runs out of steps.
+
+Page content is trimmed to 12,000 characters with the truncation stated, so one
+long page can't eat the context the model needs to reason.
+
+## n8n
+
+```
+Settings → Community Nodes → Install → n8n-nodes-runbrowser
+```
+
+Add a **RunBrowser API** credential with your key. It's tested when you save
+it, so a wrong key surfaces then rather than mid-workflow.
+
+| Operation | Returns |
+|---|---|
+| Screenshot / PDF | A real **binary attachment** |
+| Content | HTML after JavaScript runs |
+| Extract | Typed JSON matching your schema |
+| Scrape | Named elements by selector |
+| Unblock | Whether a wall cleared, plus clearance cookies |
+| Crawl / Map | Linked pages, or every URL a site links to |
+
+Screenshots and PDFs arrive as binary attachments, not base64 inside JSON, so
+**Write File**, **Send Email** and S3 uploads work directly with no Convert
+step.
+
+Two things worth knowing: **Proxy** and **Country** live under Options (setting
+a country also moves the timezone and language), and turning on **Continue On
+Fail** lets a workflow branch on a blocked page rather than dying on one bad
+URL — which matters once you're feeding it a list.
+
+## MCP
+
+For Claude and other MCP clients, the gateway *is* an MCP server — no adapter
+package. See [MCP](/docs/mcp).
+
+## Anything else
+
+Every integration here is a thin wrapper over the same
+[REST API](/docs/api-reference). If your tool speaks HTTP, it already works:
+point it at an endpoint with a bearer token. A plain HTTP call is a supported
+way to use this platform, not a workaround.
+
+See also: [SDKs](/docs/guide-sdk).
+
+---
+
 # Proxies & geo-targeting
 
 Route a session's traffic through a proxy — bring your own, or select a managed
@@ -1682,6 +1868,167 @@ presents beyond the IP, and the
 
 ---
 
+# SDKs
+
+Typed clients for TypeScript and Python. Both are thin, both are optional, and
+neither hides the browser from you.
+
+```bash tab=npm
+npm install runbrowser
+```
+
+```bash tab=pip
+pip install runbrowser
+```
+
+```ts tab=TypeScript
+import { RunBrowser } from 'runbrowser'
+
+const rb = new RunBrowser()          // reads RUNBROWSER_API_KEY
+const png = await rb.screenshot({ url: 'https://example.com' })
+```
+
+```python tab=Python
+from runbrowser import RunBrowser
+
+rb = RunBrowser()                    # reads RUNBROWSER_API_KEY
+png = rb.screenshot(url="https://example.com")
+```
+
+## What they deliberately don't do
+
+They don't wrap Playwright or Puppeteer. You already know those, and standard
+CDP is the point of the product — a client that hides it behind its own
+vocabulary would make this platform something you have to learn instead of
+something you point your existing code at.
+
+So the SDK hands you a connect URL and gets out of the way:
+
+```ts tab=TypeScript
+import { chromium } from 'playwright'
+
+const browser = await chromium.connectOverCDP(rb.connectUrl())
+// Every script you already have works unchanged from here.
+```
+
+```python tab=Python
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.connect_over_cdp(rb.connect_url())
+```
+
+Adopting RunBrowser stays a one-line change. So does leaving, which is the
+honest test of whether a client is thin.
+
+## What they're worth using for
+
+**Routing that lands in the right place.** `proxy`, `country` and `session` are
+query parameters server-side. Put them in a JSON body by hand and they are
+silently ignored — the request succeeds and simply doesn't use your proxy. The
+clients lift them into the query string for you.
+
+```ts tab=TypeScript
+await rb.screenshot({ url, proxy: 'residential', country: 'de' })
+```
+
+```python tab=Python
+rb.screenshot(url=url, proxy="residential", country="de")
+```
+
+**Sessions that stop billing.** A parked stable session keeps charging until it
+idles out. Both clients bind that to a scope:
+
+```ts tab=TypeScript
+const session = await rb.sessions.create({ keepAlive: true })
+try {
+  const browser = await chromium.connectOverCDP(session.connectUrl)
+  // Reuse the existing tab — a page you create dies with your connection.
+  const page = browser.contexts()[0].pages()[0]
+  await page.goto('https://app.example.com')
+  await browser.close()
+} finally {
+  await session.close()
+}
+```
+
+```python tab=Python
+with rb.create_session(keepAlive=True) as session:
+    ...
+# closed here, even if the block raised
+```
+
+**A connect URL that actually connects.** A stable session's URL from the API
+carries the session *id*, not a credential — handed straight to
+`connectOverCDP` it's a `401`. An ordinary session's URL carries a one-use
+token and needs nothing added. The clients handle both, so the distinction
+never reaches your code.
+
+**Errors you can branch on.** The status and the server's own error code
+survive, because the difference between `429` and `422` is the difference
+between waiting and fixing your schema.
+
+```ts tab=TypeScript
+try {
+  await rb.extract({ url, schema })
+} catch (err) {
+  if (err instanceof RunBrowserError && err.retryable) await backoff()
+}
+```
+
+```python tab=Python
+try:
+    rb.extract(url=url, schema=schema)
+except RunBrowserError as err:
+    if err.retryable:
+        backoff()
+```
+
+## Everything else is the REST API
+
+Every method maps to one documented endpoint, using the server's own field
+names, so the [API reference](/docs/api-reference) reads as the client's
+reference too:
+
+| Client | Endpoint |
+|---|---|
+| `screenshot` `pdf` `content` `scrape` `function` | [REST shortcuts](/docs/api-reference#rest-shortcuts) |
+| `unblock` | [`POST /unblock`](/docs/api-reference#post-unblock--json) |
+| `map` `crawl` `download` | [Crawling](/docs/guide-crawling) |
+| `fetch` `extract` | [Primitives](/docs/api-reference#primitives) |
+| `sessions.*` | [Sessions](/docs/api-reference#sessions) |
+
+If a client is ever missing something, the endpoint is right there and a plain
+HTTP call is a supported way to use this platform — not a workaround.
+
+## Self-hosted and testing
+
+```ts tab=TypeScript
+new RunBrowser({
+  apiKey: '…',
+  connectUrl: 'http://localhost:3000',
+  apiUrl: 'http://localhost:8080',
+  fetch: myInstrumentedFetch,     // proxy agent, tracing, a test double
+})
+```
+
+```python tab=Python
+RunBrowser(
+    api_key="…",
+    connect_url="http://localhost:3000",
+    api_url="http://localhost:8080",
+)
+```
+
+The TypeScript client needs Node 18+ and has no runtime dependencies. The
+Python client needs 3.9+ and uses only the standard library.
+
+See also: [Sessions](/docs/guide-sessions), [Getting through
+walls](/docs/guide-unblocking), and the
+[MCP server](/docs/mcp) if you're wiring an agent rather than writing code.
+
+---
+
 # Sessions & stable sessions
 
 A **session** is one browser, yours for as long as you're connected. Connect,
@@ -1754,9 +2101,22 @@ page = (await browser.contexts())[0].pages()[0]
 // Still logged in. Still on the same page. Still holding SPA state.
 ```
 
-`connectUrl` already carries a one-use credential, so you don't append your API
-key to it. To reconnect from somewhere that only has the id, use
-`?session=<sessionId>&token=<key>`.
+Note the two `connectUrl` shapes, because they authenticate differently:
+
+- An **ordinary** session's URL carries a one-use credential and connects on
+  its own for 60 seconds. Don't append your API key to it.
+- A **stable** session's URL carries the session *id* — an identifier, not a
+  credential, because a session you reconnect to for an hour can't be
+  expressed as one-use. Add your key: `?session=<sessionId>&token=<key>`.
+  Handed to `connectOverCDP` without it, you get a `401`.
+
+The [SDK](/docs/guide-sdk) hands you a URL that already works in both cases, so
+this distinction never reaches your code.
+
+**Reuse the existing page; don't call `newPage()`.** The example above takes
+`pages()[0]` on purpose. A page Playwright creates is closed when your
+connection drops, taking its state with it — which defeats the point. The tab
+that's already there survives.
 
 ### What survives, and what doesn't
 
@@ -1794,6 +2154,155 @@ await fetch(`https://connect.runbrowser.dev/v1/sessions/${sessionId}/close`, {
 
 See also: [the live viewer](/docs/guide-viewer) to watch a session run, and the
 [API reference](/docs/api-reference#sessions) for every session field.
+
+---
+
+# Getting through walls
+
+Some sites answer an automated request with a wall instead of the page: a
+"just a moment" interstitial, a challenge widget, or a silent block. `/unblock`
+lands on the page, waits out what waiting fixes, and hands you back the
+clearance cookies so the session that does the real work starts already
+through.
+
+```bash tab=cURL
+curl -X POST https://connect.runbrowser.dev/unblock \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://example.com" }'
+```
+
+```ts tab=TypeScript
+const res = await fetch('https://connect.runbrowser.dev/unblock', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ url: 'https://example.com' }),
+})
+const { unblocked, cookies, challenge } = await res.json()
+```
+
+## The part that isn't solving anything
+
+Most walls pose no question. A passive interstitial runs a proof-of-work in the
+page and redirects itself; a real browser passes it by waiting a few seconds.
+No solver is involved, and none would help.
+
+The reason hand-written code fails here is subtle and almost universal: people
+poll `document.readyState`, which is *already* `"complete"` on the wall they're
+looking at. The check passes instantly, the script grabs the interstitial's
+markup, and it gets parsed as though it were the content. `/unblock` waits on
+the wall actually going away instead — and that single distinction is most of
+what this endpoint is for.
+
+## It names which wall you hit
+
+The three kinds need completely different answers, so you're told which one is
+in front of you rather than being left to guess.
+
+| `type` | What it is | What actually clears it |
+|---|---|---|
+| `interstitial` | Passive JS challenge | Waiting — handled for you |
+| `turnstile`, `recaptcha_v2`, `hcaptcha` | A question, with a sitekey | A solver, if you supply a key |
+| `scoring` | reCAPTCHA v3, DataDome, PerimeterX | Nothing solvable — the exit IP |
+
+That last row is the one worth dwelling on. Invisible systems score your
+session rather than posing a challenge; there is no widget and no answer to
+submit. A solver pointed at one burns two minutes and returns nothing. We check
+for them first and come back in milliseconds:
+
+```json
+{
+  "unblocked": false,
+  "challenge": { "type": "scoring", "provider": "datadome", "interactive": false },
+  "advice": "this site scores the session rather than posing a challenge, so no solver clears it; retry through a residential exit IP"
+}
+```
+
+Being told "this won't work, here's what would" immediately beats a timeout
+that bills you for the wait.
+
+## Carrying the clearance forward
+
+The cookies come back in the same shape every other endpoint takes as
+`cookies`, because passing them on is the normal next step:
+
+```ts tab=TypeScript
+const { cookies } = await (await fetch('https://connect.runbrowser.dev/unblock', {
+  method: 'POST', headers: auth,
+  body: JSON.stringify({ url: 'https://shop.example.com' }),
+})).json()
+
+// The scrape starts already through the wall.
+const data = await fetch('https://connect.runbrowser.dev/scrape', {
+  method: 'POST', headers: auth,
+  body: JSON.stringify({
+    url: 'https://shop.example.com/products',
+    cookies,
+    elements: [{ selector: '.product' }],
+  }),
+})
+```
+
+## When a challenge does pose a question
+
+Where a widget carries a sitekey, it can be answered by a solving service — and
+**you hold that account.** Pass the credential and we do the orchestration:
+detect the widget, submit it with the right task type, wait for the token,
+deliver it to the page, and watch whether the page actually moves.
+
+```json
+{
+  "url": "https://example.com/login",
+  "solver": { "provider": "capsolver", "apiKey": "CAP-…" }
+}
+```
+
+The key is used for that one call. It is never stored, never logged, and never
+comes back in the response — only `solvedBy: "request"`, naming the source.
+
+This split is deliberate. We supply the engineering; the provider account, and
+the decision to use it on a given site, stay with you. It also means you pay
+your provider's wholesale rate (~$0.001/solve) rather than a bundled allowance
+marked up to $0.02–0.05.
+
+Operators running their own RunBrowser can set `CAPTCHA_SOLVER_KEY` with
+`CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1` to serve solves from a house account
+instead. It's off unless deliberately switched on.
+
+## A widget isn't always a wall
+
+A login modal, a comment box and a newsletter signup all match the same
+selectors as a challenge. Treating them as blocks would tell you to spend a
+solve on a page that was never blocked, so we check whether the content is
+actually gated:
+
+```json
+{
+  "unblocked": true,
+  "challenge": { "type": "recaptcha_v2", "interactive": true, "wall": false },
+  "advice": "a solvable widget is present but the page content is already accessible, so no solve was spent"
+}
+```
+
+`wall: false` means read on — the widget is there, but nothing is stopping you.
+
+## What it won't do
+
+- **Nothing here defeats an access control that's meant to hold.** A wall that
+  doesn't clear is reported as unclear, with the reason. We don't retry
+  forever, and we don't hand you an interstitial dressed up as content.
+- **The exit IP is usually the real lever.** Many sites decide at the edge,
+  before any page script runs. When that's what happened, the advice says so —
+  see [Proxies & geo-targeting](/docs/guide-proxies).
+- **Respect the site's terms.** Every session carries attribution, and
+  operators keep a kill switch, precisely so this stays infrastructure rather
+  than a way around someone's rules.
+
+See also: [Device profiles](/docs/guide-device-profile) for why a coherent
+browser hits fewer walls in the first place.
 
 ---
 
