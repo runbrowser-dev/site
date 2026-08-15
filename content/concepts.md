@@ -141,27 +141,28 @@ diagnostic pill, and `postMessage` events to the parent frame.
 Read-only in v1. Mouse and keyboard back through CDP is a v1.5 feature
 waiting on someone asking for it.
 
-## Stealth
+## Device profile
 
-Our stealth is deliberately **not** a fingerprint injector.
+More spoofing is not better, and we learned that the expensive way. An early
+attempt at a fingerprint injector — hundreds of lines cycling dozens of
+profiles — measured *worse* against real targets, not better: every extra
+value we forced was one more thing that could disagree with the others, and
+disagreement is exactly what a detector looks for.
 
-We built nine iterations of one — an 883-line JS injector, a 50-profile
-pool, a content-script extension — and measured them against both CreepJS
-and real commercial targets. CreepJS scores climbed steadily. Real-world
-outcomes got *worse*: more spoofing meant more detectable inconsistency,
-and it got us reCAPTCHA'd on Google for four consecutive iterations.
-Xvfb + headed Chromium measurably worsened Google detection too, and was
-reverted.
+So the philosophy inverted. What ships is a **coherent** device profile — one
+consistent identity where every signal agrees with every other: user agent,
+`navigator.platform`, the client-hint HTTP headers, the GPU string, the fonts,
+and the Web Worker realms most setups forget. A browser that contradicts itself
+is more conspicuous than a plain one, not less. The profile is seeded per
+session, so no two customers share a fingerprint, and stable within a session,
+because real hardware doesn't change between two reads a millisecond apart.
 
-What ships is ~60 lines of Dockerfile and launch flags: Debian-packaged
-Chromium, no JS injection, no patches. On a 16-target harness of *painful*
-pages (search results and listings, not homepages) across Cloudflare,
-PerimeterX, Akamai and DataDome: 15 of 16 open. The exception is Walmart,
-whose PerimeterX threshold for price-scraping is set lower than anyone
-else's and which never offers a challenge to solve.
+We run a weekly access-regression check against a panel of real,
+bot-protected sites so we notice if that stops holding before a customer does.
 
-If a target still blocks you, the lever is almost always a residential
-IP, not more JavaScript.
+The full picture — what's covered, and honestly what a coherent profile can't
+do — is in [Device profiles](/docs/guide-device-profile). If a target still
+blocks you, the lever is almost always a residential IP, not more JavaScript.
 
 ## Proxies
 

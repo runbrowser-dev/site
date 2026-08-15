@@ -22,7 +22,7 @@ const PUBLIC_DOCS = [
   'guide-crawling.md',
   'guide-capture.md',
   'guide-proxies.md',
-  'guide-stealth.md',
+  'guide-device-profile.md',
   'api-reference.md',
   'errors.md',
   'mcp.md',

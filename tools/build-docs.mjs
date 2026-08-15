@@ -40,7 +40,7 @@ const NAV = [
   ['guide-crawling', 'Crawling a site'],
   ['guide-capture', 'Screenshots & PDFs'],
   ['guide-proxies', 'Proxies & geo-targeting'],
-  ['guide-stealth', 'Stealth & fingerprinting'],
+  ['guide-device-profile', 'Device profiles'],
   ['api-reference', 'API reference'],
   ['errors', 'Errors'],
   ['mcp', 'MCP server'],
@@ -56,7 +56,7 @@ const GUIDES = [
   ['guide-crawling', 'Crawling a site'],
   ['guide-capture', 'Screenshots & PDFs'],
   ['guide-proxies', 'Proxies & geo-targeting'],
-  ['guide-stealth', 'Stealth & fingerprinting'],
+  ['guide-device-profile', 'Device profiles'],
 ]
 
 /**

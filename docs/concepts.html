@@ -44,7 +44,7 @@
         <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
         <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
         <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
-        <a class="nav-link " href="/docs/guide-stealth">Stealth &amp; fingerprinting</a>
+        <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
     </div>
 
     <details class="nav-group" >
@@ -289,23 +289,24 @@ controls, <code>?fit=cover|fill|contain</code> for sizing, <code>?debug=1</code>
 diagnostic pill, and <code>postMessage</code> events to the parent frame.</p>
 <p>Read-only in v1. Mouse and keyboard back through CDP is a v1.5 feature
 waiting on someone asking for it.</p>
-<h2 id="stealth">Stealth<a class="anchor" href="#stealth" aria-label="Link to this section">#</a></h2>
-<p>Our stealth is deliberately <strong>not</strong> a fingerprint injector.</p>
-<p>We built nine iterations of one — an 883-line JS injector, a 50-profile
-pool, a content-script extension — and measured them against both CreepJS
-and real commercial targets. CreepJS scores climbed steadily. Real-world
-outcomes got <em>worse</em>: more spoofing meant more detectable inconsistency,
-and it got us reCAPTCHA&#39;d on Google for four consecutive iterations.
-Xvfb + headed Chromium measurably worsened Google detection too, and was
-reverted.</p>
-<p>What ships is ~60 lines of Dockerfile and launch flags: Debian-packaged
-Chromium, no JS injection, no patches. On a 16-target harness of <em>painful</em>
-pages (search results and listings, not homepages) across Cloudflare,
-PerimeterX, Akamai and DataDome: 15 of 16 open. The exception is Walmart,
-whose PerimeterX threshold for price-scraping is set lower than anyone
-else&#39;s and which never offers a challenge to solve.</p>
-<p>If a target still blocks you, the lever is almost always a residential
-IP, not more JavaScript.</p>
+<h2 id="device-profile">Device profile<a class="anchor" href="#device-profile" aria-label="Link to this section">#</a></h2>
+<p>More spoofing is not better, and we learned that the expensive way. An early
+attempt at a fingerprint injector — hundreds of lines cycling dozens of
+profiles — measured <em>worse</em> against real targets, not better: every extra
+value we forced was one more thing that could disagree with the others, and
+disagreement is exactly what a detector looks for.</p>
+<p>So the philosophy inverted. What ships is a <strong>coherent</strong> device profile — one
+consistent identity where every signal agrees with every other: user agent,
+<code>navigator.platform</code>, the client-hint HTTP headers, the GPU string, the fonts,
+and the Web Worker realms most setups forget. A browser that contradicts itself
+is more conspicuous than a plain one, not less. The profile is seeded per
+session, so no two customers share a fingerprint, and stable within a session,
+because real hardware doesn&#39;t change between two reads a millisecond apart.</p>
+<p>We run a weekly access-regression check against a panel of real,
+bot-protected sites so we notice if that stops holding before a customer does.</p>
+<p>The full picture — what&#39;s covered, and honestly what a coherent profile can&#39;t
+do — is in <a href="/docs/guide-device-profile">Device profiles</a>. If a target still
+blocks you, the lever is almost always a residential IP, not more JavaScript.</p>
 <h2 id="proxies">Proxies<a class="anchor" href="#proxies" aria-label="Link to this section">#</a></h2>
 <p>Bring your own, per session:</p>
 <div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="await chromium.connectOverCDP(`https://connect.${domain}?token=${key}&amp;proxy=${encodeURIComponent(proxyUrl)}`);">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>domain<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">?token=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>key<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&amp;proxy=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">encodeURIComponent</span><span class="token punctuation">(</span>proxyUrl<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div><p>Or keep the credentials out of the URL entirely by POSTing them to
@@ -382,7 +383,7 @@ you should say so early.</p>
     <a class="toc-2" href="#concurrency-and-queueing">Concurrency and queueing</a>
     <a class="toc-2" href="#stable-sessions">Stable sessions</a>
     <a class="toc-2" href="#live-viewer">Live viewer</a>
-    <a class="toc-2" href="#stealth">Stealth</a>
+    <a class="toc-2" href="#device-profile">Device profile</a>
     <a class="toc-2" href="#proxies">Proxies</a>
     <a class="toc-3" href="#managed-pools">Managed pools</a>
     <a class="toc-2" href="#captchas">CAPTCHAs</a>

@@ -673,27 +673,28 @@ diagnostic pill, and `postMessage` events to the parent frame.
 Read-only in v1. Mouse and keyboard back through CDP is a v1.5 feature
 waiting on someone asking for it.
 
-## Stealth
+## Device profile
 
-Our stealth is deliberately **not** a fingerprint injector.
+More spoofing is not better, and we learned that the expensive way. An early
+attempt at a fingerprint injector — hundreds of lines cycling dozens of
+profiles — measured *worse* against real targets, not better: every extra
+value we forced was one more thing that could disagree with the others, and
+disagreement is exactly what a detector looks for.
 
-We built nine iterations of one — an 883-line JS injector, a 50-profile
-pool, a content-script extension — and measured them against both CreepJS
-and real commercial targets. CreepJS scores climbed steadily. Real-world
-outcomes got *worse*: more spoofing meant more detectable inconsistency,
-and it got us reCAPTCHA'd on Google for four consecutive iterations.
-Xvfb + headed Chromium measurably worsened Google detection too, and was
-reverted.
+So the philosophy inverted. What ships is a **coherent** device profile — one
+consistent identity where every signal agrees with every other: user agent,
+`navigator.platform`, the client-hint HTTP headers, the GPU string, the fonts,
+and the Web Worker realms most setups forget. A browser that contradicts itself
+is more conspicuous than a plain one, not less. The profile is seeded per
+session, so no two customers share a fingerprint, and stable within a session,
+because real hardware doesn't change between two reads a millisecond apart.
 
-What ships is ~60 lines of Dockerfile and launch flags: Debian-packaged
-Chromium, no JS injection, no patches. On a 16-target harness of *painful*
-pages (search results and listings, not homepages) across Cloudflare,
-PerimeterX, Akamai and DataDome: 15 of 16 open. The exception is Walmart,
-whose PerimeterX threshold for price-scraping is set lower than anyone
-else's and which never offers a challenge to solve.
+We run a weekly access-regression check against a panel of real,
+bot-protected sites so we notice if that stops holding before a customer does.
 
-If a target still blocks you, the lever is almost always a residential
-IP, not more JavaScript.
+The full picture — what's covered, and honestly what a coherent profile can't
+do — is in [Device profiles](/docs/guide-device-profile). If a target still
+blocks you, the lever is almost always a residential IP, not more JavaScript.
 
 ## Proxies
 
@@ -1395,6 +1396,101 @@ the reference for [`/smart-scrape`](/docs/api-reference#post-smart-scrape-json),
 
 ---
 
+# Device profiles
+
+Every browser we hand you presents as a real, consistent device — a user
+agent, platform, GPU, fonts, timezone and hardware signals that all agree with
+each other, the way a genuine machine does. There's nothing to switch on; it's
+the default.
+
+This matters for one practical reason. Legitimate automation gets misclassified
+when its browser looks like a bare headless server in a datacenter: your uptime
+monitor, your integration tests, your price checks, your own site's
+accessibility crawl all get wrongly blocked or quietly served degraded content.
+A coherent profile is about your work not being mistaken for something it isn't
+— reliability, not disguise.
+
+## Why a profile has to be *coherent*, not just present
+
+Most setups change the user agent and stop there. The trouble is that a modern
+site doesn't read one value — it cross-checks several, and inconsistency between
+any two is the cheapest possible signal that something is off. A browser
+claiming one operating system in its user agent while its platform, GPU string
+and HTTP headers say another isn't a better disguise than a plain headless
+browser; it's a worse one, because now it looks like a machine actively
+misrepresenting itself.
+
+So the whole profile agrees with itself, in the places that are easy to forget:
+
+- **Across HTTP and JavaScript.** The client-hint request headers
+  (`sec-ch-ua`, `sec-ch-ua-platform`) are corrected at the network layer, so
+  what the server sees in the headers matches what a script reads from
+  `navigator`. These headers are emitted below the page — no amount of
+  in-page JavaScript reaches them — so a profile that only patches `navigator`
+  disagrees with its own request headers.
+- **Inside Web Workers.** A single `new Worker()` opens a fresh realm that
+  page-level patches never touch, and a worker's `navigator` and `OffscreenCanvas`
+  report the raw host. It's the most common place a profile leaks — and the
+  profile is carried into worker realms so it doesn't.
+- **In the GPU string, the fonts, the screen, the media devices.** A window
+  larger than its screen, or a desktop with no audio device, is a contradiction
+  on its own. Each of those is made consistent.
+
+## Stable per session, unique per customer
+
+Two properties that are easy to get backwards, and that we get right:
+
+**Stable, not shimmering.** A real machine produces the *same* canvas and audio
+fingerprint every time you read it. A profile that randomises on every read is,
+paradoxically, easier to flag — nothing real changes between two reads a
+millisecond apart. Ours is fixed for the life of a session, so it reads as one
+consistent device.
+
+**Unique per session.** That fixed identity is seeded per browser, so no two of
+our customers share a fingerprint. This is a fairness and reliability property
+as much as anything: your sessions aren't clustered with a stranger's, and one
+account behaving badly can't get an identity *you* depend on flagged. It's the
+fingerprint equivalent of not sharing an IP.
+
+## Locale that matches the exit
+
+When you select a [proxy country](/docs/guide-proxies), the browser's timezone
+and `Accept-Language` follow the exit IP. A connection leaving Germany while the
+clock says New York is exactly the kind of internal contradiction the rest of
+the profile works to avoid, so the locale moves with the address automatically.
+
+## Where the honesty lives
+
+A coherent profile makes a real browser look like a real browser. It is not,
+and we don't market it as, a way around the things that are meant to stop you:
+
+- **A CAPTCHA still needs solving.** A challenge you're explicitly asked to
+  complete is a different problem from looking like a genuine browser. Solving
+  is bring-your-own solver key — see [CAPTCHAs](/docs/concepts#captchas).
+- **IP reputation is separate.** Many sites decide at the edge, on the address,
+  before any page script runs. That's a [proxy](/docs/guide-proxies) question,
+  not a profile one.
+- **A site's terms still apply.** We provide per-session attribution and an
+  operator kill switch precisely so the platform stays a good citizen; respect
+  `robots.txt` and the terms of the sites you visit.
+
+And we don't hand you a bot wall dressed up as content. `/v1/fetch` and
+`/smart-scrape` tell you when a page is a challenge rather than the data you
+asked for, so you can react instead of parsing an interstitial as if it were
+real:
+
+```json
+{ "status": 403, "blocked": true, "blockProvider": "cloudflare", "body": "…" }
+```
+
+That's the point of the whole thing: a browser that behaves like a real one, and
+tells you the truth when a site pushes back.
+
+See also: [Proxies & geo-targeting](/docs/guide-proxies) for the address half of
+the problem, which is usually the half that actually decides access.
+
+---
+
 # Structured extraction
 
 Give `/v1/extract` a URL and a JSON Schema; get back JSON that matches the
@@ -1580,7 +1676,7 @@ wrong region.
 - **Managed pool** — you want geo-targeting without sourcing IPs, and you want
   the locale kept coherent automatically.
 
-See also: [Stealth & fingerprinting](/docs/guide-stealth) for what the browser
+See also: [Device profiles](/docs/guide-device-profile) for what the browser
 presents beyond the IP, and the
 [proxy query params](/docs/api-reference#connecting-a-browser).
 
@@ -1698,65 +1794,6 @@ await fetch(`https://connect.runbrowser.dev/v1/sessions/${sessionId}/close`, {
 
 See also: [the live viewer](/docs/guide-viewer) to watch a session run, and the
 [API reference](/docs/api-reference#sessions) for every session field.
-
----
-
-# Stealth & fingerprinting
-
-Every browser we hand you already carries a coherent device profile — a
-consistent, per-session identity rather than the obvious tells of a headless
-Chromium in a datacenter. There's nothing to turn on; it's the default.
-
-This page is about what that means, and — just as importantly — what it
-doesn't, so you can set expectations before you point it at a hard target.
-
-## What's handled for you
-
-- **No automation tells.** `navigator.webdriver` is false, the plugin and
-  language sets look real, `window.chrome` is present. The launch never passes
-  `--enable-automation`.
-- **A coherent OS persona.** The user agent, `navigator.platform`, the
-  client-hint headers, the WebGL renderer string and the worker-thread realm all
-  agree with each other. A mismatch between any two of those is the cheapest
-  possible bot check, and this closes them.
-- **Per-tenant isolation.** The canvas and audio fingerprints are seeded per
-  container, so no two customers share one identity. One abusive user can't get
-  the whole fleet blocked — and your sessions aren't clustered with anyone
-  else's.
-- **Coherent locale.** When you select a [proxy country](/docs/guide-proxies),
-  the timezone and `Accept-Language` move with the exit IP.
-
-## What it is not
-
-We flag bot walls; we don't pretend they aren't there, and we don't sell
-guaranteed evasion.
-
-- **A page behind a CAPTCHA still needs solving.** Fingerprint quality gets you
-  past *detection*; it does nothing about a challenge you're explicitly asked to
-  complete. See [CAPTCHAs](/docs/concepts#captchas) — solving is bring-your-own
-  solver key, at your provider's wholesale price.
-- **IP reputation is separate.** Many sites decide at the edge, on the address,
-  before a line of JavaScript runs. No amount of fingerprint work changes that —
-  [a proxy](/docs/guide-proxies) does.
-- **The GPU is real software rendering.** The reported strings are coherent, but
-  a timing or behavioural WebGL probe can still tell it's not a discrete GPU.
-
-## Knowing when you're blocked
-
-The primitives don't hand you a bot wall dressed up as content. `/v1/fetch` and
-`/smart-scrape` return a block signal so you can react instead of parsing a
-CAPTCHA page as if it were data.
-
-```json
-// A blocked fetch reports it rather than returning the wall as the body.
-{ "status": 403, "blocked": true, "blockProvider": "cloudflare", "body": "…" }
-```
-
-That honesty is the point: you find out a target is defended in the response,
-not three steps later when your extracted "data" turns out to be an interstitial.
-
-See also: [Proxies & geo-targeting](/docs/guide-proxies) for the IP half of the
-problem, which is usually the half that matters.
 
 ---
 
