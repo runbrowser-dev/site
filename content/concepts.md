@@ -206,30 +206,35 @@ already have wholesale pricing.
 
 ## CAPTCHAs
 
-**We don't solve CAPTCHAs for you.** You bring your own solver key, and the
-helper in [examples/captcha](../examples/captcha/) wires it up:
+**You hold the solving account; we do the orchestration.**
+[`/unblock`](/docs/guide-unblocking) handles the wall end to end — but where a
+challenge poses an actual question, the provider credential is yours:
 
-```ts
-await solveCaptcha(page, {
-  provider: 'capsolver',            // or '2captcha'
-  apiKey: process.env.CAPSOLVER_KEY!,
-});
+```json
+{ "url": "…", "solver": { "provider": "capsolver", "apiKey": "…" } }
 ```
 
-It talks to that provider directly from your process. Your key never
-reaches us. Because it costs us nothing, it works on every tier including
-Free, and you pay wholesale (~\$0.001/solve) rather than a marked-up
-allowance — competitors bundle this at roughly \$0.02–0.05 per solve.
+The key is used for that one call, never stored and never logged. You can also
+keep driving it yourself from your own process with the
+[standalone helper](../examples/captcha/).
 
-We used to offer managed solving on our own account and removed it. Doing
-the solve ourselves and selling it as a plan feature makes us a participant
-in circumventing an access control rather than neutral infrastructure. You
-hold the provider account and make that call; we are only the browser.
+We do the hard part — detecting the widget, picking the right task type,
+delivering the token, and checking whether the page actually moved — without
+becoming the party that holds an account for answering other people's access
+controls. That split is deliberate, and it means you pay wholesale (~\$0.001
+per solve) rather than a bundled allowance marked up to \$0.02–0.05.
 
-Invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren't solvable
-by anyone. They score your session rather than posing a question. A
-residential proxy is the answer there, and both paths tell you so instead
-of timing out.
+Operators self-hosting can flip this: `CAPTCHA_SOLVER_KEY` plus
+`CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1` serves solves from a house account. It is
+off unless switched on deliberately, so the decision is always someone's
+explicit choice rather than a default.
+
+**Most walls need no solver at all.** A passive interstitial clears itself in a
+real browser given a few seconds; `/unblock` waits it out for you. And
+invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren't solvable by
+anyone, because they score your session rather than posing a question. A
+residential proxy is the answer there, and you're told so in milliseconds
+instead of timing out.
 
 ## Regions
 

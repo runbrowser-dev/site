@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting through walls — runbrowser docs</title>
+<meta name="description" content="Some sites answer an automated request with a wall instead of the page: a &quot;just a moment&quot; interstitial, a challenge widget, or a silent block. `/unblock` l">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
+  </a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
+</header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Get started</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/quickstart">Quickstart</a>
+        <a class="nav-link " href="/docs/concepts">Concepts</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
+        <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
+        <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
+        <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
+        <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
+        <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
+        <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
+        <a class="nav-link active" href="/docs/guide-unblocking">Getting through walls</a>
+    </div>
+
+    <details class="nav-group" >
+      <summary class="nav-title nav-title-spaced">API reference</summary>
+      <div class="nav-api">
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#connecting-a-browser">Connecting a browser</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#sessions">Sessions</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#rest-shortcuts">REST shortcuts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-screenshot-imagepngjpegwebp"><span class="m m-post">POST</span><span class="ep-path">/screenshot</span></a>
+            <a class="ep" href="/docs/api-reference#post-pdf-applicationpdf"><span class="m m-post">POST</span><span class="ep-path">/pdf</span></a>
+            <a class="ep" href="/docs/api-reference#post-content-texthtml"><span class="m m-post">POST</span><span class="ep-path">/content</span></a>
+            <a class="ep" href="/docs/api-reference#post-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-function-json"><span class="m m-post">POST</span><span class="ep-path">/function</span></a>
+            <a class="ep" href="/docs/api-reference#post-export-the-resource-as-is"><span class="m m-post">POST</span><span class="ep-path">/export</span></a>
+            <a class="ep" href="/docs/api-reference#post-smart-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/smart-scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
+            <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
+            <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+            <a class="ep" href="/docs/api-reference#post-unblock-json"><span class="m m-post">POST</span><span class="ep-path">/unblock</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#mcp">MCP</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#metrics">Metrics</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#errors">Errors</a>
+          
+        </div>
+      </div>
+    </details>
+
+    <span class="nav-title nav-title-spaced">Integrations</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sdk">SDKs</a>
+        <a class="nav-link " href="/docs/guide-integrations">LangChain &amp; n8n</a>
+        <a class="nav-link " href="/docs/mcp">MCP server</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Migrating</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/errors">Errors</a>
+        <a class="nav-link" href="/#pricing">Pricing</a>
+        <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
+  </nav>
+  <main class="prose">
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Getting through walls</span></div>
+<h1 id="getting-through-walls">Getting through walls</h1>
+<p>Some sites answer an automated request with a wall instead of the page: a
+&quot;just a moment&quot; interstitial, a challenge widget, or a silent block. <code>/unblock</code>
+lands on the page, waits out what waiting fixes, and hands you back the
+clearance cookies so the session that does the real work starts already
+through.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="cURL">cURL</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button></div><button class="copy tabs-copy" type="button" data-code="curl -X POST https://connect.runbrowser.dev/unblock \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{ &quot;url&quot;: &quot;https://example.com&quot; }'">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="cURL" data-code="curl -X POST https://connect.runbrowser.dev/unblock \
+  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{ &quot;url&quot;: &quot;https://example.com&quot; }'"><span class="code-lang panel-lang">cURL</span><pre class="language-bash"><code><span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://connect.runbrowser.dev/unblock <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Content-Type: application/json"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{ "url": "https://example.com" }'</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="const res = await fetch('https://connect.runbrowser.dev/unblock', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ url: 'https://example.com' }),
+})
+const { unblocked, cookies, challenge } = await res.json()"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">'https://connect.runbrowser.dev/unblock'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
+  headers<span class="token operator">:</span> <span class="token punctuation">{</span>
+    Authorization<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Bearer </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+    <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json'</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token operator">:</span> <span class="token string">'https://example.com'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> unblocked<span class="token punctuation">,</span> cookies<span class="token punctuation">,</span> challenge <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre></div></div><h2 id="the-part-that-isnt-solving-anything">The part that isn&#39;t solving anything<a class="anchor" href="#the-part-that-isnt-solving-anything" aria-label="Link to this section">#</a></h2>
+<p>Most walls pose no question. A passive interstitial runs a proof-of-work in the
+page and redirects itself; a real browser passes it by waiting a few seconds.
+No solver is involved, and none would help.</p>
+<p>The reason hand-written code fails here is subtle and almost universal: people
+poll <code>document.readyState</code>, which is <em>already</em> <code>&quot;complete&quot;</code> on the wall they&#39;re
+looking at. The check passes instantly, the script grabs the interstitial&#39;s
+markup, and it gets parsed as though it were the content. <code>/unblock</code> waits on
+the wall actually going away instead — and that single distinction is most of
+what this endpoint is for.</p>
+<h2 id="it-names-which-wall-you-hit">It names which wall you hit<a class="anchor" href="#it-names-which-wall-you-hit" aria-label="Link to this section">#</a></h2>
+<p>The three kinds need completely different answers, so you&#39;re told which one is
+in front of you rather than being left to guess.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><code>type</code></th>
+<th>What it is</th>
+<th>What actually clears it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>interstitial</code></td>
+<td>Passive JS challenge</td>
+<td>Waiting — handled for you</td>
+</tr>
+<tr>
+<td><code>turnstile</code>, <code>recaptcha_v2</code>, <code>hcaptcha</code></td>
+<td>A question, with a sitekey</td>
+<td>A solver, if you supply a key</td>
+</tr>
+<tr>
+<td><code>scoring</code></td>
+<td>reCAPTCHA v3, DataDome, PerimeterX</td>
+<td>Nothing solvable — the exit IP</td>
+</tr>
+</tbody></table>
+</div><p>That last row is the one worth dwelling on. Invisible systems score your
+session rather than posing a challenge; there is no widget and no answer to
+submit. A solver pointed at one burns two minutes and returns nothing. We check
+for them first and come back in milliseconds:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;unblocked&quot;: false,
+  &quot;challenge&quot;: { &quot;type&quot;: &quot;scoring&quot;, &quot;provider&quot;: &quot;datadome&quot;, &quot;interactive&quot;: false },
+  &quot;advice&quot;: &quot;this site scores the session rather than posing a challenge, so no solver clears it; retry through a residential exit IP&quot;
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"unblocked"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token property">"challenge"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"scoring"</span><span class="token punctuation">,</span> <span class="token property">"provider"</span><span class="token operator">:</span> <span class="token string">"datadome"</span><span class="token punctuation">,</span> <span class="token property">"interactive"</span><span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"advice"</span><span class="token operator">:</span> <span class="token string">"this site scores the session rather than posing a challenge, so no solver clears it; retry through a residential exit IP"</span>
+<span class="token punctuation">}</span></code></pre></div><p>Being told &quot;this won&#39;t work, here&#39;s what would&quot; immediately beats a timeout
+that bills you for the wait.</p>
+<h2 id="carrying-the-clearance-forward">Carrying the clearance forward<a class="anchor" href="#carrying-the-clearance-forward" aria-label="Link to this section">#</a></h2>
+<p>The cookies come back in the same shape every other endpoint takes as
+<code>cookies</code>, because passing them on is the normal next step:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="const { cookies } = await (await fetch('https://connect.runbrowser.dev/unblock', {
+  method: 'POST', headers: auth,
+  body: JSON.stringify({ url: 'https://shop.example.com' }),
+})).json()
+
+// The scrape starts already through the wall.
+const data = await fetch('https://connect.runbrowser.dev/scrape', {
+  method: 'POST', headers: auth,
+  body: JSON.stringify({
+    url: 'https://shop.example.com/products',
+    cookies,
+    elements: [{ selector: '.product' }],
+  }),
+})">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">const</span> <span class="token punctuation">{</span> cookies <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">'https://connect.runbrowser.dev/unblock'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span> headers<span class="token operator">:</span> auth<span class="token punctuation">,</span>
+  body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token operator">:</span> <span class="token string">'https://shop.example.com'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// The scrape starts already through the wall.</span>
+<span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">'https://connect.runbrowser.dev/scrape'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span> headers<span class="token operator">:</span> auth<span class="token punctuation">,</span>
+  body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    url<span class="token operator">:</span> <span class="token string">'https://shop.example.com/products'</span><span class="token punctuation">,</span>
+    cookies<span class="token punctuation">,</span>
+    elements<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> selector<span class="token operator">:</span> <span class="token string">'.product'</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div><h2 id="when-a-challenge-does-pose-a-question">When a challenge does pose a question<a class="anchor" href="#when-a-challenge-does-pose-a-question" aria-label="Link to this section">#</a></h2>
+<p>Where a widget carries a sitekey, it can be answered by a solving service — and
+<strong>you hold that account.</strong> Pass the credential and we do the orchestration:
+detect the widget, submit it with the right task type, wait for the token,
+deliver it to the page, and watch whether the page actually moves.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;url&quot;: &quot;https://example.com/login&quot;,
+  &quot;solver&quot;: { &quot;provider&quot;: &quot;capsolver&quot;, &quot;apiKey&quot;: &quot;CAP-…&quot; }
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"https://example.com/login"</span><span class="token punctuation">,</span>
+  <span class="token property">"solver"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"provider"</span><span class="token operator">:</span> <span class="token string">"capsolver"</span><span class="token punctuation">,</span> <span class="token property">"apiKey"</span><span class="token operator">:</span> <span class="token string">"CAP-…"</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre></div><p>The key is used for that one call. It is never stored, never logged, and never
+comes back in the response — only <code>solvedBy: &quot;request&quot;</code>, naming the source.</p>
+<p>This split is deliberate. We supply the engineering; the provider account, and
+the decision to use it on a given site, stay with you. It also means you pay
+your provider&#39;s wholesale rate (~$0.001/solve) rather than a bundled allowance
+marked up to $0.02–0.05.</p>
+<p>Operators running their own RunBrowser can set <code>CAPTCHA_SOLVER_KEY</code> with
+<code>CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1</code> to serve solves from a house account
+instead. It&#39;s off unless deliberately switched on.</p>
+<h2 id="a-widget-isnt-always-a-wall">A widget isn&#39;t always a wall<a class="anchor" href="#a-widget-isnt-always-a-wall" aria-label="Link to this section">#</a></h2>
+<p>A login modal, a comment box and a newsletter signup all match the same
+selectors as a challenge. Treating them as blocks would tell you to spend a
+solve on a page that was never blocked, so we check whether the content is
+actually gated:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;unblocked&quot;: true,
+  &quot;challenge&quot;: { &quot;type&quot;: &quot;recaptcha_v2&quot;, &quot;interactive&quot;: true, &quot;wall&quot;: false },
+  &quot;advice&quot;: &quot;a solvable widget is present but the page content is already accessible, so no solve was spent&quot;
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"unblocked"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"challenge"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"recaptcha_v2"</span><span class="token punctuation">,</span> <span class="token property">"interactive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"wall"</span><span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"advice"</span><span class="token operator">:</span> <span class="token string">"a solvable widget is present but the page content is already accessible, so no solve was spent"</span>
+<span class="token punctuation">}</span></code></pre></div><p><code>wall: false</code> means read on — the widget is there, but nothing is stopping you.</p>
+<h2 id="what-it-wont-do">What it won&#39;t do<a class="anchor" href="#what-it-wont-do" aria-label="Link to this section">#</a></h2>
+<ul>
+<li><strong>Nothing here defeats an access control that&#39;s meant to hold.</strong> A wall that
+doesn&#39;t clear is reported as unclear, with the reason. We don&#39;t retry
+forever, and we don&#39;t hand you an interstitial dressed up as content.</li>
+<li><strong>The exit IP is usually the real lever.</strong> Many sites decide at the edge,
+before any page script runs. When that&#39;s what happened, the advice says so —
+see <a href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>.</li>
+<li><strong>Respect the site&#39;s terms.</strong> Every session carries attribution, and
+operators keep a kill switch, precisely so this stays infrastructure rather
+than a way around someone&#39;s rules.</li>
+</ul>
+<p>See also: <a href="/docs/guide-device-profile">Device profiles</a> for why a coherent
+browser hits fewer walls in the first place.</p>
+
+    <nav class="pager">
+      <a class="prev" href="/docs/guide-device-profile"><span>Previous</span>Device profiles</a>
+      <a class="next" href="/docs/api-reference"><span>Next</span>API reference</a>
+    </nav>
+    <hr>
+    <p class="foot">
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Getting%20through%20walls">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+    <p class="updated">Last updated 2026-08-15</p>
+  </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#the-part-that-isnt-solving-anything">The part that isn't solving anything</a>
+    <a class="toc-2" href="#it-names-which-wall-you-hit">It names which wall you hit</a>
+    <a class="toc-2" href="#carrying-the-clearance-forward">Carrying the clearance forward</a>
+    <a class="toc-2" href="#when-a-challenge-does-pose-a-question">When a challenge does pose a question</a>
+    <a class="toc-2" href="#a-widget-isnt-always-a-wall">A widget isn't always a wall</a>
+    <a class="toc-2" href="#what-it-wont-do">What it won't do</a>
+  </aside>
+</div>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>

@@ -45,6 +45,7 @@
         <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
         <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
         <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
+        <a class="nav-link " href="/docs/guide-unblocking">Getting through walls</a>
     </div>
 
     <details class="nav-group" >
@@ -76,6 +77,7 @@
             <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
             <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
             <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+            <a class="ep" href="/docs/api-reference#post-unblock-json"><span class="m m-post">POST</span><span class="ep-path">/unblock</span></a>
           </div>
         </div>
         <div class="nav-cat">
@@ -103,6 +105,8 @@
 
     <span class="nav-title nav-title-spaced">Integrations</span>
     <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sdk">SDKs</a>
+        <a class="nav-link " href="/docs/guide-integrations">LangChain &amp; n8n</a>
         <a class="nav-link " href="/docs/mcp">MCP server</a>
     </div>
 
@@ -332,26 +336,27 @@ substitution only once your data was already wrong.</p>
 <p>Bring-your-own stays free of any markup, and remains the right choice if you
 already have wholesale pricing.</p>
 <h2 id="captchas">CAPTCHAs<a class="anchor" href="#captchas" aria-label="Link to this section">#</a></h2>
-<p><strong>We don&#39;t solve CAPTCHAs for you.</strong> You bring your own solver key, and the
-helper in <a href="/docs/">examples/captcha</a> wires it up:</p>
-<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="await solveCaptcha(page, {
-  provider: 'capsolver',            // or '2captcha'
-  apiKey: process.env.CAPSOLVER_KEY!,
-});">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">await</span> <span class="token function">solveCaptcha</span><span class="token punctuation">(</span>page<span class="token punctuation">,</span> <span class="token punctuation">{</span>
-  provider<span class="token operator">:</span> <span class="token string">'capsolver'</span><span class="token punctuation">,</span>            <span class="token comment">// or '2captcha'</span>
-  apiKey<span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CAPSOLVER_KEY</span><span class="token operator">!</span><span class="token punctuation">,</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div><p>It talks to that provider directly from your process. Your key never
-reaches us. Because it costs us nothing, it works on every tier including
-Free, and you pay wholesale (~$0.001/solve) rather than a marked-up
-allowance — competitors bundle this at roughly $0.02–0.05 per solve.</p>
-<p>We used to offer managed solving on our own account and removed it. Doing
-the solve ourselves and selling it as a plan feature makes us a participant
-in circumventing an access control rather than neutral infrastructure. You
-hold the provider account and make that call; we are only the browser.</p>
-<p>Invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren&#39;t solvable
-by anyone. They score your session rather than posing a question. A
-residential proxy is the answer there, and both paths tell you so instead
-of timing out.</p>
+<p><strong>You hold the solving account; we do the orchestration.</strong>
+<a href="/docs/guide-unblocking"><code>/unblock</code></a> handles the wall end to end — but where a
+challenge poses an actual question, the provider credential is yours:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;…&quot;, &quot;solver&quot;: { &quot;provider&quot;: &quot;capsolver&quot;, &quot;apiKey&quot;: &quot;…&quot; } }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"solver"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"provider"</span><span class="token operator">:</span> <span class="token string">"capsolver"</span><span class="token punctuation">,</span> <span class="token property">"apiKey"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span></code></pre></div><p>The key is used for that one call, never stored and never logged. You can also
+keep driving it yourself from your own process with the
+<a href="/docs/">standalone helper</a>.</p>
+<p>We do the hard part — detecting the widget, picking the right task type,
+delivering the token, and checking whether the page actually moved — without
+becoming the party that holds an account for answering other people&#39;s access
+controls. That split is deliberate, and it means you pay wholesale (~$0.001
+per solve) rather than a bundled allowance marked up to $0.02–0.05.</p>
+<p>Operators self-hosting can flip this: <code>CAPTCHA_SOLVER_KEY</code> plus
+<code>CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1</code> serves solves from a house account. It is
+off unless switched on deliberately, so the decision is always someone&#39;s
+explicit choice rather than a default.</p>
+<p><strong>Most walls need no solver at all.</strong> A passive interstitial clears itself in a
+real browser given a few seconds; <code>/unblock</code> waits it out for you. And
+invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren&#39;t solvable by
+anyone, because they score your session rather than posing a question. A
+residential proxy is the answer there, and you&#39;re told so in milliseconds
+instead of timing out.</p>
 <h2 id="regions">Regions<a class="anchor" href="#regions" aria-label="Link to this section">#</a></h2>
 <p><strong>One region: the EU.</strong> Every browser, and every byte of session data, stays
 inside the European Union.</p>

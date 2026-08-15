@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrations — runbrowser docs</title>
+<meta name="description" content="RunBrowser inside the tools you already use — agent frameworks, workflow automation, and MCP clients.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
+  </a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
+</header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Get started</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/quickstart">Quickstart</a>
+        <a class="nav-link " href="/docs/concepts">Concepts</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
+        <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
+        <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
+        <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
+        <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
+        <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
+        <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
+        <a class="nav-link " href="/docs/guide-unblocking">Getting through walls</a>
+    </div>
+
+    <details class="nav-group" >
+      <summary class="nav-title nav-title-spaced">API reference</summary>
+      <div class="nav-api">
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#connecting-a-browser">Connecting a browser</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#sessions">Sessions</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#rest-shortcuts">REST shortcuts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-screenshot-imagepngjpegwebp"><span class="m m-post">POST</span><span class="ep-path">/screenshot</span></a>
+            <a class="ep" href="/docs/api-reference#post-pdf-applicationpdf"><span class="m m-post">POST</span><span class="ep-path">/pdf</span></a>
+            <a class="ep" href="/docs/api-reference#post-content-texthtml"><span class="m m-post">POST</span><span class="ep-path">/content</span></a>
+            <a class="ep" href="/docs/api-reference#post-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-function-json"><span class="m m-post">POST</span><span class="ep-path">/function</span></a>
+            <a class="ep" href="/docs/api-reference#post-export-the-resource-as-is"><span class="m m-post">POST</span><span class="ep-path">/export</span></a>
+            <a class="ep" href="/docs/api-reference#post-smart-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/smart-scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
+            <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
+            <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+            <a class="ep" href="/docs/api-reference#post-unblock-json"><span class="m m-post">POST</span><span class="ep-path">/unblock</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#mcp">MCP</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#metrics">Metrics</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#errors">Errors</a>
+          
+        </div>
+      </div>
+    </details>
+
+    <span class="nav-title nav-title-spaced">Integrations</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sdk">SDKs</a>
+        <a class="nav-link active" href="/docs/guide-integrations">LangChain &amp; n8n</a>
+        <a class="nav-link " href="/docs/mcp">MCP server</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Migrating</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/errors">Errors</a>
+        <a class="nav-link" href="/#pricing">Pricing</a>
+        <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
+  </nav>
+  <main class="prose">
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Integrations</span></div>
+<h1 id="integrations">Integrations</h1>
+<p>RunBrowser inside the tools you already use — agent frameworks, workflow
+automation, and MCP clients.</p>
+<h2 id="langchain">LangChain<a class="anchor" href="#langchain" aria-label="Link to this section">#</a></h2>
+<p>The tools ship inside the <a href="/docs/guide-sdk">SDKs</a> rather than as separate
+packages, so there&#39;s one thing to install and one version to track. LangChain
+itself is an optional peer dependency: installing the SDK never drags an agent
+framework into a project that just wants a screenshot.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="JavaScript">JavaScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="JavaScript">JavaScript</button></div><button class="copy tabs-copy" type="button" data-code="pip install &quot;runbrowser[langchain]&quot;">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="pip install &quot;runbrowser[langchain]&quot;"><span class="code-lang panel-lang">Python</span><pre class="language-bash"><code>pip <span class="token function">install</span> <span class="token string">"runbrowser[langchain]"</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="JavaScript" data-code="npm install runbrowser @langchain/core zod"><span class="code-lang panel-lang">JavaScript</span><pre class="language-bash"><code><span class="token function">npm</span> <span class="token function">install</span> runbrowser @langchain/core zod</code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="from runbrowser.langchain import get_runbrowser_tools
+from langgraph.prebuilt import create_react_agent
+
+tools = get_runbrowser_tools()          # reads RUNBROWSER_API_KEY
+agent = create_react_agent(llm, tools)
+
+agent.invoke({&quot;messages&quot;: [(&quot;user&quot;, &quot;What does example.com say?&quot;)]})"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">from</span> runbrowser<span class="token punctuation">.</span>langchain <span class="token keyword">import</span> get_runbrowser_tools
+<span class="token keyword">from</span> langgraph<span class="token punctuation">.</span>prebuilt <span class="token keyword">import</span> create_react_agent
+
+tools <span class="token operator">=</span> get_runbrowser_tools<span class="token punctuation">(</span><span class="token punctuation">)</span>          <span class="token comment"># reads RUNBROWSER_API_KEY</span>
+agent <span class="token operator">=</span> create_react_agent<span class="token punctuation">(</span>llm<span class="token punctuation">,</span> tools<span class="token punctuation">)</span>
+
+agent<span class="token punctuation">.</span>invoke<span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token string">"messages"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">(</span><span class="token string">"user"</span><span class="token punctuation">,</span> <span class="token string">"What does example.com say?"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="JavaScript" data-code="import { getRunBrowserTools } from 'runbrowser/langchain'
+
+const tools = getRunBrowserTools()      // reads RUNBROWSER_API_KEY"><span class="code-lang panel-lang">JavaScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> getRunBrowserTools <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'runbrowser/langchain'</span>
+
+<span class="token keyword">const</span> tools <span class="token operator">=</span> <span class="token function">getRunBrowserTools</span><span class="token punctuation">(</span><span class="token punctuation">)</span>      <span class="token comment">// reads RUNBROWSER_API_KEY</span></code></pre></div></div><p><strong>The tools</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it&#39;s for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>browse_page</code></td>
+<td>Read a page as markdown, JavaScript rendered</td>
+</tr>
+<tr>
+<td><code>extract_structured</code></td>
+<td>Get named fields as JSON matching a schema</td>
+</tr>
+<tr>
+<td><code>unblock_page</code></td>
+<td>Get past a bot wall that refused a previous call</td>
+</tr>
+<tr>
+<td><code>crawl_site</code></td>
+<td>Read several linked pages in one step</td>
+</tr>
+</tbody></table>
+</div><p>Pass <code>include=[...]</code> to narrow the set. Fewer, more distinct tools reliably
+improves a model&#39;s choices — if your agent only ever reads pages, give it only
+<code>browse_page</code>.</p>
+<h3 id="written-for-the-model-not-the-developer">Written for the model, not the developer<a class="anchor" href="#written-for-the-model-not-the-developer" aria-label="Link to this section">#</a></h3>
+<p>Two things make the difference between an agent that works and one that loops,
+and both are in the tool text rather than the API:</p>
+<p><strong>Each description says when to use a <em>different</em> tool.</strong> <code>browse_page</code> tells
+the model to prefer <code>extract_structured</code> when it knows which fields it wants,
+and to reach for <code>unblock_page</code> if the page reports a wall. Tool descriptions
+are prompt text; vague ones are the main reason agents pick wrong.</p>
+<p><strong>Failures say what would fix them.</strong> A model can&#39;t act on <code>HTTP 429</code>. It can
+act on this:</p>
+<div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="FAILED: the account is out of browser quota this month. Do not retry.">Copy</button></div><pre class="language-"><code>FAILED: the account is out of browser quota this month. Do not retry.</code></pre></div><div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="BLOCKED by datadome: this page returned a bot wall rather than its content.
+Try the unblock_page tool on this URL.">Copy</button></div><pre class="language-"><code>BLOCKED by datadome: this page returned a bot wall rather than its content.
+Try the unblock_page tool on this URL.</code></pre></div><div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="Still blocked (scoring, datadome). This site scores the session rather than
+posing a challenge, so no solver clears it; retry through a residential exit
+IP. This is an infrastructure limit, not something to retry — move on.">Copy</button></div><pre class="language-"><code>Still blocked (scoring, datadome). This site scores the session rather than
+posing a challenge, so no solver clears it; retry through a residential exit
+IP. This is an infrastructure limit, not something to retry — move on.</code></pre></div><p>That last one matters most. Told the truth, an agent moves on; told &quot;Error:
+403&quot;, it retries the same call until it runs out of steps.</p>
+<p>Page content is trimmed to 12,000 characters with the truncation stated, so one
+long page can&#39;t eat the context the model needs to reason.</p>
+<h2 id="n8n">n8n<a class="anchor" href="#n8n" aria-label="Link to this section">#</a></h2>
+<div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="Settings → Community Nodes → Install → n8n-nodes-runbrowser">Copy</button></div><pre class="language-"><code>Settings → Community Nodes → Install → n8n-nodes-runbrowser</code></pre></div><p>Add a <strong>RunBrowser API</strong> credential with your key. It&#39;s tested when you save
+it, so a wrong key surfaces then rather than mid-workflow.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Screenshot / PDF</td>
+<td>A real <strong>binary attachment</strong></td>
+</tr>
+<tr>
+<td>Content</td>
+<td>HTML after JavaScript runs</td>
+</tr>
+<tr>
+<td>Extract</td>
+<td>Typed JSON matching your schema</td>
+</tr>
+<tr>
+<td>Scrape</td>
+<td>Named elements by selector</td>
+</tr>
+<tr>
+<td>Unblock</td>
+<td>Whether a wall cleared, plus clearance cookies</td>
+</tr>
+<tr>
+<td>Crawl / Map</td>
+<td>Linked pages, or every URL a site links to</td>
+</tr>
+</tbody></table>
+</div><p>Screenshots and PDFs arrive as binary attachments, not base64 inside JSON, so
+<strong>Write File</strong>, <strong>Send Email</strong> and S3 uploads work directly with no Convert
+step.</p>
+<p>Two things worth knowing: <strong>Proxy</strong> and <strong>Country</strong> live under Options (setting
+a country also moves the timezone and language), and turning on <strong>Continue On
+Fail</strong> lets a workflow branch on a blocked page rather than dying on one bad
+URL — which matters once you&#39;re feeding it a list.</p>
+<h2 id="mcp">MCP<a class="anchor" href="#mcp" aria-label="Link to this section">#</a></h2>
+<p>For Claude and other MCP clients, the gateway <em>is</em> an MCP server — no adapter
+package. See <a href="/docs/mcp">MCP</a>.</p>
+<h2 id="anything-else">Anything else<a class="anchor" href="#anything-else" aria-label="Link to this section">#</a></h2>
+<p>Every integration here is a thin wrapper over the same
+<a href="/docs/api-reference">REST API</a>. If your tool speaks HTTP, it already works:
+point it at an endpoint with a bearer token. A plain HTTP call is a supported
+way to use this platform, not a workaround.</p>
+<p>See also: <a href="/docs/guide-sdk">SDKs</a>.</p>
+
+    <nav class="pager">
+      <a class="prev" href="/docs/guide-sdk"><span>Previous</span>SDKs</a>
+      <a class="next" href="/docs/mcp"><span>Next</span>MCP server</a>
+    </nav>
+    <hr>
+    <p class="foot">
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Integrations">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+    <p class="updated">Last updated 2026-08-15</p>
+  </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#langchain">LangChain</a>
+    <a class="toc-3" href="#written-for-the-model-not-the-developer">Written for the model, not the developer</a>
+    <a class="toc-2" href="#n8n">n8n</a>
+    <a class="toc-2" href="#mcp">MCP</a>
+    <a class="toc-2" href="#anything-else">Anything else</a>
+  </aside>
+</div>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>

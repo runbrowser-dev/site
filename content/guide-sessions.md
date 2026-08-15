@@ -70,9 +70,22 @@ page = (await browser.contexts())[0].pages()[0]
 // Still logged in. Still on the same page. Still holding SPA state.
 ```
 
-`connectUrl` already carries a one-use credential, so you don't append your API
-key to it. To reconnect from somewhere that only has the id, use
-`?session=<sessionId>&token=<key>`.
+Note the two `connectUrl` shapes, because they authenticate differently:
+
+- An **ordinary** session's URL carries a one-use credential and connects on
+  its own for 60 seconds. Don't append your API key to it.
+- A **stable** session's URL carries the session *id* — an identifier, not a
+  credential, because a session you reconnect to for an hour can't be
+  expressed as one-use. Add your key: `?session=<sessionId>&token=<key>`.
+  Handed to `connectOverCDP` without it, you get a `401`.
+
+The [SDK](/docs/guide-sdk) hands you a URL that already works in both cases, so
+this distinction never reaches your code.
+
+**Reuse the existing page; don't call `newPage()`.** The example above takes
+`pages()[0]` on purpose. A page Playwright creates is closed when your
+connection drops, taking its state with it — which defeats the point. The tab
+that's already there survives.
 
 ### What survives, and what doesn't
 

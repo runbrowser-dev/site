@@ -381,6 +381,58 @@ redirect that origin performs — a link to `iana.org` that redirects to
 URL to point at — a blob assembled in the page — is out of reach, and you get
 a clear `404` saying so rather than an empty file.
 
+### `POST /unblock` → JSON
+
+Land on a page that puts up a wall, wait out the interstitial if there is one,
+and hand back the clearance cookies.
+
+```json
+{ "url": "https://example.com" }
+{ "url": "…", "waitMs": 30000, "content": true }
+{ "url": "…", "solver": { "provider": "capsolver", "apiKey": "…" } }
+```
+
+| Field | Default | Meaning |
+|---|---|---|
+| `waitMs` | `20000` | How long to wait for a passive interstitial to clear (max 60s) |
+| `content` | `false` | Include the page markup in the response |
+| `solve` | `true` | Set `false` for the wait only, never a solve |
+| `solver` | — | Your own solving credential; used for this call and never stored |
+
+**Response**
+
+```json
+{
+  "url": "https://example.com/",
+  "unblocked": true,
+  "challenge": { "type": "interstitial", "provider": "cloudflare",
+                 "interactive": false, "wall": true, "solved": false, "waitedMs": 4200 },
+  "cookies": [ { "name": "cf_clearance", "value": "…", "domain": "…" } ]
+}
+```
+
+The `cookies` are the point of the call: they come back in the same shape every
+other endpoint accepts as `cookies`, so the clearance carries straight into the
+session that does the real work.
+
+**It tells you which wall you hit,** because the walls need different answers:
+
+| `type` | What it is | What clears it |
+|---|---|---|
+| `interstitial` | A passive JS challenge — "Just a moment…" | Waiting. Handled for you |
+| `turnstile`, `recaptcha_v2`, `hcaptcha` | A question with a sitekey | A solver, if you supply a key |
+| `scoring` | reCAPTCHA v3, DataDome, PerimeterX | Nothing solvable — a residential exit IP |
+
+A `scoring` result comes back in milliseconds rather than after a two-minute
+timeout, with `advice` naming the exit IP as the actual lever. That honesty is
+the feature: the alternative is billing you for a wait that was never going to
+work.
+
+**`wall` tells you whether the widget was actually gating anything.** A login
+modal on a page you can already read matches every CAPTCHA selector, so a naive
+check would tell you to spend a solve on a page that was never blocked. When
+the content is accessible you get `unblocked: true` and no solve is spent.
+
 ---
 
 ## Primitives
@@ -475,10 +527,13 @@ installed.
 
 ### CAPTCHAs
 
-There is no CAPTCHA endpoint. We don't solve them on your behalf — you use
-your own solver key via the [helper](../examples/captcha/), which talks to
-CapSolver or 2Captcha directly from your process. See
-[Concepts](concepts.md#captchas) for why.
+[`/unblock`](#post-unblock--json) handles the wall for you, including the
+passive interstitials that need no solver at all. Where a challenge does pose a
+question, **you hold the solving account** — pass `solver.provider` and
+`solver.apiKey` and we orchestrate it, or keep using the
+[standalone helper](../examples/captcha/) from your own process. Either way the
+key is yours, used for that call, and never stored. See
+[Concepts](concepts.md#captchas) for why it works that way.
 
 ---
 

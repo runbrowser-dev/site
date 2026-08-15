@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDKs — runbrowser docs</title>
+<meta name="description" content="Typed clients for TypeScript and Python. Both are thin, both are optional, and neither hides the browser from you.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
+  </a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
+</header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Get started</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/quickstart">Quickstart</a>
+        <a class="nav-link " href="/docs/concepts">Concepts</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
+        <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
+        <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
+        <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
+        <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
+        <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
+        <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
+        <a class="nav-link " href="/docs/guide-unblocking">Getting through walls</a>
+    </div>
+
+    <details class="nav-group" >
+      <summary class="nav-title nav-title-spaced">API reference</summary>
+      <div class="nav-api">
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#connecting-a-browser">Connecting a browser</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#sessions">Sessions</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#rest-shortcuts">REST shortcuts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-screenshot-imagepngjpegwebp"><span class="m m-post">POST</span><span class="ep-path">/screenshot</span></a>
+            <a class="ep" href="/docs/api-reference#post-pdf-applicationpdf"><span class="m m-post">POST</span><span class="ep-path">/pdf</span></a>
+            <a class="ep" href="/docs/api-reference#post-content-texthtml"><span class="m m-post">POST</span><span class="ep-path">/content</span></a>
+            <a class="ep" href="/docs/api-reference#post-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-function-json"><span class="m m-post">POST</span><span class="ep-path">/function</span></a>
+            <a class="ep" href="/docs/api-reference#post-export-the-resource-as-is"><span class="m m-post">POST</span><span class="ep-path">/export</span></a>
+            <a class="ep" href="/docs/api-reference#post-smart-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/smart-scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
+            <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
+            <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+            <a class="ep" href="/docs/api-reference#post-unblock-json"><span class="m m-post">POST</span><span class="ep-path">/unblock</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#mcp">MCP</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#metrics">Metrics</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#errors">Errors</a>
+          
+        </div>
+      </div>
+    </details>
+
+    <span class="nav-title nav-title-spaced">Integrations</span>
+    <div class="nav-links">
+        <a class="nav-link active" href="/docs/guide-sdk">SDKs</a>
+        <a class="nav-link " href="/docs/guide-integrations">LangChain &amp; n8n</a>
+        <a class="nav-link " href="/docs/mcp">MCP server</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Migrating</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/errors">Errors</a>
+        <a class="nav-link" href="/#pricing">Pricing</a>
+        <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
+  </nav>
+  <main class="prose">
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>SDKs</span></div>
+<h1 id="sdks">SDKs</h1>
+<p>Typed clients for TypeScript and Python. Both are thin, both are optional, and
+neither hides the browser from you.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="npm">npm</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="pip">pip</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="npm install runbrowser">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="npm" data-code="npm install runbrowser"><span class="code-lang panel-lang">npm</span><pre class="language-bash"><code><span class="token function">npm</span> <span class="token function">install</span> runbrowser</code></pre></div><div class="tab-panel" role="tabpanel" data-lang="pip" data-code="pip install runbrowser"><span class="code-lang panel-lang">pip</span><pre class="language-bash"><code>pip <span class="token function">install</span> runbrowser</code></pre></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="import { RunBrowser } from 'runbrowser'
+
+const rb = new RunBrowser()          // reads RUNBROWSER_API_KEY
+const png = await rb.screenshot({ url: 'https://example.com' })"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> RunBrowser <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'runbrowser'</span>
+
+<span class="token keyword">const</span> rb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">)</span>          <span class="token comment">// reads RUNBROWSER_API_KEY</span>
+<span class="token keyword">const</span> png <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">screenshot</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token operator">:</span> <span class="token string">'https://example.com'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="from runbrowser import RunBrowser
+
+rb = RunBrowser()                    # reads RUNBROWSER_API_KEY
+png = rb.screenshot(url=&quot;https://example.com&quot;)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">from</span> runbrowser <span class="token keyword">import</span> RunBrowser
+
+rb <span class="token operator">=</span> RunBrowser<span class="token punctuation">(</span><span class="token punctuation">)</span>                    <span class="token comment"># reads RUNBROWSER_API_KEY</span>
+png <span class="token operator">=</span> rb<span class="token punctuation">.</span>screenshot<span class="token punctuation">(</span>url<span class="token operator">=</span><span class="token string">"https://example.com"</span><span class="token punctuation">)</span></code></pre></div></div><h2 id="what-they-deliberately-dont-do">What they deliberately don&#39;t do<a class="anchor" href="#what-they-deliberately-dont-do" aria-label="Link to this section">#</a></h2>
+<p>They don&#39;t wrap Playwright or Puppeteer. You already know those, and standard
+CDP is the point of the product — a client that hides it behind its own
+vocabulary would make this platform something you have to learn instead of
+something you point your existing code at.</p>
+<p>So the SDK hands you a connect URL and gets out of the way:</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="import { chromium } from 'playwright'
+
+const browser = await chromium.connectOverCDP(rb.connectUrl())
+// Every script you already have works unchanged from here.">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="import { chromium } from 'playwright'
+
+const browser = await chromium.connectOverCDP(rb.connectUrl())
+// Every script you already have works unchanged from here."><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> chromium <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'playwright'</span>
+
+<span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>rb<span class="token punctuation">.</span><span class="token function">connectUrl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// Every script you already have works unchanged from here.</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.connect_over_cdp(rb.connect_url())"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">from</span> playwright<span class="token punctuation">.</span>sync_api <span class="token keyword">import</span> sync_playwright
+
+<span class="token keyword">with</span> sync_playwright<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> p<span class="token punctuation">:</span>
+    browser <span class="token operator">=</span> p<span class="token punctuation">.</span>chromium<span class="token punctuation">.</span>connect_over_cdp<span class="token punctuation">(</span>rb<span class="token punctuation">.</span>connect_url<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre></div></div><p>Adopting RunBrowser stays a one-line change. So does leaving, which is the
+honest test of whether a client is thin.</p>
+<h2 id="what-theyre-worth-using-for">What they&#39;re worth using for<a class="anchor" href="#what-theyre-worth-using-for" aria-label="Link to this section">#</a></h2>
+<p><strong>Routing that lands in the right place.</strong> <code>proxy</code>, <code>country</code> and <code>session</code> are
+query parameters server-side. Put them in a JSON body by hand and they are
+silently ignored — the request succeeds and simply doesn&#39;t use your proxy. The
+clients lift them into the query string for you.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="await rb.screenshot({ url, proxy: 'residential', country: 'de' })">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="await rb.screenshot({ url, proxy: 'residential', country: 'de' })"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">screenshot</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token punctuation">,</span> proxy<span class="token operator">:</span> <span class="token string">'residential'</span><span class="token punctuation">,</span> country<span class="token operator">:</span> <span class="token string">'de'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="rb.screenshot(url=url, proxy=&quot;residential&quot;, country=&quot;de&quot;)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code>rb<span class="token punctuation">.</span>screenshot<span class="token punctuation">(</span>url<span class="token operator">=</span>url<span class="token punctuation">,</span> proxy<span class="token operator">=</span><span class="token string">"residential"</span><span class="token punctuation">,</span> country<span class="token operator">=</span><span class="token string">"de"</span><span class="token punctuation">)</span></code></pre></div></div><p><strong>Sessions that stop billing.</strong> A parked stable session keeps charging until it
+idles out. Both clients bind that to a scope:</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="const session = await rb.sessions.create({ keepAlive: true })
+try {
+  const browser = await chromium.connectOverCDP(session.connectUrl)
+  // Reuse the existing tab — a page you create dies with your connection.
+  const page = browser.contexts()[0].pages()[0]
+  await page.goto('https://app.example.com')
+  await browser.close()
+} finally {
+  await session.close()
+}">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="const session = await rb.sessions.create({ keepAlive: true })
+try {
+  const browser = await chromium.connectOverCDP(session.connectUrl)
+  // Reuse the existing tab — a page you create dies with your connection.
+  const page = browser.contexts()[0].pages()[0]
+  await page.goto('https://app.example.com')
+  await browser.close()
+} finally {
+  await session.close()
+}"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">const</span> session <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span>sessions<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">{</span> keepAlive<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">try</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>session<span class="token punctuation">.</span>connectUrl<span class="token punctuation">)</span>
+  <span class="token comment">// Reuse the existing tab — a page you create dies with your connection.</span>
+  <span class="token keyword">const</span> page <span class="token operator">=</span> browser<span class="token punctuation">.</span><span class="token function">contexts</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">pages</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://app.example.com'</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> session<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="with rb.create_session(keepAlive=True) as session:
+    ...
+# closed here, even if the block raised"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">with</span> rb<span class="token punctuation">.</span>create_session<span class="token punctuation">(</span>keepAlive<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">)</span> <span class="token keyword">as</span> session<span class="token punctuation">:</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token comment"># closed here, even if the block raised</span></code></pre></div></div><p><strong>A connect URL that actually connects.</strong> A stable session&#39;s URL from the API
+carries the session <em>id</em>, not a credential — handed straight to
+<code>connectOverCDP</code> it&#39;s a <code>401</code>. An ordinary session&#39;s URL carries a one-use
+token and needs nothing added. The clients handle both, so the distinction
+never reaches your code.</p>
+<p><strong>Errors you can branch on.</strong> The status and the server&#39;s own error code
+survive, because the difference between <code>429</code> and <code>422</code> is the difference
+between waiting and fixing your schema.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="try {
+  await rb.extract({ url, schema })
+} catch (err) {
+  if (err instanceof RunBrowserError &amp;&amp; err.retryable) await backoff()
+}">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="try {
+  await rb.extract({ url, schema })
+} catch (err) {
+  if (err instanceof RunBrowserError &amp;&amp; err.retryable) await backoff()
+}"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">try</span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">extract</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token punctuation">,</span> schema <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>err <span class="token keyword">instanceof</span> <span class="token class-name">RunBrowserError</span> <span class="token operator">&amp;&amp;</span> err<span class="token punctuation">.</span>retryable<span class="token punctuation">)</span> <span class="token keyword">await</span> <span class="token function">backoff</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="try:
+    rb.extract(url=url, schema=schema)
+except RunBrowserError as err:
+    if err.retryable:
+        backoff()"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">try</span><span class="token punctuation">:</span>
+    rb<span class="token punctuation">.</span>extract<span class="token punctuation">(</span>url<span class="token operator">=</span>url<span class="token punctuation">,</span> schema<span class="token operator">=</span>schema<span class="token punctuation">)</span>
+<span class="token keyword">except</span> RunBrowserError <span class="token keyword">as</span> err<span class="token punctuation">:</span>
+    <span class="token keyword">if</span> err<span class="token punctuation">.</span>retryable<span class="token punctuation">:</span>
+        backoff<span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre></div></div><h2 id="everything-else-is-the-rest-api">Everything else is the REST API<a class="anchor" href="#everything-else-is-the-rest-api" aria-label="Link to this section">#</a></h2>
+<p>Every method maps to one documented endpoint, using the server&#39;s own field
+names, so the <a href="/docs/api-reference">API reference</a> reads as the client&#39;s
+reference too:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Client</th>
+<th>Endpoint</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>screenshot</code> <code>pdf</code> <code>content</code> <code>scrape</code> <code>function</code></td>
+<td><a href="/docs/api-reference#rest-shortcuts">REST shortcuts</a></td>
+</tr>
+<tr>
+<td><code>unblock</code></td>
+<td><a href="/docs/api-reference#post-unblock--json"><code>POST /unblock</code></a></td>
+</tr>
+<tr>
+<td><code>map</code> <code>crawl</code> <code>download</code></td>
+<td><a href="/docs/guide-crawling">Crawling</a></td>
+</tr>
+<tr>
+<td><code>fetch</code> <code>extract</code></td>
+<td><a href="/docs/api-reference#primitives">Primitives</a></td>
+</tr>
+<tr>
+<td><code>sessions.*</code></td>
+<td><a href="/docs/api-reference#sessions">Sessions</a></td>
+</tr>
+</tbody></table>
+</div><p>If a client is ever missing something, the endpoint is right there and a plain
+HTTP call is a supported way to use this platform — not a workaround.</p>
+<h2 id="self-hosted-and-testing">Self-hosted and testing<a class="anchor" href="#self-hosted-and-testing" aria-label="Link to this section">#</a></h2>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="new RunBrowser({
+  apiKey: '…',
+  connectUrl: 'http://localhost:3000',
+  apiUrl: 'http://localhost:8080',
+  fetch: myInstrumentedFetch,     // proxy agent, tracing, a test double
+})">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="new RunBrowser({
+  apiKey: '…',
+  connectUrl: 'http://localhost:3000',
+  apiUrl: 'http://localhost:8080',
+  fetch: myInstrumentedFetch,     // proxy agent, tracing, a test double
+})"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  apiKey<span class="token operator">:</span> <span class="token string">'…'</span><span class="token punctuation">,</span>
+  connectUrl<span class="token operator">:</span> <span class="token string">'http://localhost:3000'</span><span class="token punctuation">,</span>
+  apiUrl<span class="token operator">:</span> <span class="token string">'http://localhost:8080'</span><span class="token punctuation">,</span>
+  fetch<span class="token operator">:</span> myInstrumentedFetch<span class="token punctuation">,</span>     <span class="token comment">// proxy agent, tracing, a test double</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="RunBrowser(
+    api_key=&quot;…&quot;,
+    connect_url=&quot;http://localhost:3000&quot;,
+    api_url=&quot;http://localhost:8080&quot;,
+)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code>RunBrowser<span class="token punctuation">(</span>
+    api_key<span class="token operator">=</span><span class="token string">"…"</span><span class="token punctuation">,</span>
+    connect_url<span class="token operator">=</span><span class="token string">"http://localhost:3000"</span><span class="token punctuation">,</span>
+    api_url<span class="token operator">=</span><span class="token string">"http://localhost:8080"</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span></code></pre></div></div><p>The TypeScript client needs Node 18+ and has no runtime dependencies. The
+Python client needs 3.9+ and uses only the standard library.</p>
+<p>See also: <a href="/docs/guide-sessions">Sessions</a>, <a href="/docs/guide-unblocking">Getting through
+walls</a>, and the
+<a href="/docs/mcp">MCP server</a> if you&#39;re wiring an agent rather than writing code.</p>
+
+    <nav class="pager">
+      <a class="prev" href="/docs/errors"><span>Previous</span>Errors</a>
+      <a class="next" href="/docs/guide-integrations"><span>Next</span>Integrations</a>
+    </nav>
+    <hr>
+    <p class="foot">
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20SDKs">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+    <p class="updated">Last updated 2026-08-15</p>
+  </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#what-they-deliberately-dont-do">What they deliberately don't do</a>
+    <a class="toc-2" href="#what-theyre-worth-using-for">What they're worth using for</a>
+    <a class="toc-2" href="#everything-else-is-the-rest-api">Everything else is the REST API</a>
+    <a class="toc-2" href="#self-hosted-and-testing">Self-hosted and testing</a>
+  </aside>
+</div>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>

@@ -45,6 +45,7 @@
         <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
         <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
         <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
+        <a class="nav-link " href="/docs/guide-unblocking">Getting through walls</a>
     </div>
 
     <details class="nav-group" >
@@ -76,6 +77,7 @@
             <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
             <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
             <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+            <a class="ep" href="/docs/api-reference#post-unblock-json"><span class="m m-post">POST</span><span class="ep-path">/unblock</span></a>
           </div>
         </div>
         <div class="nav-cat">
@@ -103,6 +105,8 @@
 
     <span class="nav-title nav-title-spaced">Integrations</span>
     <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sdk">SDKs</a>
+        <a class="nav-link " href="/docs/guide-integrations">LangChain &amp; n8n</a>
         <a class="nav-link " href="/docs/mcp">MCP server</a>
     </div>
 
@@ -221,9 +225,21 @@ page = (await browser.contexts())[0].pages()[0]
 <span class="token comment">// 3. Later — a different process, even — reconnect to the same browser.</span>
 browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>connectUrl<span class="token punctuation">)</span>
 page <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">contexts</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">pages</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
-<span class="token comment">// Still logged in. Still on the same page. Still holding SPA state.</span></code></pre></div><p><code>connectUrl</code> already carries a one-use credential, so you don&#39;t append your API
-key to it. To reconnect from somewhere that only has the id, use
-<code>?session=&lt;sessionId&gt;&amp;token=&lt;key&gt;</code>.</p>
+<span class="token comment">// Still logged in. Still on the same page. Still holding SPA state.</span></code></pre></div><p>Note the two <code>connectUrl</code> shapes, because they authenticate differently:</p>
+<ul>
+<li>An <strong>ordinary</strong> session&#39;s URL carries a one-use credential and connects on
+its own for 60 seconds. Don&#39;t append your API key to it.</li>
+<li>A <strong>stable</strong> session&#39;s URL carries the session <em>id</em> — an identifier, not a
+credential, because a session you reconnect to for an hour can&#39;t be
+expressed as one-use. Add your key: <code>?session=&lt;sessionId&gt;&amp;token=&lt;key&gt;</code>.
+Handed to <code>connectOverCDP</code> without it, you get a <code>401</code>.</li>
+</ul>
+<p>The <a href="/docs/guide-sdk">SDK</a> hands you a URL that already works in both cases, so
+this distinction never reaches your code.</p>
+<p><strong>Reuse the existing page; don&#39;t call <code>newPage()</code>.</strong> The example above takes
+<code>pages()[0]</code> on purpose. A page Playwright creates is closed when your
+connection drops, taking its state with it — which defeats the point. The tab
+that&#39;s already there survives.</p>
 <h3 id="what-survives-and-what-doesnt">What survives, and what doesn&#39;t<a class="anchor" href="#what-survives-and-what-doesnt" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table>
 <thead>
