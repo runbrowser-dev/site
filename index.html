@@ -42,6 +42,10 @@
   }
 
   * { box-sizing: border-box; }
+  /* Belt-and-suspenders against a stray wide child ever scrolling the page
+     sideways on a phone. Wide content (code, tables) scrolls inside its own
+     container, so nothing legitimate needs the body to scroll horizontally. */
+  html, body { max-width: 100%; overflow-x: hidden; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
@@ -113,6 +117,10 @@
     transition: background .15s, border-color .15s;
   }
   .nav-cta:hover { background: rgba(0,210,106,0.18); border-color: var(--live); }
+  /* Controlled by class, not an inline style — an inline display:flex would
+     beat this media query and leave the links overflowing the header on
+     phones, which is what dragged the whole page into a sideways scroll. */
+  .nav-links { display: flex; gap: 22px; }
   @media (max-width: 720px) { .nav-links { display: none; } }
 
   /* ---- hero ---- */
@@ -214,8 +222,12 @@
 
   /* ---- logos / trust strip ---- */
   .compat { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-top: 46px; }
-  .compat .row { display: flex; align-items: center; gap: 30px; flex-wrap: wrap; padding: 20px 0; }
+  .compat .row { display: flex; align-items: center; gap: 18px 26px; flex-wrap: wrap; padding: 20px 0; }
   .compat .lab { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  .compat .mcp { margin-left: auto; }
+  /* When the row wraps on a phone, margin-left:auto would shove the MCP label
+     past the right edge; drop it so the labels simply flow. */
+  @media (max-width: 640px) { .compat .mcp { margin-left: 0; } }
   .compat .name { font-family: var(--mono); font-size: 14px; color: var(--muted); }
   .compat .name:hover { color: var(--text); }
 
@@ -308,6 +320,18 @@
   .foot { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 26px 0; font-family: var(--mono); font-size: 12.5px; color: var(--faint); }
   .foot a { color: var(--muted); } .foot a:hover { color: var(--text); }
   .foot .sep { color: var(--border-lit); }
+
+  /* ---- phones: tighten the gutter and vertical rhythm ---- */
+  @media (max-width: 640px) {
+    .wrap { padding: 0 20px; }
+    .hero { padding: 40px 0 28px; }
+    section.block { padding: 52px 0; }
+    .final { padding: 32px 22px; border-radius: 14px; }
+    .foot { justify-content: flex-start; }
+    /* the two hero buttons go full-width and stack, easier to tap */
+    .hero .cta-row { flex-direction: column; align-items: stretch; }
+    .hero .cta-row .btn { justify-content: center; }
+  }
 </style>
 
 <header>
@@ -319,7 +343,7 @@
       <span>runbrowser</span>
     </a>
     <nav class="nav-right">
-      <span class="nav-links" style="display:flex; gap:22px;">
+      <span class="nav-links">
         <a class="nav-link" href="#how">How it works</a>
         <a class="nav-link" href="#features">Features</a>
         <a class="nav-link" href="#pricing">Pricing</a>
@@ -389,7 +413,7 @@
         <span class="name">Selenium</span>
         <span class="name">Playwright&nbsp;MCP</span>
         <span class="name">CDP</span>
-        <span class="lab" style="margin-left:auto">Model Context Protocol&nbsp;✓</span>
+        <span class="lab mcp">Model Context Protocol&nbsp;✓</span>
       </div>
     </div>
   </section>
