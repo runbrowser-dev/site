@@ -16,6 +16,13 @@ import { execSync } from 'node:child_process'
 const PUBLIC_DOCS = [
   'quickstart.md',
   'concepts.md',
+  'guide-sessions.md',
+  'guide-viewer.md',
+  'guide-extract.md',
+  'guide-crawling.md',
+  'guide-capture.md',
+  'guide-proxies.md',
+  'guide-stealth.md',
   'api-reference.md',
   'errors.md',
   'mcp.md',

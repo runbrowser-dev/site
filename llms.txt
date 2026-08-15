@@ -7,6 +7,13 @@
 
 - [Quickstart](https://runbrowser.dev/docs/quickstart.md): Connect an existing Playwright or Puppeteer script in one line, in TypeScript or Python.
 - [Concepts](https://runbrowser.dev/docs/concepts.md): Sessions, the session lifecycle, billing granularity, stable sessions, stealth, proxies and the live viewer.
+- [Sessions & stable sessions](https://runbrowser.dev/docs/guide-sessions.md): Sessions & stable sessions
+- [The live viewer](https://runbrowser.dev/docs/guide-viewer.md): The live viewer
+- [Structured extraction](https://runbrowser.dev/docs/guide-extract.md): Structured extraction
+- [Crawling a site](https://runbrowser.dev/docs/guide-crawling.md): Crawling a site
+- [Screenshots & PDFs](https://runbrowser.dev/docs/guide-capture.md): Screenshots & PDFs
+- [Proxies & geo-targeting](https://runbrowser.dev/docs/guide-proxies.md): Proxies & geo-targeting
+- [Stealth & fingerprinting](https://runbrowser.dev/docs/guide-stealth.md): Stealth & fingerprinting
 
 ## Reference
 

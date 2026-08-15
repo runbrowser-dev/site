@@ -1228,6 +1228,636 @@ code, and roughly when it happened, and we'll look at the actual logs.
 
 ---
 
+# Screenshots & PDFs
+
+Turn a page — or HTML you already hold — into an image or a PDF in one call.
+No browser to drive, no fleet to run: `POST` the request, get the bytes back
+with the right `Content-Type`.
+
+Both endpoints take **either** a `url` to load **or** `html` to render
+directly. Inline `html` is for documents you generated yourself — an invoice, a
+report, an OG image — so you never have to publish a customer's billing details
+to a public URL just to render them.
+
+## A screenshot
+
+```bash tab=cURL
+curl -X POST https://connect.runbrowser.dev/screenshot \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://example.com", "options": { "fullPage": true } }' \
+  --output page.png
+```
+
+```ts tab=TypeScript
+const res = await fetch('https://connect.runbrowser.dev/screenshot', {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ url: 'https://example.com', options: { fullPage: true } }),
+})
+const buffer = Buffer.from(await res.arrayBuffer())
+await fs.writeFile('page.png', buffer)
+```
+
+**Clip to one element** with a selector — it captures the match even below the
+fold, and takes precedence over `fullPage`. A selector that matches nothing is a
+`400`, not a silent full-page shot.
+
+```json
+{ "url": "…", "options": { "selector": "#pricing-table", "format": "webp", "quality": 90 } }
+```
+
+## A PDF
+
+```bash tab=cURL
+curl -X POST https://connect.runbrowser.dev/pdf \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "html": "<h1>Invoice INV-2026-0001</h1>", "options": { "printBackground": true, "format": "A4" } }' \
+  --output invoice.pdf
+```
+
+> **Set `printBackground` unless you mean not to.** It defaults to `false`, matching
+> Chrome — which drops every background colour in your document: header blocks,
+> table shading, status badges. You get a valid PDF with no error, and white text
+> on a coloured block becomes white text on white. It's the most common way a
+> generated document is silently wrong.
+
+## Common options
+
+Both endpoints accept the shared browser controls:
+
+```json
+{
+  "url": "https://example.com",
+  "waitForTimeout": 5000,
+  "cookies": [{ "name": "session", "value": "…" }],
+  "headers": { "X-Custom": "value" }
+}
+```
+
+`cookies` default their scope to the page you're loading, so `{name, value}`
+alone gets you past a consent wall or age gate in the same call.
+
+See the full option tables in the reference:
+[`/screenshot`](/docs/api-reference#post-screenshot-image-png-jpeg-webp) ·
+[`/pdf`](/docs/api-reference#post-pdf-application-pdf).
+
+---
+
+# Crawling a site
+
+Three endpoints that build on each other: `/smart-scrape` reads one page the
+cheapest way that works, `/map` discovers what's on a site, and `/crawl` walks
+it. All three keep the browser cost down and tell you what they did.
+
+## One page, cheapest-first: `/smart-scrape`
+
+The expensive part of this platform is the browser. Plain HTTP has none — so
+`/smart-scrape` tries that first and only pays for a render when the page comes
+back blocked, empty, or client-rendered. It tells you which path it took.
+
+```bash tab=cURL
+curl -X POST https://connect.runbrowser.dev/smart-scrape \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://example.com", "format": "markdown-full" }'
+```
+
+```json
+// A server-rendered page — no browser was used.
+{ "url": "…", "method": "http", "status": 200, "content": "…" }
+
+// A JavaScript app — it escalated and rendered.
+{ "url": "…", "method": "browser", "escalationReason": "thin_body_probably_js_rendered", "content": "…" }
+```
+
+`escalationReason` is worth reading: `anti_bot_cloudflare` and
+`thin_body_probably_js_rendered` are different facts about a target, and both
+are worth knowing before you build a job around it.
+
+## What's on the site: `/map`
+
+Discover URLs from two sources at once — the sitemap (authoritative, often
+absent) and the on-page links (always present, one page's worth). It reports
+them separately so you can tell a 40,000-URL sitemap from forty footer links.
+
+```bash tab=cURL
+curl -X POST https://connect.runbrowser.dev/map \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://example.com", "limit": 500 }'
+```
+
+```json
+{ "total": 128, "sources": { "sitemap": 96, "page": 41 }, "urls": ["…"] }
+```
+
+Same-origin only unless you pass `includeExternal`. Discovery runs inside the
+page, so a sitemap behind a login is reachable for the same reason the page is.
+
+## Walk it: `/crawl`
+
+Follow links from a seed, breadth-first, up to `maxPages` and `maxDepth` — all
+inside **one browser lease** rather than a cold start per page. It always tells
+you why it stopped.
+
+```bash tab=cURL
+curl -X POST https://connect.runbrowser.dev/crawl \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://example.com", "maxPages": 20, "maxDepth": 2 }'
+```
+
+```json
+{
+  "total": 20,
+  "stoppedBecause": "maxPages",
+  "queuedButNotVisited": 43,
+  "pages": [ { "url": "…", "depth": 0, "chars": 1713, "content": "…" } ]
+}
+```
+
+`stoppedBecause` is `exhausted`, `maxPages`, `maxDepth` or `deadline` — the
+first question worth asking of a crawl, and the expensive one to get wrong. A
+page that fails to load is recorded with an `error` and stepped over rather than
+ending the run.
+
+## Putting them together
+
+A typical pipeline: `/map` to find the pages, then `/v1/extract` on each to get
+structured data, or `/crawl` when the link graph matters more than the sitemap.
+
+See also: [Structured extraction](/docs/guide-extract) to type the results, and
+the reference for [`/smart-scrape`](/docs/api-reference#post-smart-scrape-json),
+[`/map`](/docs/api-reference#post-map-json) and
+[`/crawl`](/docs/api-reference#post-crawl-json).
+
+---
+
+# Structured extraction
+
+Give `/v1/extract` a URL and a JSON Schema; get back JSON that matches the
+schema. It renders the page in a real browser first, so it works on JavaScript
+sites, then asks a model to fill your shape and validates the result before
+returning it. When the model's output doesn't match, it retries with the
+validation errors fed back, and if it still can't comply you get a `422` — not
+malformed data you have to defend against downstream.
+
+It's the difference between "scrape the page and parse the HTML yourself" and
+"tell me what you want and get it typed."
+
+## A worked example
+
+Pull the fields you care about off a product page:
+
+```bash tab=cURL
+curl -X POST https://api.runbrowser.dev/v1/extract \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/product/42",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "title":       { "type": "string" },
+        "priceUsd":    { "type": "number" },
+        "inStock":     { "type": "boolean" },
+        "sizes":       { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["title", "priceUsd", "inStock"]
+    }
+  }'
+```
+
+```ts tab=TypeScript
+const res = await fetch('https://api.runbrowser.dev/v1/extract', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    url: 'https://example.com/product/42',
+    schema: {
+      type: 'object',
+      properties: {
+        title:    { type: 'string' },
+        priceUsd: { type: 'number' },
+        inStock:  { type: 'boolean' },
+        sizes:    { type: 'array', items: { type: 'string' } },
+      },
+      required: ['title', 'priceUsd', 'inStock'],
+    },
+  }),
+})
+const { data } = await res.json()
+// data.priceUsd is a number, not a string you have to clean.
+```
+
+**Response**
+
+```json
+{
+  "data": {
+    "title": "Merino Runner",
+    "priceUsd": 129,
+    "inStock": true,
+    "sizes": ["S", "M", "L", "XL"]
+  },
+  "usage": { "promptTokens": 4210, "completionTokens": 96 },
+  "trace": { "screenshotUrl": null }
+}
+```
+
+## Steering it
+
+- **`instructions`** — a sentence of natural-language guidance, for when the
+  schema alone is ambiguous. *"Only in-stock items."* *"Prices in USD, convert
+  if the page shows another currency."*
+- **`contentFormat`** — how the page is fed to the model. `markdown` (default)
+  runs Readability and is right for articles; `markdown-full` keeps the whole
+  page including navigation and is right for listings and grids; `text` and
+  `html` do what they say. Getting this right cuts token cost several-fold and
+  makes small models markedly more accurate.
+- **`waitForSelector`** — hold until an element appears before extracting, for
+  pages that render their content late.
+
+```json
+{
+  "url": "https://example.com/search?q=boots",
+  "instructions": "Only the sponsored results.",
+  "contentFormat": "markdown-full",
+  "waitForSelector": ".results",
+  "schema": { "type": "array", "items": { "type": "object", "properties": {
+    "name": { "type": "string" }, "url": { "type": "string" } } } }
+}
+```
+
+## Billing & failure
+
+- Counts against a separate monthly **extract** allowance, because each call
+  spends both browser-time and model tokens. The `usage` block reports the exact
+  token counts.
+- A schema the output can't satisfy after one retry returns
+  [`422 schema_validation_failed`](/docs/errors) rather than best-effort data.
+- A page behind a bot wall is reported as blocked, not summarised as if the
+  wall were the content.
+
+See also: [`/v1/fetch`](/docs/api-reference#post-v1fetch) when you want the page
+text without a model, and [crawling](/docs/guide-crawling) to extract across a
+whole site.
+
+---
+
+# Proxies & geo-targeting
+
+Route a session's traffic through a proxy — bring your own, or select a managed
+pool by name and country. When you pick a country, the browser's timezone and
+`Accept-Language` follow the exit IP, so you don't hand a site a New York clock
+on a Frankfurt address.
+
+## Bring your own
+
+Pass a full proxy URL, credentials embedded. It's validated against SSRF and
+never logged.
+
+```ts tab=TypeScript
+const proxy = encodeURIComponent('http://user:pass@proxy.example.com:8080')
+const browser = await chromium.connectOverCDP(
+  `wss://connect.runbrowser.dev?token=${TOKEN}&proxy=${proxy}`,
+)
+```
+
+Prefer to keep the credentials off the connect URL entirely? Put them in a
+[session](/docs/guide-sessions) instead and connect with the opaque id it
+returns. BYO proxies carry **no markup** — you pay your provider's wholesale
+price and nothing to us.
+
+## Managed pools
+
+Where your operator has configured them, select a pool by name and, for
+geo-targeting, a country. Credentials stay on our side; you never see them.
+
+```ts tab=TypeScript
+const browser = await chromium.connectOverCDP(
+  `wss://connect.runbrowser.dev?token=${TOKEN}&proxy=residential&country=de`,
+)
+```
+
+```bash tab=cURL
+# The same selection works on the REST endpoints, as query params.
+curl -X POST "https://connect.runbrowser.dev/screenshot?proxy=residential&country=de" \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://example.com" }' --output shot.png
+```
+
+Each session gets its own **sticky exit IP**, so a multi-step flow doesn't
+change address halfway through — which, to the site you're visiting, looks like
+account sharing.
+
+### Geo sets more than the IP
+
+Asking for `country=de` also sets the browser's timezone to `Europe/Berlin` and
+its `Accept-Language` to `de-DE`. That coupling is the point: an IP in one place
+paired with a clock from another is a contradiction any site can check for free,
+and geo-targeting that only changes the address gives a site a *better* signal
+than it removes.
+
+A country a pool doesn't carry is **refused, with the list of what's
+available** — you find out immediately, not after your data comes back from the
+wrong region.
+
+```json
+// GET a pool that doesn't offer that country →
+{ "error": "pool \"residential\" does not offer country \"br\"; available: de, gb, jp" }
+```
+
+## Which to use
+
+- **BYO** — you already have a proxy provider and want wholesale pricing.
+- **Managed pool** — you want geo-targeting without sourcing IPs, and you want
+  the locale kept coherent automatically.
+
+See also: [Stealth & fingerprinting](/docs/guide-stealth) for what the browser
+presents beyond the IP, and the
+[proxy query params](/docs/api-reference#connecting-a-browser).
+
+---
+
+# Sessions & stable sessions
+
+A **session** is one browser, yours for as long as you're connected. Connect,
+drive it with Playwright or Puppeteer, disconnect — and by default the browser
+is destroyed and its state goes with it. A **stable session** keeps that
+browser alive between connects, so the second connect lands on the same tabs,
+the same in-memory SPA state, the same everything — not just the same cookies.
+
+## An ordinary session
+
+Connect over CDP and it's a normal Playwright script from there. One line
+differs from running locally: the endpoint.
+
+```ts tab=TypeScript
+import { chromium } from 'playwright'
+
+const browser = await chromium.connectOverCDP(
+  `wss://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
+)
+const page = await browser.newPage()
+await page.goto('https://example.com')
+console.log(await page.title())
+await browser.close()   // the browser is destroyed here
+```
+
+```python tab=Python
+from playwright.sync_api import sync_playwright
+import os
+
+with sync_playwright() as p:
+    browser = p.chromium.connect_over_cdp(
+        f"wss://connect.runbrowser.dev?token={os.environ['RUNBROWSER_TOKEN']}"
+    )
+    page = browser.new_page()
+    page.goto("https://example.com")
+    print(page.title())
+    browser.close()   # the browser is destroyed here
+```
+
+You're billed for the wall-clock time the browser is alive, per second, floored
+at 10 seconds. Closing the browser stops the meter — see [Billing](/docs/concepts#browser-time-billing).
+
+## A stable session
+
+Two things change. You create the session up front, and you reconnect to it by
+id instead of opening a fresh browser.
+
+```ts tab=TypeScript
+// 1. Create a session that outlives the connection.
+const res = await fetch('https://connect.runbrowser.dev/v1/sessions', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ keepAlive: true, maxIdleSeconds: 600 }),
+})
+const { sessionId, connectUrl } = await res.json()
+
+// 2. Connect, do the first half of the work, disconnect.
+let browser = await chromium.connectOverCDP(connectUrl)
+let page = (await browser.contexts())[0].pages()[0] ?? await browser.newPage()
+await page.goto('https://app.example.com/login')
+// … sign in …
+await browser.close()   // the BROWSER stays alive; only your connection drops
+
+// 3. Later — a different process, even — reconnect to the same browser.
+browser = await chromium.connectOverCDP(connectUrl)
+page = (await browser.contexts())[0].pages()[0]
+// Still logged in. Still on the same page. Still holding SPA state.
+```
+
+`connectUrl` already carries a one-use credential, so you don't append your API
+key to it. To reconnect from somewhere that only has the id, use
+`?session=<sessionId>&token=<key>`.
+
+### What survives, and what doesn't
+
+| Survives | Doesn't |
+|---|---|
+| Open tabs and their URLs | A restart of the **host machine** — containers die with it |
+| In-memory JS state, a hydrated SPA | Anything past `maxIdleSeconds` of no connection |
+| Cookies, localStorage, session storage | Anything past the hard max session lifetime |
+| Our own redeploys of the platform | |
+
+A reattach to a session that has since been reclaimed returns
+[`404`](/docs/errors) — the case worth writing a retry around.
+
+## Keeping the meter honest
+
+A parked stable session **keeps billing** until it idles out — it's a live
+browser holding a slot. `maxIdleSeconds` is your backstop, and the dashboard's
+Sessions panel lists everything running so you can close what you forgot.
+
+```ts tab=TypeScript
+// Close a stable session explicitly when you're done with it.
+await fetch(`https://connect.runbrowser.dev/v1/sessions/${sessionId}/close`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}` },
+})
+```
+
+## When to reach for which
+
+- **Ordinary session** — a scrape, a screenshot, a one-shot automation. Open,
+  work, close. Cheapest and simplest.
+- **Stable session** — a multi-step agent flow, anything where signing in once
+  and reusing the logged-in browser across several calls beats re-authenticating
+  every time.
+
+See also: [the live viewer](/docs/guide-viewer) to watch a session run, and the
+[API reference](/docs/api-reference#sessions) for every session field.
+
+---
+
+# Stealth & fingerprinting
+
+Every browser we hand you already carries a coherent device profile — a
+consistent, per-session identity rather than the obvious tells of a headless
+Chromium in a datacenter. There's nothing to turn on; it's the default.
+
+This page is about what that means, and — just as importantly — what it
+doesn't, so you can set expectations before you point it at a hard target.
+
+## What's handled for you
+
+- **No automation tells.** `navigator.webdriver` is false, the plugin and
+  language sets look real, `window.chrome` is present. The launch never passes
+  `--enable-automation`.
+- **A coherent OS persona.** The user agent, `navigator.platform`, the
+  client-hint headers, the WebGL renderer string and the worker-thread realm all
+  agree with each other. A mismatch between any two of those is the cheapest
+  possible bot check, and this closes them.
+- **Per-tenant isolation.** The canvas and audio fingerprints are seeded per
+  container, so no two customers share one identity. One abusive user can't get
+  the whole fleet blocked — and your sessions aren't clustered with anyone
+  else's.
+- **Coherent locale.** When you select a [proxy country](/docs/guide-proxies),
+  the timezone and `Accept-Language` move with the exit IP.
+
+## What it is not
+
+We flag bot walls; we don't pretend they aren't there, and we don't sell
+guaranteed evasion.
+
+- **A page behind a CAPTCHA still needs solving.** Fingerprint quality gets you
+  past *detection*; it does nothing about a challenge you're explicitly asked to
+  complete. See [CAPTCHAs](/docs/concepts#captchas) — solving is bring-your-own
+  solver key, at your provider's wholesale price.
+- **IP reputation is separate.** Many sites decide at the edge, on the address,
+  before a line of JavaScript runs. No amount of fingerprint work changes that —
+  [a proxy](/docs/guide-proxies) does.
+- **The GPU is real software rendering.** The reported strings are coherent, but
+  a timing or behavioural WebGL probe can still tell it's not a discrete GPU.
+
+## Knowing when you're blocked
+
+The primitives don't hand you a bot wall dressed up as content. `/v1/fetch` and
+`/smart-scrape` return a block signal so you can react instead of parsing a
+CAPTCHA page as if it were data.
+
+```json
+// A blocked fetch reports it rather than returning the wall as the body.
+{ "status": 403, "blocked": true, "blockProvider": "cloudflare", "body": "…" }
+```
+
+That honesty is the point: you find out a target is defended in the response,
+not three steps later when your extracted "data" turns out to be an interstitial.
+
+See also: [Proxies & geo-targeting](/docs/guide-proxies) for the IP half of the
+problem, which is usually the half that matters.
+
+---
+
+# The live viewer
+
+Watch a session as it runs. Not a recording played back later, not a log —
+the actual browser, streamed live, that you can open in a tab or hand to a
+teammate. It's the fastest way to answer "what is my agent actually doing?"
+and the thing neither Browserless nor Browserbase puts on the front page.
+
+## Get a viewer link
+
+Mint a signed, expiring URL for a running session. It carries no API key, so
+it's safe to paste into a ticket or embed in your own dashboard.
+
+```ts tab=TypeScript
+const res = await fetch(
+  `https://connect.runbrowser.dev/v1/sessions/${sessionId}/viewer-token`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RUNBROWSER_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ ttlSeconds: 3600 }),   // 1h default, 24h max
+  },
+)
+const { webUrl } = await res.json()
+// https://connect.runbrowser.dev/viewer?...  — signed, expiring, no token inside
+```
+
+```bash tab=cURL
+curl -X POST \
+  https://connect.runbrowser.dev/v1/sessions/$SESSION_ID/viewer-token \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "ttlSeconds": 3600 }'
+```
+
+Open `webUrl` in any browser. Anyone holding it can watch until it expires;
+because there's no bearer token in the URL, sharing the link never shares your
+key.
+
+## Embed it
+
+The viewer page is built to be put in an `<iframe>` — no chrome, no controls of
+its own, so it drops cleanly into your product.
+
+```html
+<iframe
+  src="https://connect.runbrowser.dev/viewer?...&fit=cover"
+  style="width: 100%; aspect-ratio: 16/10; border: 0; border-radius: 12px"
+  allow="clipboard-read"
+></iframe>
+```
+
+**Query options**
+
+| Param | Values | Effect |
+|---|---|---|
+| `fit` | `cover` \| `contain` \| `fill` | How the stream sizes into the frame |
+| `debug` | `1` | Show a small diagnostic pill (fps, connection state) |
+
+The page also posts `postMessage` events to the parent frame as the session
+connects, streams and ends, so you can react to state in your own UI.
+
+## A watched run, end to end
+
+```ts tab=TypeScript
+// 1. Start a stable session so it's alive to watch.
+const { sessionId, connectUrl } = await (await fetch(
+  'https://connect.runbrowser.dev/v1/sessions',
+  { method: 'POST', headers: auth, body: JSON.stringify({ keepAlive: true }) },
+)).json()
+
+// 2. Mint a viewer link and print it before you start driving.
+const { webUrl } = await (await fetch(
+  `https://connect.runbrowser.dev/v1/sessions/${sessionId}/viewer-token`,
+  { method: 'POST', headers: auth, body: JSON.stringify({ ttlSeconds: 900 }) },
+)).json()
+console.log('Watch it here →', webUrl)
+
+// 3. Drive. Whoever opened the link sees every step as it happens.
+const browser = await chromium.connectOverCDP(connectUrl)
+const page = await browser.newPage()
+await page.goto('https://example.com')
+```
+
+## Notes
+
+- The stream is **not recorded** and nothing from it is written to disk. When
+  the link expires or the session ends, it's gone.
+- Streaming a session costs the normal browser-time it's already running; the
+  viewer itself adds no separate charge.
+- Available on **every plan**, including Free — it isn't gated to a higher tier.
+
+See also: [Sessions](/docs/guide-sessions) for creating something to watch, and
+the [API reference](/docs/api-reference#sessions) for the token fields.
+
+---
+
 # MCP server
 
 The gateway exposes an [MCP](https://modelcontextprotocol.io) endpoint at

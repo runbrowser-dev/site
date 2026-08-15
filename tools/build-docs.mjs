@@ -30,15 +30,33 @@ loadLanguages(['typescript', 'javascript', 'json', 'bash', 'diff', 'python'])
 const CONTENT = 'content'
 const OUT = 'docs'
 
-// Reading order for someone new, not alphabetical.
+// Reading order for someone new, not alphabetical. Drives prev/next paging.
 const NAV = [
   ['quickstart', 'Quickstart'],
   ['concepts', 'Concepts'],
+  ['guide-sessions', 'Sessions & stable sessions'],
+  ['guide-viewer', 'The live viewer'],
+  ['guide-extract', 'Structured extraction'],
+  ['guide-crawling', 'Crawling a site'],
+  ['guide-capture', 'Screenshots & PDFs'],
+  ['guide-proxies', 'Proxies & geo-targeting'],
+  ['guide-stealth', 'Stealth & fingerprinting'],
   ['api-reference', 'API reference'],
   ['errors', 'Errors'],
   ['mcp', 'MCP server'],
   ['migrating-from-browserless', 'From Browserless'],
   ['migrating-from-browserbase', 'From Browserbase'],
+]
+
+// The guide pages, in the order they appear in the sidebar's Guides group.
+const GUIDES = [
+  ['guide-sessions', 'Sessions & stable sessions'],
+  ['guide-viewer', 'The live viewer'],
+  ['guide-extract', 'Structured extraction'],
+  ['guide-crawling', 'Crawling a site'],
+  ['guide-capture', 'Screenshots & PDFs'],
+  ['guide-proxies', 'Proxies & geo-targeting'],
+  ['guide-stealth', 'Stealth & fingerprinting'],
 ]
 
 /**
@@ -305,11 +323,17 @@ function sidebarHtml(currentSlug) {
     .join('\n        ')
 
   const apiOpen = currentSlug === 'api-reference'
+  const guides = GUIDES.map(([s, label]) => link(s, label)).join('\n        ')
   return `
     <span class="nav-title">Get started</span>
     <div class="nav-links">
         ${link('quickstart', 'Quickstart')}
         ${link('concepts', 'Concepts')}
+    </div>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        ${guides}
     </div>
 
     <details class="nav-group" ${apiOpen ? 'open' : ''}>
@@ -319,16 +343,20 @@ function sidebarHtml(currentSlug) {
       </div>
     </details>
 
-    <span class="nav-title nav-title-spaced">Guides</span>
+    <span class="nav-title nav-title-spaced">Integrations</span>
     <div class="nav-links">
-        ${link('errors', 'Errors')}
         ${link('mcp', 'MCP server')}
+    </div>
+
+    <span class="nav-title nav-title-spaced">Migrating</span>
+    <div class="nav-links">
         ${link('migrating-from-browserless', 'From Browserless')}
         ${link('migrating-from-browserbase', 'From Browserbase')}
     </div>
 
     <span class="nav-title nav-title-spaced">More</span>
     <div class="nav-links">
+        ${link('errors', 'Errors')}
         <a class="nav-link" href="/#pricing">Pricing</a>
         <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
     </div>`
@@ -491,12 +519,13 @@ await page.goto('https://example.com')`
 
 const cards = [
   ['quickstart', 'Quickstart', 'Change one line and run your existing script on our browsers.'],
-  ['concepts', 'Concepts', 'Sessions, billing, stable sessions, the viewer, stealth and proxies.'],
-  ['api-reference', 'API reference', 'Every endpoint, with request and response shapes.'],
-  ['errors', 'Errors', 'Every status code we return, what causes it, and what to do about it.'],
+  ['guide-sessions', 'Sessions & stable sessions', 'One browser, yours while connected — and how to keep it alive between connects.'],
+  ['guide-viewer', 'The live viewer', 'Watch a run in real time, or hand someone a signed link that carries no key.'],
+  ['guide-extract', 'Structured extraction', 'A URL and a JSON Schema in, validated JSON out — on JavaScript sites too.'],
+  ['guide-crawling', 'Crawling a site', 'Smart-scrape, map and crawl — cheapest-first, and honest about what they did.'],
+  ['api-reference', 'API reference', 'Every endpoint, categorised, with request and response shapes.'],
   ['mcp', 'MCP server', 'Browser tools for Claude, Cursor, or anything that speaks MCP.'],
-  ['migrating-from-browserless', 'From Browserless', 'A 1:1 mapping, the honest gaps, and how billing differs.'],
-  ['migrating-from-browserbase', 'From Browserbase', 'Contexts vs stable sessions, and what we do not have.'],
+  ['errors', 'Errors', 'Every status code we return, what causes it, and what to do about it.'],
 ]
   .map(
     ([s, t, blurb]) =>
