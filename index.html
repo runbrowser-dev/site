@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RunBrowser — browser infrastructure you can watch</title>
 <meta name="description" content="Hosted Chromium for Playwright, Puppeteer and AI agents. Drop-in over CDP, per-second billing, a live session viewer, EU-hosted. Free tier, no card.">
 <meta property="og:title" content="RunBrowser — browser infrastructure you can watch">
@@ -353,18 +353,29 @@
     .sess-foot { gap: 12px; padding: 8px 12px; font-size: 10.5px; }
     .sess-foot .spacer { display: none; }
 
-    /* Code reads at a size where more of each line fits before it scrolls. */
-    pre { font-size: 12px; line-height: 1.6; padding: 18px 16px; }
+    /* Code WRAPS on a phone instead of scrolling sideways. A horizontal
+       scroll region chops every long line at the panel's right edge — the
+       "cut" that looked broken. Wrapping shows every character; the one long
+       string (the wss:// URL) breaks anywhere rather than forcing an overflow. */
+    pre { font-size: 12px; line-height: 1.6; padding: 18px 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
     .code-top { padding: 9px 12px; }
     .code-top .file, .code-top .ep { font-size: 11px; }
     .code-top .ep { max-width: 52%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Comparison table: three columns don't fit 390px comfortably. Drop the
+       empty spacer header, tighten padding, shrink type, and let the cells
+       wrap so nothing is cut. */
+    .cmp th, .cmp td { padding: 11px 12px; font-size: 12.5px; }
+    .cmp thead th { font-size: 10.5px; letter-spacing: 0.04em; }
+    .cmp td.q { font-size: 11.5px; }
 
     /* Section index numbers add clutter at this size. */
     .sec-head .idx { display: none; }
 
     .cell { padding: 18px; }
     .final { padding: 30px 20px; border-radius: 14px; }
-    .foot { justify-content: flex-start; gap: 8px 16px; }
+    /* Clear the iOS Safari bottom toolbar so the footer isn't tucked under it. */
+    .foot { justify-content: flex-start; gap: 8px 16px; padding-bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
   }
 
   @media (max-width: 380px) {
