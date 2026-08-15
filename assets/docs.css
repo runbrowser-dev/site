@@ -136,7 +136,7 @@ kbd {
   display: grid; grid-template-columns: 216px minmax(0, 1fr) 190px;
   gap: 44px; max-width: 1280px; margin: 0 auto; padding: 36px 32px 96px;
 }
-.sidebar { position: sticky; top: 84px; align-self: start; max-height: calc(100vh - 110px); overflow-y: auto; }
+.sidebar { position: sticky; top: 84px; align-self: start; max-height: calc(100vh - 110px); overflow-y: auto; overflow-x: hidden; min-width: 0; }
 .nav-title {
   display: block; font-family: var(--mono); font-size: 11px;
   text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted);
@@ -150,6 +150,54 @@ kbd {
 }
 .nav-links a:hover { color: var(--fg); background: rgba(255,255,255,0.03); }
 .nav-links a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,210,106,0.06); }
+
+/* ---- categorised API reference nav ---- */
+.nav-group { margin-top: 28px; }
+.nav-group > summary {
+  list-style: none; cursor: pointer; margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-group > summary::-webkit-details-marker { display: none; }
+.nav-group > summary::after {
+  content: "›"; font-family: var(--mono); color: var(--muted);
+  transform: rotate(90deg); transition: transform 140ms;
+}
+.nav-group:not([open]) > summary::after { transform: rotate(0deg); }
+.nav-title-spaced { margin-top: 28px; }
+
+.nav-api { display: flex; flex-direction: column; gap: 14px; }
+.nav-cat { display: flex; flex-direction: column; gap: 2px; }
+.nav-cat-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  color: var(--muted-2); text-decoration: none; padding: 3px 10px;
+}
+.nav-cat-label:hover { color: var(--fg); }
+.nav-eps { display: flex; flex-direction: column; gap: 1px; }
+.nav-eps .ep {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 4px 10px; border-radius: 6px; border-left: 2px solid transparent;
+  text-decoration: none; min-width: 0;
+}
+.nav-eps .ep:hover { background: rgba(255,255,255,0.03); }
+.nav-eps .ep.active { border-left-color: var(--accent); background: rgba(0,210,106,0.06); }
+.nav-eps .ep-path {
+  font-family: var(--mono); font-size: 12.5px; color: var(--muted-2);
+  min-width: 0; overflow-wrap: anywhere; line-height: 1.5;
+}
+.nav-eps .ep:hover .ep-path { color: var(--fg); }
+.nav-eps .ep.active .ep-path { color: var(--accent); }
+
+/* Method badge: colour by verb so the surface is scannable. */
+.m {
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.03em; padding: 2px 5px; border-radius: 4px;
+  min-width: 34px; text-align: center; flex: none; line-height: 1.4;
+}
+.m-get    { color: #74d0ff; background: rgba(116,208,255,0.12); }
+.m-post   { color: var(--accent); background: rgba(0,210,106,0.12); }
+.m-put    { color: #ffcf6b; background: rgba(255,207,107,0.12); }
+.m-patch  { color: #ffcf6b; background: rgba(255,207,107,0.12); }
+.m-delete { color: #ff8f8f; background: rgba(255,143,143,0.12); }
 
 /* On-page table of contents. */
 .toc { position: sticky; top: 84px; align-self: start; max-height: calc(100vh - 110px); overflow-y: auto; }
@@ -327,6 +375,11 @@ h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1
   .layout { grid-template-columns: 1fr; gap: 24px; padding: 24px 20px 64px; }
   .sidebar { position: static; max-height: none; }
   .nav-links { flex-direction: row; flex-wrap: wrap; }
+  /* On a phone the full 16-endpoint tree above every page is too much, but the
+     category links still navigate usefully. Keep the categories, hide the
+     per-endpoint rows; tapping a category opens the reference at that section. */
+  .nav-eps { display: none; }
+  .nav-api { gap: 4px; }
   .cards { grid-template-columns: 1fr; }
   .prose h1 { font-size: 28px; }
   .docs-header { padding: 12px 16px; gap: 12px; }
