@@ -323,14 +323,53 @@
 
   /* ---- phones: tighten the gutter and vertical rhythm ---- */
   @media (max-width: 640px) {
-    .wrap { padding: 0 20px; }
-    .hero { padding: 40px 0 28px; }
-    section.block { padding: 52px 0; }
-    .final { padding: 32px 22px; border-radius: 14px; }
-    .foot { justify-content: flex-start; }
-    /* the two hero buttons go full-width and stack, easier to tap */
+    .wrap { padding: 0 18px; }
+
+    /* The console grid was tuned for a wide desktop. On a phone its big empty
+       squares are the loudest thing on screen and make the page feel bare, so
+       shrink the cell and let the radial mask swallow it faster. */
+    body { background-size: auto, 30px 30px, 30px 30px; }
+    body::before { background: radial-gradient(150% 55% at 50% 0%, transparent 20%, var(--ground) 62%); }
+
+    /* Tighter vertical rhythm — desktop section spacing reads as dead air here. */
+    .hero { padding: 34px 0 24px; }
+    section.block { padding: 44px 0; }
+    .sec-head { margin-bottom: 22px; }
+    .compat { margin-top: 34px; }
+
+    /* Headline down a notch; lede narrower so lines aren't too long. */
+    .hero h1 { font-size: 34px; line-height: 1.06; }
+    .hero .lede { font-size: 16px; }
+
+    /* Two hero buttons go full-width and stack, easier to tap. */
     .hero .cta-row { flex-direction: column; align-items: stretch; }
     .hero .cta-row .btn { justify-content: center; }
+
+    /* Compat strip: smaller, tighter, no dead columns. */
+    .compat .row { gap: 10px 18px; padding: 16px 0; }
+    .compat .lab, .compat .name { font-size: 11px; }
+
+    /* Session frame footer fits on one line instead of each label wrapping. */
+    .sess-foot { gap: 12px; padding: 8px 12px; font-size: 10.5px; }
+    .sess-foot .spacer { display: none; }
+
+    /* Code reads at a size where more of each line fits before it scrolls. */
+    pre { font-size: 12px; line-height: 1.6; padding: 18px 16px; }
+    .code-top { padding: 9px 12px; }
+    .code-top .file, .code-top .ep { font-size: 11px; }
+    .code-top .ep { max-width: 52%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Section index numbers add clutter at this size. */
+    .sec-head .idx { display: none; }
+
+    .cell { padding: 18px; }
+    .final { padding: 30px 20px; border-radius: 14px; }
+    .foot { justify-content: flex-start; gap: 8px 16px; }
+  }
+
+  @media (max-width: 380px) {
+    .hero h1 { font-size: 30px; }
+    .sess-foot { font-size: 10px; gap: 9px; }
   }
 </style>
 
