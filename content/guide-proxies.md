@@ -68,6 +68,6 @@ wrong region.
 - **Managed pool** — you want geo-targeting without sourcing IPs, and you want
   the locale kept coherent automatically.
 
-See also: [Stealth & fingerprinting](/docs/guide-stealth) for what the browser
+See also: [Device profiles](/docs/guide-device-profile) for what the browser
 presents beyond the IP, and the
 [proxy query params](/docs/api-reference#connecting-a-browser).

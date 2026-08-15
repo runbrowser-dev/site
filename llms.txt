@@ -13,7 +13,7 @@
 - [Crawling a site](https://runbrowser.dev/docs/guide-crawling.md): Crawling a site
 - [Screenshots & PDFs](https://runbrowser.dev/docs/guide-capture.md): Screenshots & PDFs
 - [Proxies & geo-targeting](https://runbrowser.dev/docs/guide-proxies.md): Proxies & geo-targeting
-- [Stealth & fingerprinting](https://runbrowser.dev/docs/guide-stealth.md): Stealth & fingerprinting
+- [Device profiles](https://runbrowser.dev/docs/guide-device-profile.md): Device profiles
 
 ## Reference
 
