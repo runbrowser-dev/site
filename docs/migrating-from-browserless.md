@@ -35,7 +35,7 @@ Be honest with yourself about this list before you switch:
 | Firefox, WebKit | **No.** Chromium only — if you need cross-browser testing, this is the wrong product. |
 | Session replay / recording | **No.** The [live viewer](concepts.md#live-viewer) shows the present, not the past. |
 | Bundled proxies | BYO proxy. Wholesale pricing from your provider, no markup from us. |
-| `/search` | Different shape: ours is `POST /v1/search` on the API host with `{q, count}`. |
+| `/search` | **No.** We give you browsers, not a web index — bring your own provider. |
 
 If you depend on BrowserQL or need a non-Chromium engine, this isn't a
 drop-in and you should stay where you are.
@@ -76,7 +76,7 @@ These were gaps and no longer are:
 Browserless bills in **units**, where a unit covers a block of browser
 time and partial blocks round **up**. We bill **browser-seconds**, floored
 at 10 seconds per session, plus separate monthly allowances for
-`/v1/fetch`, `/v1/search` and `/v1/extract`. Proxy traffic and CAPTCHA
+`/v1/fetch` and `/v1/extract`. Proxy traffic and CAPTCHA
 solving stay on your providers' bills rather than ours.
 
 The practical consequences:

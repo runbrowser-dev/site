@@ -23,7 +23,7 @@ can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.
 
-| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract |
+| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /extract |
 |---|---|---|---|---|---|---|---|
 | Free | €0 | 3 | 1 | 15 min | 1,000 | 1,000 | 25 |
 | Hobby | €19/mo | 10 | 150 | 60 min | 5,000 | 5,000 | 100 |

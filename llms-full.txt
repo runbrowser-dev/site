@@ -5,7 +5,7 @@ Three surfaces, three hostnames:
 | Host | What lives there |
 |---|---|
 | `connect.runbrowser.dev` | CDP, REST shortcuts, sessions, viewer, MCP |
-| `api.runbrowser.dev` | `/v1` primitives (fetch, search, extract) |
+| `api.runbrowser.dev` | `/v1` primitives (fetch, extract) |
 | `app.runbrowser.dev` | Dashboard, auth, keys, billing, usage |
 
 Auth everywhere is your API key, as `Authorization: Bearer ab_…` or
@@ -473,16 +473,6 @@ page is a Cloudflare wall" from "this page is empty" from "this page is a
 404" without guessing. Check `status`: an error page is still a page, and
 its body reads like ordinary content.
 
-### `POST /v1/search`
-
-```json
-{ "q": "browser automation", "count": 10, "lang": "en",
-  "phrase": false, "include_hosts": ["example.com"], "exclude_hosts": ["spam.example"] }
-```
-
-Note the field names: `q` and `count`, not `query` and `limit`.
-`count` maxes at 20.
-
 ### `POST /v1/extract`
 
 Renders the page in a real browser, then asks an LLM for exactly the
@@ -545,7 +535,7 @@ stored. See
 ## MCP
 
 `POST https://connect.runbrowser.dev/mcp` — Model Context Protocol over
-Streamable HTTP. Thirteen tools. See [mcp.md](mcp.md).
+Streamable HTTP. Twelve tools. See [mcp.md](mcp.md).
 
 ---
 
@@ -615,7 +605,7 @@ can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.
 
-| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract |
+| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /extract |
 |---|---|---|---|---|---|---|---|
 | Free | €0 | 3 | 1 | 15 min | 1,000 | 1,000 | 25 |
 | Hobby | €19/mo | 10 | 150 | 60 min | 5,000 | 5,000 | 100 |
@@ -856,7 +846,7 @@ status you got instead of guessing.
 
 `connect.runbrowser.dev` (browsers, sessions, the REST shortcuts, MCP)
 answers with **plain text**. `api.runbrowser.dev` (`/v1/fetch`,
-`/v1/search`, `/v1/extract`) answers with **JSON**.
+`/v1/extract`) answers with **JSON**.
 
 If you write one error handler that assumes JSON everywhere, it will throw
 a parse error on the exact request that was already failing, and you'll
@@ -1041,20 +1031,6 @@ code is the whole answer.
 A response over 10 MB comes back as a **success** with `truncated: true`.
 It is not an error.
 
-## /v1/search
-
-| Status | `error` | Cause | What to do |
-|---|---|---|---|
-| 400 | `validation_failed` | Bad `includeHosts`/`excludeHosts`. Max 50 entries, 200 chars each | See `message` for which |
-| **402** | `spend_cap_exceeded` | Your account has reached its monthly third-party spend ceiling | Wait for month rollover, or contact us to raise it |
-| 400 | `invalid_query` | Empty `q` | Supply a query |
-| **504** | `search_provider_timeout` | The search backend was too slow | Retry |
-| 502 | `search_provider_unavailable` | The backend failed or returned nonsense | Retry with backoff |
-| 502 | `search_provider_error` | The backend rejected the query | Retry; tell us if it persists |
-| 429 | `monthly_quota_exceeded` | Search allowance exhausted | Upgrade or wait |
-
-**Zero results is a 200 with an empty array**, not a 404 and not an error.
-
 ## /v1/extract
 
 Extract is the one endpoint where two different things both return `429`,
@@ -1191,7 +1167,7 @@ timezone, not your billing date.
 |---|---|
 | Concurrent sessions | Requests **wait ~20 seconds** for a free slot, then `429`. A short burst usually resolves itself |
 | Monthly browser-seconds | `429 monthly_quota_exceeded` with `used_seconds`/`limit_seconds` |
-| Monthly fetches, searches, extracts | `429 monthly_quota_exceeded` with `type`/`used`/`limit` |
+| Monthly fetches, extracts | `429 monthly_quota_exceeded` with `type`/`used`/`limit` |
 | Fleet capacity | `503` with `Retry-After: 30` |
 
 The difference between `429` and `503` is worth keeping straight: `429`
@@ -2519,7 +2495,6 @@ same header.
 | Tool | Browser? | What it's for |
 |---|---|---|
 | `fetch` | no | Read one URL over plain HTTP. Fast, but no JavaScript runs. |
-| `search` | no | Web search: titles, URLs, snippets. |
 | `extract` | no | URL + JSON Schema → structured JSON. Renders the page first, so it handles JS-heavy sites. |
 | `browser_navigate` | yes | Open a URL in this session's persistent browser. |
 | `browser_click` | yes | Click the first element matching a CSS selector. |
@@ -2533,7 +2508,7 @@ same header.
 | `browser_close` | yes | Release the browser and stop the meter. |
 
 The tool descriptions deliberately steer a model toward `fetch` /
-`search` / `extract` first. Those are stateless, fast, and don't hold a
+`extract` first. Those are stateless, fast, and don't hold a
 container; the `browser_*` family exists for the cases they can't
 handle — logging in, clicking through a flow, filling a form.
 
@@ -2623,7 +2598,7 @@ clicked instead.
 request; the server ties it to one browser.
 
 The browser is created **lazily**, on the first `browser_*` call — an
-agent that only ever calls `fetch` and `search` never starts one, and
+agent that only ever calls `fetch` never starts one, and
 never pays for one. It's a normal keepAlive session from the same fleet
 customers drive directly, so per-org concurrency caps, monthly
 browser-time quotas, idle timers and metering all apply unchanged.
@@ -2738,7 +2713,8 @@ Same two-step, no SDK required.
 | Extensions, file uploads | Via CDP, no dedicated API |
 | File downloads | [`POST /download`](/docs/api-reference#post-download-the-file-as-is), or CDP |
 | Multiple regions | EU only |
-| Fetch, Search | `POST /v1/fetch`, `POST /v1/search` — comparable, separate allowance |
+| Fetch | `POST /v1/fetch` — comparable, separate allowance |
+| Search | **No equivalent.** We give you browsers, not a web index |
 | Agents, Functions, Model Gateway | **No equivalent.** We're infrastructure; the agent framework is yours. |
 
 ## Contexts vs stable sessions — the one real difference
@@ -2816,13 +2792,13 @@ for.
 
 ## What you get instead
 
-- **An MCP server** — thirteen tools, no integration code. [Details](mcp.md).
-- **`/v1/fetch` and `/v1/search`**, billed against separate monthly
+- **An MCP server** — twelve tools, no integration code. [Details](mcp.md).
+- **`/v1/fetch`**, billed against a separate monthly
   allowances rather than browser-time, so agent loops stop burning
-  browser-seconds on cheap operations. Browserbase ships Fetch and Search
-  too — this isn't a capability we have and they don't. Compare the
-  billing rather than the feature list: what matters is whether those
-  calls draw from the same balance as your browser time.
+  browser-seconds on cheap operations. Browserbase ships Fetch too — this
+  isn't a capability we have and they don't. Compare the billing rather
+  than the feature list: what matters is whether those calls draw from the
+  same balance as your browser time.
 - **EU residency** by default.
 - **No proprietary SDK to unpick.** There are [typed clients](/docs/guide-sdk)
   if you want them, but they are optional and thin: you connect over standard CDP, so the
@@ -2872,7 +2848,7 @@ Be honest with yourself about this list before you switch:
 | Firefox, WebKit | **No.** Chromium only — if you need cross-browser testing, this is the wrong product. |
 | Session replay / recording | **No.** The [live viewer](concepts.md#live-viewer) shows the present, not the past. |
 | Bundled proxies | BYO proxy. Wholesale pricing from your provider, no markup from us. |
-| `/search` | Different shape: ours is `POST /v1/search` on the API host with `{q, count}`. |
+| `/search` | **No.** We give you browsers, not a web index — bring your own provider. |
 
 If you depend on BrowserQL or need a non-Chromium engine, this isn't a
 drop-in and you should stay where you are.
@@ -2913,7 +2889,7 @@ These were gaps and no longer are:
 Browserless bills in **units**, where a unit covers a block of browser
 time and partial blocks round **up**. We bill **browser-seconds**, floored
 at 10 seconds per session, plus separate monthly allowances for
-`/v1/fetch`, `/v1/search` and `/v1/extract`. Proxy traffic and CAPTCHA
+`/v1/fetch` and `/v1/extract`. Proxy traffic and CAPTCHA
 solving stay on your providers' bills rather than ours.
 
 The practical consequences:
@@ -3084,11 +3060,6 @@ curl -X POST https://api.runbrowser.dev/v1/fetch \
   -H 'Content-Type: application/json' \
   -d '{"url": "https://example.com", "format": "markdown"}'
 
-# Search the web
-curl -X POST https://api.runbrowser.dev/v1/search \
-  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"q": "browser automation", "count": 5}'
 
 # Pull structured data out of a page (renders it in a real browser first)
 curl -X POST https://api.runbrowser.dev/v1/extract \
@@ -3116,11 +3087,6 @@ page = requests.post(
     json={"url": "https://example.com", "format": "markdown"},
 ).json()
 
-# Search the web
-hits = requests.post(
-    f"{API}/v1/search", headers=auth,
-    json={"q": "browser automation", "count": 5},
-).json()
 
 # Pull structured data out of a page (renders it in a real browser first)
 data = requests.post(
@@ -3156,8 +3122,6 @@ const call = async (path: string, body: unknown) => {
 // Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
 const page = await call('/v1/fetch', { url: 'https://example.com', format: 'markdown' });
 
-// Search the web
-const hits = await call('/v1/search', { q: 'browser automation', count: 5 });
 
 // Pull structured data out of a page (renders it in a real browser first)
 const data = await call('/v1/extract', {
@@ -3186,7 +3150,7 @@ If you're building with an MCP-aware agent, skip the code entirely:
 }
 ```
 
-Thirteen tools appear: `fetch`, `search`, `extract`, and a `browser_*` family
+Twelve tools appear: `fetch`, `extract`, and a `browser_*` family
 that drives one persistent browser across calls. See [mcp.md](mcp.md).
 
 ## What you're billed for
@@ -3196,8 +3160,8 @@ to the moment it's released. Not per session, so a script that opens one
 browser and drives it for an hour costs the same as sixty scripts that
 each take a minute.
 
-`/v1/fetch` and `/v1/search` are billed per call against a separate
-monthly allowance and consume no browser-time at all. `/v1/extract` uses a
+`/v1/fetch` is billed per call against a separate monthly allowance and
+consumes no browser-time at all. `/v1/extract` uses a
 browser, so it does.
 
 The meter stops when your CDP connection closes — unless you asked for a
@@ -3540,7 +3504,7 @@ enters the picture for a challenge that literally asks a question, and then
 
 ## Give an agent the browser as a tool
 
-No glue code: point an MCP-aware agent at the server and it gets thirteen tools.
+No glue code: point an MCP-aware agent at the server and it gets twelve tools.
 
 ```json
 {

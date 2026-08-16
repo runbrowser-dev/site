@@ -323,7 +323,7 @@ enters the picture for a challenge that literally asks a question, and then
 
 ## Give an agent the browser as a tool
 
-No glue code: point an MCP-aware agent at the server and it gets thirteen tools.
+No glue code: point an MCP-aware agent at the server and it gets twelve tools.
 
 ```json
 {

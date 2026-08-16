@@ -53,7 +53,8 @@ Same two-step, no SDK required.
 | Extensions, file uploads | Via CDP, no dedicated API |
 | File downloads | [`POST /download`](/docs/api-reference#post-download-the-file-as-is), or CDP |
 | Multiple regions | EU only |
-| Fetch, Search | `POST /v1/fetch`, `POST /v1/search` — comparable, separate allowance |
+| Fetch | `POST /v1/fetch` — comparable, separate allowance |
+| Search | **No equivalent.** We give you browsers, not a web index |
 | Agents, Functions, Model Gateway | **No equivalent.** We're infrastructure; the agent framework is yours. |
 
 ## Contexts vs stable sessions — the one real difference
@@ -131,13 +132,13 @@ for.
 
 ## What you get instead
 
-- **An MCP server** — thirteen tools, no integration code. [Details](mcp.md).
-- **`/v1/fetch` and `/v1/search`**, billed against separate monthly
+- **An MCP server** — twelve tools, no integration code. [Details](mcp.md).
+- **`/v1/fetch`**, billed against a separate monthly
   allowances rather than browser-time, so agent loops stop burning
-  browser-seconds on cheap operations. Browserbase ships Fetch and Search
-  too — this isn't a capability we have and they don't. Compare the
-  billing rather than the feature list: what matters is whether those
-  calls draw from the same balance as your browser time.
+  browser-seconds on cheap operations. Browserbase ships Fetch too — this
+  isn't a capability we have and they don't. Compare the billing rather
+  than the feature list: what matters is whether those calls draw from the
+  same balance as your browser time.
 - **EU residency** by default.
 - **No proprietary SDK to unpick.** There are [typed clients](/docs/guide-sdk)
   if you want them, but they are optional and thin: you connect over standard CDP, so the

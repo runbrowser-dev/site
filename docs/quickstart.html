@@ -85,7 +85,6 @@
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
-            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
             <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
           </div>
         </div>
@@ -247,11 +246,6 @@ curl -X POST https://api.runbrowser.dev/v1/fetch \
   -H 'Content-Type: application/json' \
   -d '{&quot;url&quot;: &quot;https://example.com&quot;, &quot;format&quot;: &quot;markdown&quot;}'
 
-# Search the web
-curl -X POST https://api.runbrowser.dev/v1/search \
-  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
-  -H 'Content-Type: application/json' \
-  -d '{&quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 5}'
 
 # Pull structured data out of a page (renders it in a real browser first)
 curl -X POST https://api.runbrowser.dev/v1/extract \
@@ -270,11 +264,6 @@ curl -X POST https://api.runbrowser.dev/v1/fetch \
   -H 'Content-Type: application/json' \
   -d '{&quot;url&quot;: &quot;https://example.com&quot;, &quot;format&quot;: &quot;markdown&quot;}'
 
-# Search the web
-curl -X POST https://api.runbrowser.dev/v1/search \
-  -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
-  -H 'Content-Type: application/json' \
-  -d '{&quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 5}'
 
 # Pull structured data out of a page (renders it in a real browser first)
 curl -X POST https://api.runbrowser.dev/v1/extract \
@@ -293,11 +282,6 @@ curl -X POST https://api.runbrowser.dev/v1/extract \
   <span class="token parameter variable">-H</span> <span class="token string">'Content-Type: application/json'</span> <span class="token punctuation">\</span>
   <span class="token parameter variable">-d</span> <span class="token string">'{"url": "https://example.com", "format": "markdown"}'</span>
 
-<span class="token comment"># Search the web</span>
-<span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://api.runbrowser.dev/v1/search <span class="token punctuation">\</span>
-  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer <span class="token variable">$RUNBROWSER_TOKEN</span>"</span> <span class="token punctuation">\</span>
-  <span class="token parameter variable">-H</span> <span class="token string">'Content-Type: application/json'</span> <span class="token punctuation">\</span>
-  <span class="token parameter variable">-d</span> <span class="token string">'{"q": "browser automation", "count": 5}'</span>
 
 <span class="token comment"># Pull structured data out of a page (renders it in a real browser first)</span>
 <span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://api.runbrowser.dev/v1/extract <span class="token punctuation">\</span>
@@ -321,11 +305,6 @@ page = requests.post(
     json={&quot;url&quot;: &quot;https://example.com&quot;, &quot;format&quot;: &quot;markdown&quot;},
 ).json()
 
-# Search the web
-hits = requests.post(
-    f&quot;{API}/v1/search&quot;, headers=auth,
-    json={&quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 5},
-).json()
 
 # Pull structured data out of a page (renders it in a real browser first)
 data = requests.post(
@@ -349,11 +328,6 @@ page <span class="token operator">=</span> requests<span class="token punctuatio
     json<span class="token operator">=</span><span class="token punctuation">{</span><span class="token string">"url"</span><span class="token punctuation">:</span> <span class="token string">"https://example.com"</span><span class="token punctuation">,</span> <span class="token string">"format"</span><span class="token punctuation">:</span> <span class="token string">"markdown"</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
 <span class="token punctuation">)</span><span class="token punctuation">.</span>json<span class="token punctuation">(</span><span class="token punctuation">)</span>
 
-<span class="token comment"># Search the web</span>
-hits <span class="token operator">=</span> requests<span class="token punctuation">.</span>post<span class="token punctuation">(</span>
-    <span class="token string-interpolation"><span class="token string">f"</span><span class="token interpolation"><span class="token punctuation">{</span>API<span class="token punctuation">}</span></span><span class="token string">/v1/search"</span></span><span class="token punctuation">,</span> headers<span class="token operator">=</span>auth<span class="token punctuation">,</span>
-    json<span class="token operator">=</span><span class="token punctuation">{</span><span class="token string">"q"</span><span class="token punctuation">:</span> <span class="token string">"browser automation"</span><span class="token punctuation">,</span> <span class="token string">"count"</span><span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-<span class="token punctuation">)</span><span class="token punctuation">.</span>json<span class="token punctuation">(</span><span class="token punctuation">)</span>
 
 <span class="token comment"># Pull structured data out of a page (renders it in a real browser first)</span>
 data <span class="token operator">=</span> requests<span class="token punctuation">.</span>post<span class="token punctuation">(</span>
@@ -385,8 +359,6 @@ const call = async (path: string, body: unknown) =&gt; {
 // Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
 const page = await call('/v1/fetch', { url: 'https://example.com', format: 'markdown' });
 
-// Search the web
-const hits = await call('/v1/search', { q: 'browser automation', count: 5 });
 
 // Pull structured data out of a page (renders it in a real browser first)
 const data = await call('/v1/extract', {
@@ -415,8 +387,6 @@ const data = await call('/v1/extract', {
 <span class="token comment">// Read a page as markdown (plain HTTP — fast, but no JavaScript runs)</span>
 <span class="token keyword">const</span> page <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'/v1/fetch'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> url<span class="token operator">:</span> <span class="token string">'https://example.com'</span><span class="token punctuation">,</span> format<span class="token operator">:</span> <span class="token string">'markdown'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token comment">// Search the web</span>
-<span class="token keyword">const</span> hits <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'/v1/search'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> q<span class="token operator">:</span> <span class="token string">'browser automation'</span><span class="token punctuation">,</span> count<span class="token operator">:</span> <span class="token number">5</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token comment">// Pull structured data out of a page (renders it in a real browser first)</span>
 <span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'/v1/extract'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
@@ -444,15 +414,15 @@ const data = await call('/v1/extract', {
                <span class="token string">"--header"</span><span class="token punctuation">,</span> <span class="token string">"Authorization: Bearer ab_yourkey"</span><span class="token punctuation">]</span>
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre></div><p>Thirteen tools appear: <code>fetch</code>, <code>search</code>, <code>extract</code>, and a <code>browser_*</code> family
+<span class="token punctuation">}</span></code></pre></div><p>Twelve tools appear: <code>fetch</code>, <code>extract</code>, and a <code>browser_*</code> family
 that drives one persistent browser across calls. See <a href="/docs/mcp">mcp.md</a>.</p>
 <h2 id="what-youre-billed-for">What you&#39;re billed for<a class="anchor" href="#what-youre-billed-for" aria-label="Link to this section">#</a></h2>
 <p><strong>Browser-time, by the second</strong> — from the moment a browser is provisioned
 to the moment it&#39;s released. Not per session, so a script that opens one
 browser and drives it for an hour costs the same as sixty scripts that
 each take a minute.</p>
-<p><code>/v1/fetch</code> and <code>/v1/search</code> are billed per call against a separate
-monthly allowance and consume no browser-time at all. <code>/v1/extract</code> uses a
+<p><code>/v1/fetch</code> is billed per call against a separate monthly allowance and
+consumes no browser-time at all. <code>/v1/extract</code> uses a
 browser, so it does.</p>
 <p>The meter stops when your CDP connection closes — unless you asked for a
 <a href="/docs/concepts#stable-sessions">stable session</a>, which keeps the browser

@@ -85,7 +85,6 @@
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
-            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
             <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
           </div>
         </div>
@@ -136,7 +135,7 @@ status you got instead of guessing.</p>
 <p><strong>Two services answer you, and their error bodies are not the same shape.</strong></p>
 <p><code>connect.runbrowser.dev</code> (browsers, sessions, the REST shortcuts, MCP)
 answers with <strong>plain text</strong>. <code>api.runbrowser.dev</code> (<code>/v1/fetch</code>,
-<code>/v1/search</code>, <code>/v1/extract</code>) answers with <strong>JSON</strong>.</p>
+<code>/v1/extract</code>) answers with <strong>JSON</strong>.</p>
 <p>If you write one error handler that assumes JSON everywhere, it will throw
 a parse error on the exact request that was already failing, and you&#39;ll
 debug the wrong thing. Branch on the host, or on the response&#39;s
@@ -632,60 +631,6 @@ code is the whole answer.</p>
 </tbody></table>
 </div><p>A response over 10 MB comes back as a <strong>success</strong> with <code>truncated: true</code>.
 It is not an error.</p>
-<h2 id="v1search">/v1/search<a class="anchor" href="#v1search" aria-label="Link to this section">#</a></h2>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Status</th>
-<th><code>error</code></th>
-<th>Cause</th>
-<th>What to do</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>400</td>
-<td><code>validation_failed</code></td>
-<td>Bad <code>includeHosts</code>/<code>excludeHosts</code>. Max 50 entries, 200 chars each</td>
-<td>See <code>message</code> for which</td>
-</tr>
-<tr>
-<td><strong>402</strong></td>
-<td><code>spend_cap_exceeded</code></td>
-<td>Your account has reached its monthly third-party spend ceiling</td>
-<td>Wait for month rollover, or contact us to raise it</td>
-</tr>
-<tr>
-<td>400</td>
-<td><code>invalid_query</code></td>
-<td>Empty <code>q</code></td>
-<td>Supply a query</td>
-</tr>
-<tr>
-<td><strong>504</strong></td>
-<td><code>search_provider_timeout</code></td>
-<td>The search backend was too slow</td>
-<td>Retry</td>
-</tr>
-<tr>
-<td>502</td>
-<td><code>search_provider_unavailable</code></td>
-<td>The backend failed or returned nonsense</td>
-<td>Retry with backoff</td>
-</tr>
-<tr>
-<td>502</td>
-<td><code>search_provider_error</code></td>
-<td>The backend rejected the query</td>
-<td>Retry; tell us if it persists</td>
-</tr>
-<tr>
-<td>429</td>
-<td><code>monthly_quota_exceeded</code></td>
-<td>Search allowance exhausted</td>
-<td>Upgrade or wait</td>
-</tr>
-</tbody></table>
-</div><p><strong>Zero results is a 200 with an empty array</strong>, not a 404 and not an error.</p>
 <h2 id="v1extract">/v1/extract<a class="anchor" href="#v1extract" aria-label="Link to this section">#</a></h2>
 <p>Extract is the one endpoint where two different things both return <code>429</code>,
 so this is the clearest case for branching on <code>error</code> rather than status.</p>
@@ -964,7 +909,7 @@ timezone, not your billing date.</p>
 <td><code>429 monthly_quota_exceeded</code> with <code>used_seconds</code>/<code>limit_seconds</code></td>
 </tr>
 <tr>
-<td>Monthly fetches, searches, extracts</td>
+<td>Monthly fetches, extracts</td>
 <td><code>429 monthly_quota_exceeded</code> with <code>type</code>/<code>used</code>/<code>limit</code></td>
 </tr>
 <tr>
@@ -1158,7 +1103,6 @@ code, and roughly when it happened, and we&#39;ll look at the actual logs.</p>
     <a class="toc-2" href="#sessions-api">Sessions API</a>
     <a class="toc-2" href="#rest-shortcuts">REST shortcuts</a>
     <a class="toc-2" href="#v1fetch">/v1/fetch</a>
-    <a class="toc-2" href="#v1search">/v1/search</a>
     <a class="toc-2" href="#v1extract">/v1/extract</a>
     <a class="toc-2" href="#mcp-server">MCP server</a>
     <a class="toc-2" href="#live-viewer">Live viewer</a>
