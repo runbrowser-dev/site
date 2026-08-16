@@ -179,7 +179,7 @@ reference too:
 | Client | Endpoint |
 |---|---|
 | `screenshot` `pdf` `content` `scrape` `function` | [REST shortcuts](/docs/api-reference#rest-shortcuts) |
-| `unblock` | [`POST /unblock`](/docs/api-reference#post-unblock--json) |
+| `unblock` | [`POST /unblock`](/docs/api-reference#post-unblock-json) |
 | `map` `crawl` `download` | [Crawling](/docs/guide-crawling) |
 | `fetch` `extract` | [Primitives](/docs/api-reference#primitives) |
 | `sessions.*` | [Sessions](/docs/api-reference#sessions) |

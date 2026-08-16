@@ -179,49 +179,63 @@ existing calls generally work untouched.</p>
 </tr>
 </thead>
 <tbody><tr>
-<td><code>/function</code></td>
-<td><strong>No equivalent.</strong> You run your own code via CDP instead.</td>
-</tr>
-<tr>
-<td><code>/unblock</code></td>
-<td>No. Our stealth is always-on and there&#39;s no bypass endpoint to call.</td>
-</tr>
-<tr>
-<td><code>/download</code>, <code>/export</code></td>
-<td>No. Use CDP&#39;s download handling.</td>
-</tr>
-<tr>
 <td><code>/performance</code> (Lighthouse)</td>
-<td>No.</td>
-</tr>
-<tr>
-<td><code>/crawl</code>, <code>/map</code>, <code>/smart-scrape</code></td>
-<td>No. <code>/v1/fetch</code> + <code>/v1/search</code> cover some of this differently.</td>
+<td><strong>No.</strong> Not planned — pick a browser API for browsers, not SEO audits.</td>
 </tr>
 <tr>
 <td>BrowserQL (GraphQL automation language)</td>
-<td>No, and not planned. We bet on plain Playwright.</td>
+<td><strong>No, and not planned.</strong> We bet on plain Playwright.</td>
 </tr>
 <tr>
 <td>Firefox, WebKit</td>
-<td>No. Chromium only.</td>
-</tr>
-<tr>
-<td><code>/search</code></td>
-<td>Different: ours is <code>POST /v1/search</code> on the API host with <code>{q, count}</code>.</td>
+<td><strong>No.</strong> Chromium only — if you need cross-browser testing, this is the wrong product.</td>
 </tr>
 <tr>
 <td>Session replay / recording</td>
-<td>No. The <a href="/docs/concepts#live-viewer">live viewer</a> shows the present, not the past.</td>
+<td><strong>No.</strong> The <a href="/docs/concepts#live-viewer">live viewer</a> shows the present, not the past.</td>
 </tr>
 <tr>
 <td>Bundled proxies</td>
 <td>BYO proxy. Wholesale pricing from your provider, no markup from us.</td>
 </tr>
+<tr>
+<td><code>/search</code></td>
+<td>Different shape: ours is <code>POST /v1/search</code> on the API host with <code>{q, count}</code>.</td>
+</tr>
 </tbody></table>
-</div><p>If you depend on <code>/function</code> or BrowserQL, this isn&#39;t a drop-in and you
-should budget real work — or stay where you are.</p>
-<h2 id="what-you-get-here">What you get here<a class="anchor" href="#what-you-get-here" aria-label="Link to this section">#</a></h2>
+</div><p>If you depend on BrowserQL or need a non-Chromium engine, this isn&#39;t a
+drop-in and you should stay where you are.</p>
+<h3 id="what-we-now-match">What we now match<a class="anchor" href="#what-we-now-match" aria-label="Link to this section">#</a></h3>
+<p>These were gaps and no longer are:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Browserless</th>
+<th>Here</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/function</code></td>
+<td><a href="/docs/api-reference#post-function-json"><code>POST /function</code></a> — your JavaScript, run in the page</td>
+</tr>
+<tr>
+<td><code>/unblock</code></td>
+<td><a href="/docs/guide-unblocking"><code>POST /unblock</code></a> — and it tells you <em>which</em> wall you hit</td>
+</tr>
+<tr>
+<td><code>/download</code>, <code>/export</code></td>
+<td><a href="/docs/api-reference#post-download-the-file-as-is"><code>POST /download</code></a>, <a href="/docs/api-reference#post-export-the-resource-as-is"><code>POST /export</code></a></td>
+</tr>
+<tr>
+<td><code>/scrape</code></td>
+<td>Same <code>elements[]</code> shape</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>/map</code>, <code>/crawl</code>, <code>/smart-scrape</code> — see <a href="/docs/guide-crawling">Crawling</a></td>
+</tr>
+</tbody></table>
+</div><h2 id="what-you-get-here">What you get here<a class="anchor" href="#what-you-get-here" aria-label="Link to this section">#</a></h2>
 <ul>
 <li><strong>Stable sessions</strong> that survive disconnect with <em>full</em> state — in-memory
 SPA state and open tabs, not just cookies. <a href="/docs/concepts#stable-sessions">Details</a>.</li>
@@ -253,10 +267,12 @@ solving stay on your providers&#39; bills rather than ours.</p>
 session bills as a whole block. Ours bills as 10 seconds. If your
 workload is many short sessions, this is the single biggest difference
 in the whole migration — and the one to model against your own numbers.</li>
-<li><strong>CAPTCHA solving moves to your own account.</strong> We don&#39;t offer it. You
-bring a CapSolver or 2Captcha key to <a href="/docs/guide-unblocking"><code>/unblock</code></a> and
-pay them directly at their list price. Usually cheaper than a bundled
-rate, but it&#39;s a signup you didn&#39;t have before.</li>
+<li><strong>CAPTCHA solving moves to your own account.</strong> We orchestrate it, but the
+provider account is yours: pass a CapSolver or 2Captcha key to
+<a href="/docs/guide-unblocking"><code>/unblock</code></a> and pay them at list price. Usually
+cheaper than a bundled rate, but it&#39;s a signup you didn&#39;t have before.
+Most walls need no solver at all — passive interstitials are waited out
+for you.</li>
 <li><strong>Your proxy bill becomes visible.</strong> Bundled proxy traffic stops being
 part of one invoice and becomes a line item from your proxy provider.
 Usually cheaper at wholesale, but always more work to set up.</li>
@@ -314,12 +330,13 @@ you is almost certainly on that list.</p>
       <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Migrating%20from%20Browserless">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
-    <p class="updated">Last updated 2026-08-13</p>
+    <p class="updated">Last updated 2026-08-16</p>
   </main>
   <aside class="toc">
     <span class="toc-title">On this page</span>
     <a class="toc-2" href="#what-maps-directly">What maps directly</a>
     <a class="toc-2" href="#what-we-dont-have">What we don't have</a>
+    <a class="toc-3" href="#what-we-now-match">What we now match</a>
     <a class="toc-2" href="#what-you-get-here">What you get here</a>
     <a class="toc-2" href="#billing-differences-that-will-actually-surprise-you">Billing differences that will actually surprise you</a>
     <a class="toc-2" href="#concurrency">Concurrency</a>

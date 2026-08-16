@@ -532,7 +532,7 @@ is no "keep forever".
 
 ### CAPTCHAs
 
-[`/unblock`](#post-unblock--json) handles the wall for you, including the
+[`/unblock`](#post-unblock-json) handles the wall for you, including the
 passive interstitials that need no solver at all. Where a challenge does pose a
 question, **you hold the solving account** — pass `solver.provider` and
 `solver.apiKey` and we orchestrate it, or talk to your provider directly from

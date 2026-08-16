@@ -156,7 +156,8 @@ Plain-text bodies.
 
 ## REST shortcuts
 
-`/screenshot`, `/pdf`, `/content` and `/scrape` on
+`/screenshot`, `/pdf`, `/content`, `/scrape`, `/function`, `/export`,
+`/smart-scrape`, `/map`, `/crawl`, `/download` and `/unblock` on
 `connect.runbrowser.dev`. Plain-text bodies.
 
 | Status | Body | Cause | What to do |
@@ -224,7 +225,7 @@ so this is the clearest case for branching on `error` rather than status.
 | **429** | `monthly_quota_exceeded` | Your extract allowance is gone — **not transient** | Upgrade or wait for rollover |
 | 502 | `gateway_unreachable`, `gateway_error` | The browser tier failed | Retry |
 | 502 | `llm_transport_failed`, `llm_provider_error`, `llm_unparseable` | The model provider failed | Retry |
-| 503 | `llm_not_configured` | Extraction isn't available on this deployment | Contact us |
+| 503 | `llm_not_configured` | Extraction is temporarily unavailable | Contact us |
 
 `422` is worth internalising: it means we reached the page and read it,
 but the result didn't fit the shape you asked for. That is usually a
@@ -307,7 +308,7 @@ when `blocked` is true**, because not every blocker identifies itself.
 
 When you hit this, `/v1/fetch` is the wrong tool: it's plain HTTP and runs
 no JavaScript. Use a real browser session, optionally with
-[stealth and a residential proxy](concepts.md#stealth).
+[a coherent device profile and a residential proxy](concepts.md#device-profile).
 
 The MCP `fetch` tool prepends `[anti-bot block detected: …]` to the text
 for the same reason — so a model doesn't summarise a block page as

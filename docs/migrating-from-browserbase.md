@@ -48,9 +48,10 @@ Same two-step, no SDK required.
 | Session recording / replay | **No equivalent.** |
 | Stagehand | Works — it connects over CDP like anything else |
 | Advanced Stealth | Always-on here, no tier gate |
-| Bundled CAPTCHA solving | **Not bundled.** Bring your own solver key to [`/unblock`](/docs/guide-unblocking) — you pay wholesale |
+| Bundled CAPTCHA solving | **Not bundled.** We orchestrate it with your own solver key via [`/unblock`](/docs/guide-unblocking) — you pay wholesale |
 | Bundled proxies | BYO proxy, no markup |
-| Extensions, file uploads/downloads | Via CDP, no dedicated API |
+| Extensions, file uploads | Via CDP, no dedicated API |
+| File downloads | [`POST /download`](/docs/api-reference#post-download-the-file-as-is), or CDP |
 | Multiple regions | EU only |
 | Fetch, Search | `POST /v1/fetch`, `POST /v1/search` — comparable, separate allowance |
 | Agents, Functions, Model Gateway | **No equivalent.** We're infrastructure; the agent framework is yours. |
@@ -94,9 +95,9 @@ capabilities associated with higher tiers. Ours is a plan plus
 browser-hours too (€0 / €19 / €99 / €499), with two structural
 differences:
 
-- **Stealth isn't a tier here.** Free-tier browsers get the same stack as
-  Scale. There's nothing to upgrade into, because our stealth is a handful
-  of launch flags rather than a product SKU.
+- **A realistic device profile isn't a tier here.** Free-tier browsers get
+  exactly what Scale gets. There is nothing to upgrade into — see
+  [Device profiles](/docs/guide-device-profile).
 - **CAPTCHAs and proxies are both yours to buy.** We don't solve CAPTCHAs
   on your behalf and we don't resell proxies; you bring a key for each and
   pay wholesale. Cheaper, but more setup. If you'd rather the invoice be
@@ -120,7 +121,8 @@ capacity difference, not a pricing one.
   we're deliberately staying infrastructure. If you want the agent runtime
   bundled with the browser, that's them, not us.
 - One region.
-- No bundled proxy and no bundled CAPTCHA solving — both are BYO.
+- No bundled proxy, and CAPTCHA solving uses your provider account rather
+  than ours.
 - Lower concurrency ceiling.
 
 If your product depends on any of those, stay. If you're paying premium
@@ -129,7 +131,7 @@ for.
 
 ## What you get instead
 
-- **An MCP server** — nine tools, no integration code. [Details](mcp.md).
+- **An MCP server** — thirteen tools, no integration code. [Details](mcp.md).
 - **`/v1/fetch` and `/v1/search`**, billed against separate monthly
   allowances rather than browser-time, so agent loops stop burning
   browser-seconds on cheap operations. Browserbase ships Fetch and Search
@@ -137,7 +139,8 @@ for.
   billing rather than the feature list: what matters is whether those
   calls draw from the same balance as your browser time.
 - **EU residency** by default.
-- **No proprietary SDK to unpick.** You connect over standard CDP, so the
+- **No proprietary SDK to unpick.** There are [typed clients](/docs/guide-sdk)
+  if you want them, but they are optional and thin: you connect over standard CDP, so the
   automation you write here runs anywhere that speaks it. The lock-in
   question for a browser service is whether *your code* is portable, and
   ours is. (The Chromium image our fleet runs is

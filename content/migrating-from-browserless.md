@@ -30,19 +30,27 @@ Be honest with yourself about this list before you switch:
 
 | Browserless | Status here |
 |---|---|
-| `/function` | **No equivalent.** You run your own code via CDP instead. |
-| `/unblock` | No. Our stealth is always-on and there's no bypass endpoint to call. |
-| `/download`, `/export` | No. Use CDP's download handling. |
-| `/performance` (Lighthouse) | No. |
-| `/crawl`, `/map`, `/smart-scrape` | No. `/v1/fetch` + `/v1/search` cover some of this differently. |
-| BrowserQL (GraphQL automation language) | No, and not planned. We bet on plain Playwright. |
-| Firefox, WebKit | No. Chromium only. |
-| `/search` | Different: ours is `POST /v1/search` on the API host with `{q, count}`. |
-| Session replay / recording | No. The [live viewer](concepts.md#live-viewer) shows the present, not the past. |
+| `/performance` (Lighthouse) | **No.** Not planned — pick a browser API for browsers, not SEO audits. |
+| BrowserQL (GraphQL automation language) | **No, and not planned.** We bet on plain Playwright. |
+| Firefox, WebKit | **No.** Chromium only — if you need cross-browser testing, this is the wrong product. |
+| Session replay / recording | **No.** The [live viewer](concepts.md#live-viewer) shows the present, not the past. |
 | Bundled proxies | BYO proxy. Wholesale pricing from your provider, no markup from us. |
+| `/search` | Different shape: ours is `POST /v1/search` on the API host with `{q, count}`. |
 
-If you depend on `/function` or BrowserQL, this isn't a drop-in and you
-should budget real work — or stay where you are.
+If you depend on BrowserQL or need a non-Chromium engine, this isn't a
+drop-in and you should stay where you are.
+
+### What we now match
+
+These were gaps and no longer are:
+
+| Browserless | Here |
+|---|---|
+| `/function` | [`POST /function`](/docs/api-reference#post-function-json) — your JavaScript, run in the page |
+| `/unblock` | [`POST /unblock`](/docs/guide-unblocking) — and it tells you *which* wall you hit |
+| `/download`, `/export` | [`POST /download`](/docs/api-reference#post-download-the-file-as-is), [`POST /export`](/docs/api-reference#post-export-the-resource-as-is) |
+| `/scrape` | Same `elements[]` shape |
+| — | `/map`, `/crawl`, `/smart-scrape` — see [Crawling](/docs/guide-crawling) |
 
 ## What you get here
 
@@ -77,10 +85,12 @@ The practical consequences:
   session bills as a whole block. Ours bills as 10 seconds. If your
   workload is many short sessions, this is the single biggest difference
   in the whole migration — and the one to model against your own numbers.
-- **CAPTCHA solving moves to your own account.** We don't offer it. You
-  bring a CapSolver or 2Captcha key to [`/unblock`](/docs/guide-unblocking) and
-  pay them directly at their list price. Usually cheaper than a bundled
-  rate, but it's a signup you didn't have before.
+- **CAPTCHA solving moves to your own account.** We orchestrate it, but the
+  provider account is yours: pass a CapSolver or 2Captcha key to
+  [`/unblock`](/docs/guide-unblocking) and pay them at list price. Usually
+  cheaper than a bundled rate, but it's a signup you didn't have before.
+  Most walls need no solver at all — passive interstitials are waited out
+  for you.
 - **Your proxy bill becomes visible.** Bundled proxy traffic stops being
   part of one invoice and becomes a line item from your proxy provider.
   Usually cheaper at wholesale, but always more work to set up.

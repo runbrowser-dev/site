@@ -70,5 +70,5 @@ Both endpoints accept the shared browser controls:
 alone gets you past a consent wall or age gate in the same call.
 
 See the full option tables in the reference:
-[`/screenshot`](/docs/api-reference#post-screenshot-image-png-jpeg-webp) ·
-[`/pdf`](/docs/api-reference#post-pdf-application-pdf).
+[`/screenshot`](/docs/api-reference#post-screenshot-imagepngjpegwebp) ·
+[`/pdf`](/docs/api-reference#post-pdf-applicationpdf).
