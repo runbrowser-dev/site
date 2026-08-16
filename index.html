@@ -123,6 +123,16 @@
   .nav-links { display: flex; gap: 22px; }
   @media (max-width: 720px) { .nav-links { display: none; } }
 
+  .code-note {
+    margin: 14px 2px 0; font-size: 13.5px; line-height: 1.6; color: var(--faint);
+  }
+  .code-note code {
+    font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+    background: rgba(255,255,255,0.05); padding: 1px 5px; border-radius: 4px;
+  }
+  .code-note a { color: var(--live); text-decoration: none; }
+  .code-note a:hover { text-decoration: underline; }
+
   /* ---- hero ---- */
   .hero { padding: 70px 0 40px; }
   .hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 54px; align-items: center; }
@@ -487,6 +497,12 @@
 <span class="k">await</span> page.screenshot({ path: <span class="s">'out.png'</span> })
 <span class="k">await</span> browser.close()</pre>
       </div>
+      <p class="code-note">
+        That's the whole integration — standard CDP, nothing to rewrite. Prefer a
+        typed client for the REST endpoints? <code>npm install runbrowser</code> or
+        <code>pip install runbrowser</code>; neither wraps Playwright, and neither
+        has runtime dependencies. <a href="/docs/guide-sdk">SDKs &rarr;</a>
+      </p>
     </div>
   </section>
 

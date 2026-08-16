@@ -55,10 +55,57 @@ existing selectors, waits and assertions are unchanged.
 If the connection is refused, the reason is in the close code — see
 [Errors](errors.md).
 
+Driving a **stable session** instead? Its connect URL carries the session id
+rather than a credential, so it needs your key appended — the
+[SDK](guide-sdk.md) hands you one that already works, and
+[Sessions](guide-sessions.md) explains the two shapes.
+
 ## 3. Or skip the browser entirely
 
 Half of what agents do with a browser doesn't need one. These cost no
-browser-time:
+browser-time.
+
+The quickest way in is the [SDK](guide-sdk.md) — one install, no HTTP
+plumbing, and it keeps `proxy`/`country` in the query string where the server
+expects them (send those in a JSON body by hand and they are silently
+ignored):
+
+```bash tab=npm
+npm install runbrowser
+```
+
+```bash tab=pip
+pip install runbrowser
+```
+
+```ts tab=TypeScript
+import { RunBrowser } from 'runbrowser'
+
+const rb = new RunBrowser()                       // reads RUNBROWSER_API_KEY
+
+const page = await rb.fetch({ url: 'https://example.com', format: 'markdown' })
+const { data } = await rb.extract({
+  url: 'https://example.com',
+  schema: { type: 'object', properties: { title: { type: 'string' } } },
+})
+const png = await rb.screenshot({ url: 'https://example.com' })
+```
+
+```python tab=Python
+from runbrowser import RunBrowser
+
+rb = RunBrowser()                                 # reads RUNBROWSER_API_KEY
+
+page = rb.fetch(url="https://example.com", format="markdown")
+data = rb.extract(
+    url="https://example.com",
+    schema={"type": "object", "properties": {"title": {"type": "string"}}},
+)
+png = rb.screenshot(url="https://example.com")
+```
+
+Neither client has runtime dependencies, and neither wraps Playwright — see
+[SDKs](guide-sdk.md). Prefer plain HTTP? Every call above is one request:
 
 ```bash tab=cURL
 # Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
