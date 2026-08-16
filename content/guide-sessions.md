@@ -79,6 +79,14 @@ Note the two `connectUrl` shapes, because they authenticate differently:
   expressed as one-use. Add your key: `?session=<sessionId>&token=<key>`.
   Handed to `connectOverCDP` without it, you get a `401`.
 
+**Keep the whole URL, not just the id.** The host in a stable session's
+`connectUrl` identifies the machine holding that browser, and a browser cannot
+move between machines. Rebuilding the URL from the id against a generic
+hostname can reach a machine that isn't holding it, which answers
+[`421`](/docs/errors#connecting-a-browser) and names the host you actually
+want. Storing `connectUrl` alongside `sessionId` avoids the round trip
+entirely.
+
 The [SDK](/docs/guide-sdk) hands you a URL that already works in both cases, so
 this distinction never reaches your code.
 

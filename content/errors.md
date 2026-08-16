@@ -66,6 +66,7 @@ The short version, before the exhaustive tables.
 | Status | Retry? | How |
 |---|---|---|
 | 400, 403, 413, 415 | **No** | Your request is wrong. Retrying sends the same wrong request |
+| 421 | **No** — retry elsewhere | Right session, wrong machine. Use the `connectUrl` you were given; the body names the host |
 | 401 | **No** | Fix the key |
 | 402 | **No** | A spend or plan ceiling. Nothing changes until the month rolls over or the ceiling is raised |
 | 404 | **No** | The session is gone. Create a new one |
@@ -99,6 +100,7 @@ status and a plain-text body. Playwright and Puppeteer surface this as
 | 403 | `session belongs to a different org` | That session isn't yours | Check which key you're using |
 | 404 | `session not found, expired, or already destroyed` | It idled out, hit its ceiling, or was closed | Create a new one |
 | 409 | `session is currently attached; close the existing CDP connection first` | One CDP client per session | Close the other connection first |
+| 421 | `this session is running on <host>; …` | The session exists but its browser is on a different machine, and browsers don't move | Reconnect using the `connectUrl` you were given. The message names the host if you built the URL yourself |
 | 429 | JSON `monthly_quota_exceeded` | Monthly browser-seconds are gone | Upgrade, or wait for the UTC month to roll over |
 | 429 | `concurrency limit reached for this org` | You're at your tier's concurrent limit, after waiting ~20s for a slot | Close a session, back off, or upgrade |
 | 503 | `the fleet is at capacity; retry shortly` | The box is genuinely full. **Not your fault and not your limit** | Retry after 30s. `Retry-After: 30` is set |
