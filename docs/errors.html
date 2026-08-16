@@ -460,7 +460,8 @@ Plain-text bodies.</p>
 </tr>
 </tbody></table>
 </div><h2 id="rest-shortcuts">REST shortcuts<a class="anchor" href="#rest-shortcuts" aria-label="Link to this section">#</a></h2>
-<p><code>/screenshot</code>, <code>/pdf</code>, <code>/content</code> and <code>/scrape</code> on
+<p><code>/screenshot</code>, <code>/pdf</code>, <code>/content</code>, <code>/scrape</code>, <code>/function</code>, <code>/export</code>,
+<code>/smart-scrape</code>, <code>/map</code>, <code>/crawl</code>, <code>/download</code> and <code>/unblock</code> on
 <code>connect.runbrowser.dev</code>. Plain-text bodies.</p>
 <div class="table-wrap"><table>
 <thead>
@@ -736,7 +737,7 @@ so this is the clearest case for branching on <code>error</code> rather than sta
 <tr>
 <td>503</td>
 <td><code>llm_not_configured</code></td>
-<td>Extraction isn&#39;t available on this deployment</td>
+<td>Extraction is temporarily unavailable</td>
 <td>Contact us</td>
 </tr>
 </tbody></table>
@@ -883,7 +884,7 @@ bug will surface much later as bad data rather than as a failure.</p>
 when <code>blocked</code> is true</strong>, because not every blocker identifies itself.</p>
 <p>When you hit this, <code>/v1/fetch</code> is the wrong tool: it&#39;s plain HTTP and runs
 no JavaScript. Use a real browser session, optionally with
-<a href="/docs/concepts#stealth">stealth and a residential proxy</a>.</p>
+<a href="/docs/concepts#device-profile">a coherent device profile and a residential proxy</a>.</p>
 <p>The MCP <code>fetch</code> tool prepends <code>[anti-bot block detected: …]</code> to the text
 for the same reason — so a model doesn&#39;t summarise a block page as
 content.</p>
