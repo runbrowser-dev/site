@@ -339,18 +339,15 @@ already have wholesale pricing.</p>
 <p><strong>You hold the solving account; we do the orchestration.</strong>
 <a href="/docs/guide-unblocking"><code>/unblock</code></a> handles the wall end to end — but where a
 challenge poses an actual question, the provider credential is yours:</p>
-<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;…&quot;, &quot;solver&quot;: { &quot;provider&quot;: &quot;capsolver&quot;, &quot;apiKey&quot;: &quot;…&quot; } }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"solver"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"provider"</span><span class="token operator">:</span> <span class="token string">"capsolver"</span><span class="token punctuation">,</span> <span class="token property">"apiKey"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span></code></pre></div><p>The key is used for that one call, never stored and never logged. You can also
-keep driving it yourself from your own process with the
-<a href="/docs/">standalone helper</a>.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;…&quot;, &quot;solver&quot;: { &quot;provider&quot;: &quot;capsolver&quot;, &quot;apiKey&quot;: &quot;…&quot; } }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"solver"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"provider"</span><span class="token operator">:</span> <span class="token string">"capsolver"</span><span class="token punctuation">,</span> <span class="token property">"apiKey"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span></code></pre></div><p>The key is used for that one call, never stored and never logged. Prefer to
+drive the solver yourself? Talk to CapSolver or 2Captcha directly from your own
+process and pass the resulting token into the page — nothing here requires our
+involvement.</p>
 <p>We do the hard part — detecting the widget, picking the right task type,
 delivering the token, and checking whether the page actually moved — without
 becoming the party that holds an account for answering other people&#39;s access
 controls. That split is deliberate, and it means you pay wholesale (~$0.001
 per solve) rather than a bundled allowance marked up to $0.02–0.05.</p>
-<p>Operators self-hosting can flip this: <code>CAPTCHA_SOLVER_KEY</code> plus
-<code>CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1</code> serves solves from a house account. It is
-off unless switched on deliberately, so the decision is always someone&#39;s
-explicit choice rather than a default.</p>
 <p><strong>Most walls need no solver at all.</strong> A passive interstitial clears itself in a
 real browser given a few seconds; <code>/unblock</code> waits it out for you. And
 invisible systems — reCAPTCHA v3, DataDome, PerimeterX — aren&#39;t solvable by

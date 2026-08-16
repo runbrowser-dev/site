@@ -48,7 +48,7 @@ Same two-step, no SDK required.
 | Session recording / replay | **No equivalent.** |
 | Stagehand | Works — it connects over CDP like anything else |
 | Advanced Stealth | Always-on here, no tier gate |
-| Bundled CAPTCHA solving | **Not offered.** BYO solver key via the [helper](../examples/captcha/) — you pay wholesale |
+| Bundled CAPTCHA solving | **Not bundled.** Bring your own solver key to [`/unblock`](/docs/guide-unblocking) — you pay wholesale |
 | Bundled proxies | BYO proxy, no markup |
 | Extensions, file uploads/downloads | Via CDP, no dedicated API |
 | Multiple regions | EU only |

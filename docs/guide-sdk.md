@@ -187,23 +187,24 @@ reference too:
 If a client is ever missing something, the endpoint is right there and a plain
 HTTP call is a supported way to use this platform — not a workaround.
 
-## Self-hosted and testing
+## Testing
+
+Swap in your own `fetch` to assert what your code sends without touching the
+network — a test double, a proxy agent, or a tracing wrapper:
 
 ```ts tab=TypeScript
 new RunBrowser({
-  apiKey: '…',
-  connectUrl: 'http://localhost:3000',
-  apiUrl: 'http://localhost:8080',
-  fetch: myInstrumentedFetch,     // proxy agent, tracing, a test double
+  apiKey: 'test-key',
+  fetch: async (url, init) => {
+    recorded.push({ url, init })
+    return new Response(JSON.stringify({ data: { title: 'stub' } }))
+  },
 })
 ```
 
 ```python tab=Python
-RunBrowser(
-    api_key="…",
-    connect_url="http://localhost:3000",
-    api_url="http://localhost:8080",
-)
+# The Python client speaks plain HTTP, so point it at a local stub server:
+RunBrowser("test-key", connect_url="http://127.0.0.1:8931", api_url="http://127.0.0.1:8931")
 ```
 
 The TypeScript client needs Node 18+ and has no runtime dependencies. The

@@ -160,7 +160,6 @@ reach a remote server through the <code>mcp-remote</code> bridge:</p>
 <span class="token punctuation">}</span></code></pre></div><p>Clients with native remote-server support (including Claude Code via
 <code>claude mcp add --transport http</code>) can point straight at the URL with the
 same header.</p>
-<p>Locally, against the dev stack, the endpoint is <code>http://localhost:3000/mcp</code>.</p>
 <h2 id="tools">Tools<a class="anchor" href="#tools" aria-label="Link to this section">#</a></h2>
 <div class="table-wrap"><table>
 <thead>
@@ -315,8 +314,8 @@ it connects and disconnects, which is what keeps idle accounting honest.</p>
 the model to do when it&#39;s finished.</li>
 <li><code>DELETE /mcp</code> with the session header — what a well-behaved client sends
 when the user closes it.</li>
-<li>Idle timeout — the browser&#39;s own <code>MAX_KEEPALIVE_IDLE_SECONDS</code>, plus a
-30-minute sweep of MCP sessions nobody has touched.</li>
+<li>Idle timeout — the browser&#39;s own idle window, plus a 30-minute sweep of
+MCP sessions nobody has touched.</li>
 </ul>
 <p>A gateway restart drops MCP sessions, exactly as it drops parked keepAlive
 sessions. Clients get a <code>404</code> and re-initialize, which the spec requires
@@ -339,9 +338,9 @@ used)&quot; rather than a bare 429.</p>
 <li>Every request is authenticated with the customer&#39;s API key, and the org
 is re-checked on each call, so revoking a key kills its MCP sessions
 immediately and a leaked session id is useless to another org.</li>
-<li>Requests carrying an <code>Origin</code> header are refused unless the origin is
-listed in <code>MCP_ALLOWED_ORIGINS</code>. Real MCP clients aren&#39;t browsers and
-don&#39;t send one; this is the spec&#39;s DNS-rebinding guard.</li>
+<li>Requests carrying an <code>Origin</code> header are refused unless it is on the
+allow-list. Real MCP clients aren&#39;t browsers and don&#39;t send one; this is
+the spec&#39;s DNS-rebinding guard.</li>
 <li><code>GET /mcp</code> returns 405. There are no server-initiated messages, so
 there&#39;s no stream to open.</li>
 </ul>

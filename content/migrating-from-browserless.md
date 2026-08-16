@@ -78,7 +78,7 @@ The practical consequences:
   workload is many short sessions, this is the single biggest difference
   in the whole migration — and the one to model against your own numbers.
 - **CAPTCHA solving moves to your own account.** We don't offer it. You
-  bring a CapSolver or 2Captcha key ([helper](../examples/captcha/)) and
+  bring a CapSolver or 2Captcha key to [`/unblock`](/docs/guide-unblocking) and
   pay them directly at their list price. Usually cheaper than a bundled
   rate, but it's a signup you didn't have before.
 - **Your proxy bill becomes visible.** Bundled proxy traffic stops being

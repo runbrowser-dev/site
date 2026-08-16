@@ -526,20 +526,18 @@ field for the page title, a heading, the raw text of a section. That comes
 from the same content the model read, so it actually answers the question
 a screenshot only appears to.
 
-Self-hosted operators can turn capture on with
-`EXTRACT_ARTIFACTS_RETENTION_DAYS`. Retention is bounded by construction —
-there is no "keep forever" — and on object storage it is enforced as a
-bucket lifecycle rule, with capture disabling itself if the rule can't be
-installed.
+Screenshot capture is off. If your use case genuinely needs it, get in
+touch — where it is enabled, retention is bounded by construction and there
+is no "keep forever".
 
 ### CAPTCHAs
 
 [`/unblock`](#post-unblock--json) handles the wall for you, including the
 passive interstitials that need no solver at all. Where a challenge does pose a
 question, **you hold the solving account** — pass `solver.provider` and
-`solver.apiKey` and we orchestrate it, or keep using the
-[standalone helper](../examples/captcha/) from your own process. Either way the
-key is yours, used for that call, and never stored. See
+`solver.apiKey` and we orchestrate it, or talk to your provider directly from
+your own process. Either way the key is yours, used for that call, and never
+stored. See
 [Concepts](concepts.md#captchas) for why it works that way.
 
 ---
@@ -808,20 +806,16 @@ challenge poses an actual question, the provider credential is yours:
 { "url": "…", "solver": { "provider": "capsolver", "apiKey": "…" } }
 ```
 
-The key is used for that one call, never stored and never logged. You can also
-keep driving it yourself from your own process with the
-[standalone helper](../examples/captcha/).
+The key is used for that one call, never stored and never logged. Prefer to
+drive the solver yourself? Talk to CapSolver or 2Captcha directly from your own
+process and pass the resulting token into the page — nothing here requires our
+involvement.
 
 We do the hard part — detecting the widget, picking the right task type,
 delivering the token, and checking whether the page actually moved — without
 becoming the party that holds an account for answering other people's access
 controls. That split is deliberate, and it means you pay wholesale (~\$0.001
 per solve) rather than a bundled allowance marked up to \$0.02–0.05.
-
-Operators self-hosting can flip this: `CAPTCHA_SOLVER_KEY` plus
-`CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1` serves solves from a house account. It is
-off unless switched on deliberately, so the decision is always someone's
-explicit choice rather than a default.
 
 **Most walls need no solver at all.** A passive interstitial clears itself in a
 real browser given a few seconds; `/unblock` waits it out for you. And
@@ -2064,23 +2058,24 @@ reference too:
 If a client is ever missing something, the endpoint is right there and a plain
 HTTP call is a supported way to use this platform — not a workaround.
 
-## Self-hosted and testing
+## Testing
+
+Swap in your own `fetch` to assert what your code sends without touching the
+network — a test double, a proxy agent, or a tracing wrapper:
 
 ```ts tab=TypeScript
 new RunBrowser({
-  apiKey: '…',
-  connectUrl: 'http://localhost:3000',
-  apiUrl: 'http://localhost:8080',
-  fetch: myInstrumentedFetch,     // proxy agent, tracing, a test double
+  apiKey: 'test-key',
+  fetch: async (url, init) => {
+    recorded.push({ url, init })
+    return new Response(JSON.stringify({ data: { title: 'stub' } }))
+  },
 })
 ```
 
 ```python tab=Python
-RunBrowser(
-    api_key="…",
-    connect_url="http://localhost:3000",
-    api_url="http://localhost:8080",
-)
+# The Python client speaks plain HTTP, so point it at a local stub server:
+RunBrowser("test-key", connect_url="http://127.0.0.1:8931", api_url="http://127.0.0.1:8931")
 ```
 
 The TypeScript client needs Node 18+ and has no runtime dependencies. The
@@ -2338,10 +2333,6 @@ the decision to use it on a given site, stay with you. It also means you pay
 your provider's wholesale rate (~$0.001/solve) rather than a bundled allowance
 marked up to $0.02–0.05.
 
-Operators running their own RunBrowser can set `CAPTCHA_SOLVER_KEY` with
-`CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1` to serve solves from a house account
-instead. It's off unless deliberately switched on.
-
 ## A widget isn't always a wall
 
 A login modal, a comment box and a newsletter signup all match the same
@@ -2512,8 +2503,6 @@ Clients with native remote-server support (including Claude Code via
 `claude mcp add --transport http`) can point straight at the URL with the
 same header.
 
-Locally, against the dev stack, the endpoint is `http://localhost:3000/mcp`.
-
 ## Tools
 
 | Tool | Browser? | What it's for |
@@ -2638,8 +2627,8 @@ Three things end a browser:
   the model to do when it's finished.
 - `DELETE /mcp` with the session header — what a well-behaved client sends
   when the user closes it.
-- Idle timeout — the browser's own `MAX_KEEPALIVE_IDLE_SECONDS`, plus a
-  30-minute sweep of MCP sessions nobody has touched.
+- Idle timeout — the browser's own idle window, plus a 30-minute sweep of
+  MCP sessions nobody has touched.
 
 A gateway restart drops MCP sessions, exactly as it drops parked keepAlive
 sessions. Clients get a `404` and re-initialize, which the spec requires
@@ -2665,9 +2654,9 @@ used)" rather than a bare 429.
 - Every request is authenticated with the customer's API key, and the org
   is re-checked on each call, so revoking a key kills its MCP sessions
   immediately and a leaked session id is useless to another org.
-- Requests carrying an `Origin` header are refused unless the origin is
-  listed in `MCP_ALLOWED_ORIGINS`. Real MCP clients aren't browsers and
-  don't send one; this is the spec's DNS-rebinding guard.
+- Requests carrying an `Origin` header are refused unless it is on the
+  allow-list. Real MCP clients aren't browsers and don't send one; this is
+  the spec's DNS-rebinding guard.
 - `GET /mcp` returns 405. There are no server-initiated messages, so
   there's no stream to open.
 
@@ -2733,7 +2722,7 @@ Same two-step, no SDK required.
 | Session recording / replay | **No equivalent.** |
 | Stagehand | Works — it connects over CDP like anything else |
 | Advanced Stealth | Always-on here, no tier gate |
-| Bundled CAPTCHA solving | **Not offered.** BYO solver key via the [helper](../examples/captcha/) — you pay wholesale |
+| Bundled CAPTCHA solving | **Not bundled.** Bring your own solver key to [`/unblock`](/docs/guide-unblocking) — you pay wholesale |
 | Bundled proxies | BYO proxy, no markup |
 | Extensions, file uploads/downloads | Via CDP, no dedicated API |
 | Multiple regions | EU only |
@@ -2912,7 +2901,7 @@ The practical consequences:
   workload is many short sessions, this is the single biggest difference
   in the whole migration — and the one to model against your own numbers.
 - **CAPTCHA solving moves to your own account.** We don't offer it. You
-  bring a CapSolver or 2Captcha key ([helper](../examples/captcha/)) and
+  bring a CapSolver or 2Captcha key to [`/unblock`](/docs/guide-unblocking) and
   pay them directly at their list price. Usually cheaper than a bundled
   rate, but it's a signup you didn't have before.
 - **Your proxy bill becomes visible.** Bundled proxy traffic stops being
