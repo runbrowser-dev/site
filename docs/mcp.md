@@ -36,8 +36,6 @@ Clients with native remote-server support (including Claude Code via
 `claude mcp add --transport http`) can point straight at the URL with the
 same header.
 
-Locally, against the dev stack, the endpoint is `http://localhost:3000/mcp`.
-
 ## Tools
 
 | Tool | Browser? | What it's for |
@@ -162,8 +160,8 @@ Three things end a browser:
   the model to do when it's finished.
 - `DELETE /mcp` with the session header — what a well-behaved client sends
   when the user closes it.
-- Idle timeout — the browser's own `MAX_KEEPALIVE_IDLE_SECONDS`, plus a
-  30-minute sweep of MCP sessions nobody has touched.
+- Idle timeout — the browser's own idle window, plus a 30-minute sweep of
+  MCP sessions nobody has touched.
 
 A gateway restart drops MCP sessions, exactly as it drops parked keepAlive
 sessions. Clients get a `404` and re-initialize, which the spec requires
@@ -189,9 +187,9 @@ used)" rather than a bare 429.
 - Every request is authenticated with the customer's API key, and the org
   is re-checked on each call, so revoking a key kills its MCP sessions
   immediately and a leaked session id is useless to another org.
-- Requests carrying an `Origin` header are refused unless the origin is
-  listed in `MCP_ALLOWED_ORIGINS`. Real MCP clients aren't browsers and
-  don't send one; this is the spec's DNS-rebinding guard.
+- Requests carrying an `Origin` header are refused unless it is on the
+  allow-list. Real MCP clients aren't browsers and don't send one; this is
+  the spec's DNS-rebinding guard.
 - `GET /mcp` returns 405. There are no server-initiated messages, so
   there's no stream to open.
 

@@ -116,10 +116,6 @@ the decision to use it on a given site, stay with you. It also means you pay
 your provider's wholesale rate (~$0.001/solve) rather than a bundled allowance
 marked up to $0.02–0.05.
 
-Operators running their own RunBrowser can set `CAPTCHA_SOLVER_KEY` with
-`CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1` to serve solves from a house account
-instead. It's off unless deliberately switched on.
-
 ## A widget isn't always a wall
 
 A login modal, a comment box and a newsletter signup all match the same

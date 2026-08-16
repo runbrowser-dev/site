@@ -646,18 +646,16 @@ back. We&#39;d rather not hold that, and you&#39;d rather not pay for it.</p>
 field for the page title, a heading, the raw text of a section. That comes
 from the same content the model read, so it actually answers the question
 a screenshot only appears to.</p>
-<p>Self-hosted operators can turn capture on with
-<code>EXTRACT_ARTIFACTS_RETENTION_DAYS</code>. Retention is bounded by construction —
-there is no &quot;keep forever&quot; — and on object storage it is enforced as a
-bucket lifecycle rule, with capture disabling itself if the rule can&#39;t be
-installed.</p>
+<p>Screenshot capture is off. If your use case genuinely needs it, get in
+touch — where it is enabled, retention is bounded by construction and there
+is no &quot;keep forever&quot;.</p>
 <h3 id="captchas">CAPTCHAs<a class="anchor" href="#captchas" aria-label="Link to this section">#</a></h3>
 <p><a href="#post-unblock--json"><code>/unblock</code></a> handles the wall for you, including the
 passive interstitials that need no solver at all. Where a challenge does pose a
 question, <strong>you hold the solving account</strong> — pass <code>solver.provider</code> and
-<code>solver.apiKey</code> and we orchestrate it, or keep using the
-<a href="/docs/">standalone helper</a> from your own process. Either way the
-key is yours, used for that call, and never stored. See
+<code>solver.apiKey</code> and we orchestrate it, or talk to your provider directly from
+your own process. Either way the key is yours, used for that call, and never
+stored. See
 <a href="/docs/concepts#captchas">Concepts</a> for why it works that way.</p>
 <hr>
 <h2 id="mcp">MCP<a class="anchor" href="#mcp" aria-label="Link to this section">#</a></h2>

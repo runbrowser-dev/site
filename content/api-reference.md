@@ -526,20 +526,18 @@ field for the page title, a heading, the raw text of a section. That comes
 from the same content the model read, so it actually answers the question
 a screenshot only appears to.
 
-Self-hosted operators can turn capture on with
-`EXTRACT_ARTIFACTS_RETENTION_DAYS`. Retention is bounded by construction —
-there is no "keep forever" — and on object storage it is enforced as a
-bucket lifecycle rule, with capture disabling itself if the rule can't be
-installed.
+Screenshot capture is off. If your use case genuinely needs it, get in
+touch — where it is enabled, retention is bounded by construction and there
+is no "keep forever".
 
 ### CAPTCHAs
 
 [`/unblock`](#post-unblock--json) handles the wall for you, including the
 passive interstitials that need no solver at all. Where a challenge does pose a
 question, **you hold the solving account** — pass `solver.provider` and
-`solver.apiKey` and we orchestrate it, or keep using the
-[standalone helper](../examples/captcha/) from your own process. Either way the
-key is yours, used for that call, and never stored. See
+`solver.apiKey` and we orchestrate it, or talk to your provider directly from
+your own process. Either way the key is yours, used for that call, and never
+stored. See
 [Concepts](concepts.md#captchas) for why it works that way.
 
 ---

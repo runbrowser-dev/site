@@ -214,20 +214,16 @@ challenge poses an actual question, the provider credential is yours:
 { "url": "…", "solver": { "provider": "capsolver", "apiKey": "…" } }
 ```
 
-The key is used for that one call, never stored and never logged. You can also
-keep driving it yourself from your own process with the
-[standalone helper](../examples/captcha/).
+The key is used for that one call, never stored and never logged. Prefer to
+drive the solver yourself? Talk to CapSolver or 2Captcha directly from your own
+process and pass the resulting token into the page — nothing here requires our
+involvement.
 
 We do the hard part — detecting the widget, picking the right task type,
 delivering the token, and checking whether the page actually moved — without
 becoming the party that holds an account for answering other people's access
 controls. That split is deliberate, and it means you pay wholesale (~\$0.001
 per solve) rather than a bundled allowance marked up to \$0.02–0.05.
-
-Operators self-hosting can flip this: `CAPTCHA_SOLVER_KEY` plus
-`CAPTCHA_SOLVER_ALLOW_OPERATOR_KEY=1` serves solves from a house account. It is
-off unless switched on deliberately, so the decision is always someone's
-explicit choice rather than a default.
 
 **Most walls need no solver at all.** A passive interstitial clears itself in a
 real browser given a few seconds; `/unblock` waits it out for you. And

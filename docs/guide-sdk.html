@@ -345,31 +345,30 @@ reference too:</p>
 </tbody></table>
 </div><p>If a client is ever missing something, the endpoint is right there and a plain
 HTTP call is a supported way to use this platform — not a workaround.</p>
-<h2 id="self-hosted-and-testing">Self-hosted and testing<a class="anchor" href="#self-hosted-and-testing" aria-label="Link to this section">#</a></h2>
+<h2 id="testing">Testing<a class="anchor" href="#testing" aria-label="Link to this section">#</a></h2>
+<p>Swap in your own <code>fetch</code> to assert what your code sends without touching the
+network — a test double, a proxy agent, or a tracing wrapper:</p>
 <div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="new RunBrowser({
-  apiKey: '…',
-  connectUrl: 'http://localhost:3000',
-  apiUrl: 'http://localhost:8080',
-  fetch: myInstrumentedFetch,     // proxy agent, tracing, a test double
+  apiKey: 'test-key',
+  fetch: async (url, init) =&gt; {
+    recorded.push({ url, init })
+    return new Response(JSON.stringify({ data: { title: 'stub' } }))
+  },
 })">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="new RunBrowser({
-  apiKey: '…',
-  connectUrl: 'http://localhost:3000',
-  apiUrl: 'http://localhost:8080',
-  fetch: myInstrumentedFetch,     // proxy agent, tracing, a test double
+  apiKey: 'test-key',
+  fetch: async (url, init) =&gt; {
+    recorded.push({ url, init })
+    return new Response(JSON.stringify({ data: { title: 'stub' } }))
+  },
 })"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-  apiKey<span class="token operator">:</span> <span class="token string">'…'</span><span class="token punctuation">,</span>
-  connectUrl<span class="token operator">:</span> <span class="token string">'http://localhost:3000'</span><span class="token punctuation">,</span>
-  apiUrl<span class="token operator">:</span> <span class="token string">'http://localhost:8080'</span><span class="token punctuation">,</span>
-  fetch<span class="token operator">:</span> myInstrumentedFetch<span class="token punctuation">,</span>     <span class="token comment">// proxy agent, tracing, a test double</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="RunBrowser(
-    api_key=&quot;…&quot;,
-    connect_url=&quot;http://localhost:3000&quot;,
-    api_url=&quot;http://localhost:8080&quot;,
-)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code>RunBrowser<span class="token punctuation">(</span>
-    api_key<span class="token operator">=</span><span class="token string">"…"</span><span class="token punctuation">,</span>
-    connect_url<span class="token operator">=</span><span class="token string">"http://localhost:3000"</span><span class="token punctuation">,</span>
-    api_url<span class="token operator">=</span><span class="token string">"http://localhost:8080"</span><span class="token punctuation">,</span>
-<span class="token punctuation">)</span></code></pre></div></div><p>The TypeScript client needs Node 18+ and has no runtime dependencies. The
+  apiKey<span class="token operator">:</span> <span class="token string">'test-key'</span><span class="token punctuation">,</span>
+  <span class="token function-variable function">fetch</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span>url<span class="token punctuation">,</span> init<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    recorded<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token punctuation">,</span> init <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Response</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> data<span class="token operator">:</span> <span class="token punctuation">{</span> title<span class="token operator">:</span> <span class="token string">'stub'</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="# The Python client speaks plain HTTP, so point it at a local stub server:
+RunBrowser(&quot;test-key&quot;, connect_url=&quot;http://127.0.0.1:8931&quot;, api_url=&quot;http://127.0.0.1:8931&quot;)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token comment"># The Python client speaks plain HTTP, so point it at a local stub server:</span>
+RunBrowser<span class="token punctuation">(</span><span class="token string">"test-key"</span><span class="token punctuation">,</span> connect_url<span class="token operator">=</span><span class="token string">"http://127.0.0.1:8931"</span><span class="token punctuation">,</span> api_url<span class="token operator">=</span><span class="token string">"http://127.0.0.1:8931"</span><span class="token punctuation">)</span></code></pre></div></div><p>The TypeScript client needs Node 18+ and has no runtime dependencies. The
 Python client needs 3.9+ and uses only the standard library.</p>
 <p>See also: <a href="/docs/guide-sessions">Sessions</a>, <a href="/docs/guide-unblocking">Getting through
 walls</a>, and the
@@ -385,7 +384,7 @@ walls</a>, and the
       <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20SDKs">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
-    <p class="updated">Last updated 2026-08-15</p>
+    <p class="updated">Last updated 2026-08-16</p>
   </main>
   <aside class="toc">
     <span class="toc-title">On this page</span>
@@ -394,7 +393,7 @@ walls</a>, and the
     <a class="toc-2" href="#prefer-to-wire-it-yourself">Prefer to wire it yourself</a>
     <a class="toc-2" href="#what-theyre-worth-using-for">What they're worth using for</a>
     <a class="toc-2" href="#everything-else-is-the-rest-api">Everything else is the REST API</a>
-    <a class="toc-2" href="#self-hosted-and-testing">Self-hosted and testing</a>
+    <a class="toc-2" href="#testing">Testing</a>
   </aside>
 </div>
 <script src="/assets/docs.js" defer></script>
