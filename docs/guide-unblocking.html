@@ -256,46 +256,48 @@ deliver it to the page, and watch whether the page actually moves.</p>
 <span class="token punctuation">}</span></code></pre></div><p>The key is used for that one call. It is never stored, never logged, and never
 comes back in the response — only <code>solvedBy: &quot;request&quot;</code>, naming the source.</p>
 <h3 id="choosing-a-provider">Choosing a provider<a class="anchor" href="#choosing-a-provider" aria-label="Link to this section">#</a></h3>
-<p><code>provider</code> accepts <code>capsolver</code> or <code>2captcha</code>. Both are supported for every
-challenge type we solve, and neither is a default — pick per your workload.</p>
+<p><code>provider</code> accepts <code>capsolver</code> or <code>2captcha</code>. There is no default — a missing
+<code>provider</code> is an error rather than a guess, because the two bill separately
+and picking one for you would spend your money.</p>
+<p>Both solve all three of the challenge types we submit, and only those three:</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th></th>
+<th>Challenge type</th>
 <th>CapSolver</th>
 <th>2Captcha</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>reCAPTCHA v2</td>
-<td>$1.00 / 1k</td>
-<td>€0.99–2.80 / 1k</td>
+<td><code>recaptcha_v2</code></td>
+<td>yes</td>
+<td>yes</td>
 </tr>
 <tr>
-<td>reCAPTCHA v3</td>
-<td>—</td>
-<td>€1.40 / 1k (score ≤0.3), €2.80 (&gt;0.3)</td>
+<td><code>hcaptcha</code></td>
+<td>yes</td>
+<td>yes</td>
 </tr>
 <tr>
-<td>Cloudflare Turnstile</td>
-<td>$1.20 / 1k</td>
-<td>€1.40 / 1k</td>
-</tr>
-<tr>
-<td>Image / normal</td>
-<td>—</td>
-<td>€0.50–1.00 / 1k</td>
+<td><code>turnstile</code></td>
+<td>yes</td>
+<td>yes</td>
 </tr>
 </tbody></table>
-</div><p>Read off each vendor&#39;s own pricing page on <strong>2026-08-16</strong>; note the currencies
-differ. CapSolver quotes ~$0.65/1k for reCAPTCHA at high volume. 2Captcha&#39;s
-ranges reflect solving speed, so the low end is not what an impatient
-integration pays.</p>
-<p>On success rate we have no measurement of our own, so we publish none. Both
-vendors benchmark themselves and each other, and both come out ahead in their
-own numbers. Rates vary by challenge type and by target site, so if a specific
-site matters to you, run a few hundred solves through each against <em>that</em>
-site before committing.</p>
+</div><p>Nothing else on this page is solvable by either of them. <code>interstitial</code> needs
+waiting, not solving, and we do it for you. <code>scoring</code> — reCAPTCHA v3, DataDome,
+PerimeterX — has no answer to submit at any price; see the table above.</p>
+<p>Because the capability is identical, the choice is about price and success
+rate on <em>your</em> targets. Both publish per-type pricing that lands in the
+region of $0.001–0.003 per solve and changes often enough that we would rather
+send you to the source than quote a figure that goes stale here:
+<a href="https://docs.capsolver.com/en/pricing/">CapSolver pricing</a>,
+<a href="https://2captcha.com/pricing">2Captcha pricing</a>. Note they quote in
+different currencies.</p>
+<p>On success rate we publish nothing, because we have measured nothing. Both
+vendors benchmark themselves against the other and both come out ahead in
+their own numbers. If one site matters to you, run a few hundred solves
+through each against <em>that</em> site and believe your own results.</p>
 <p>This split is deliberate. We supply the engineering; the provider account, and
 the decision to use it on a given site, stay with you. It also means you pay
 your provider&#39;s wholesale rate — roughly $0.001–0.003 per solve depending on

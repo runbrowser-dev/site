@@ -113,26 +113,34 @@ comes back in the response — only `solvedBy: "request"`, naming the source.
 
 ### Choosing a provider
 
-`provider` accepts `capsolver` or `2captcha`. Both are supported for every
-challenge type we solve, and neither is a default — pick per your workload.
+`provider` accepts `capsolver` or `2captcha`. There is no default — a missing
+`provider` is an error rather than a guess, because the two bill separately
+and picking one for you would spend your money.
 
-| | CapSolver | 2Captcha |
+Both solve all three of the challenge types we submit, and only those three:
+
+| Challenge type | CapSolver | 2Captcha |
 |---|---|---|
-| reCAPTCHA v2 | $1.00 / 1k | €0.99–2.80 / 1k |
-| reCAPTCHA v3 | — | €1.40 / 1k (score ≤0.3), €2.80 (>0.3) |
-| Cloudflare Turnstile | $1.20 / 1k | €1.40 / 1k |
-| Image / normal | — | €0.50–1.00 / 1k |
+| `recaptcha_v2` | yes | yes |
+| `hcaptcha` | yes | yes |
+| `turnstile` | yes | yes |
 
-Read off each vendor's own pricing page on **2026-08-16**; note the currencies
-differ. CapSolver quotes ~$0.65/1k for reCAPTCHA at high volume. 2Captcha's
-ranges reflect solving speed, so the low end is not what an impatient
-integration pays.
+Nothing else on this page is solvable by either of them. `interstitial` needs
+waiting, not solving, and we do it for you. `scoring` — reCAPTCHA v3, DataDome,
+PerimeterX — has no answer to submit at any price; see the table above.
 
-On success rate we have no measurement of our own, so we publish none. Both
-vendors benchmark themselves and each other, and both come out ahead in their
-own numbers. Rates vary by challenge type and by target site, so if a specific
-site matters to you, run a few hundred solves through each against *that*
-site before committing.
+Because the capability is identical, the choice is about price and success
+rate on *your* targets. Both publish per-type pricing that lands in the
+region of $0.001–0.003 per solve and changes often enough that we would rather
+send you to the source than quote a figure that goes stale here:
+[CapSolver pricing](https://docs.capsolver.com/en/pricing/),
+[2Captcha pricing](https://2captcha.com/pricing). Note they quote in
+different currencies.
+
+On success rate we publish nothing, because we have measured nothing. Both
+vendors benchmark themselves against the other and both come out ahead in
+their own numbers. If one site matters to you, run a few hundred solves
+through each against *that* site and believe your own results.
 
 This split is deliberate. We supply the engineering; the provider account, and
 the decision to use it on a given site, stay with you. It also means you pay
