@@ -228,6 +228,9 @@ challenge poses an actual question, the provider credential is yours:
 { "url": "…", "solver": { "provider": "capsolver", "apiKey": "…" } }
 ```
 
+`provider` is `capsolver` or `2captcha` — both work for every challenge type
+we solve, and [neither is a default](/docs/guide-unblocking#choosing-a-provider).
+
 The key is used for that one call, never stored and never logged. Prefer to
 drive the solver yourself? Talk to CapSolver or 2Captcha directly from your own
 process and pass the resulting token into the page — nothing here requires our

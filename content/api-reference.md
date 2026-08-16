@@ -398,6 +398,7 @@ and hand back the clearance cookies.
 | `content` | `false` | Include the page markup in the response |
 | `solve` | `true` | Set `false` for the wait only, never a solve |
 | `solver` | — | Your own solving credential; used for this call and never stored |
+| `solver.provider` | — | `capsolver` or `2captcha`. Required when `solver` is present — see [choosing a provider](/docs/guide-unblocking#choosing-a-provider) |
 
 **Response**
 

@@ -111,10 +111,33 @@ deliver it to the page, and watch whether the page actually moves.
 The key is used for that one call. It is never stored, never logged, and never
 comes back in the response — only `solvedBy: "request"`, naming the source.
 
+### Choosing a provider
+
+`provider` accepts `capsolver` or `2captcha`. Both are supported for every
+challenge type we solve, and neither is a default — pick per your workload.
+
+| | CapSolver | 2Captcha |
+|---|---|---|
+| reCAPTCHA v2 | $1.00 / 1k | €0.99–2.80 / 1k |
+| reCAPTCHA v3 | — | €1.40 / 1k (score ≤0.3), €2.80 (>0.3) |
+| Cloudflare Turnstile | $1.20 / 1k | €1.40 / 1k |
+| Image / normal | — | €0.50–1.00 / 1k |
+
+Read off each vendor's own pricing page on **2026-08-16**; note the currencies
+differ. CapSolver quotes ~$0.65/1k for reCAPTCHA at high volume. 2Captcha's
+ranges reflect solving speed, so the low end is not what an impatient
+integration pays.
+
+On success rate we have no measurement of our own, so we publish none. Both
+vendors benchmark themselves and each other, and both come out ahead in their
+own numbers. Rates vary by challenge type and by target site, so if a specific
+site matters to you, run a few hundred solves through each against *that*
+site before committing.
+
 This split is deliberate. We supply the engineering; the provider account, and
 the decision to use it on a given site, stay with you. It also means you pay
-your provider's wholesale rate (~$0.001/solve) rather than a bundled allowance
-marked up to $0.02–0.05.
+your provider's wholesale rate — roughly $0.001–0.003 per solve depending on
+the challenge type — rather than a bundled allowance marked up to $0.02–0.05.
 
 ## A widget isn't always a wall
 
