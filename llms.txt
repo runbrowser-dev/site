@@ -7,6 +7,7 @@
 
 - [Quickstart](https://runbrowser.dev/docs/quickstart.md): Connect an existing Playwright or Puppeteer script in one line, in TypeScript or Python.
 - [Concepts](https://runbrowser.dev/docs/concepts.md): Sessions, the session lifecycle, billing granularity, stable sessions, stealth, proxies and the live viewer.
+- [Recipes](https://runbrowser.dev/docs/recipes.md): Recipes
 - [Sessions & stable sessions](https://runbrowser.dev/docs/guide-sessions.md): Sessions & stable sessions
 - [The live viewer](https://runbrowser.dev/docs/guide-viewer.md): The live viewer
 - [Structured extraction](https://runbrowser.dev/docs/guide-extract.md): Structured extraction

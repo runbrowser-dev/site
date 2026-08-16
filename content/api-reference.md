@@ -545,7 +545,7 @@ stored. See
 ## MCP
 
 `POST https://connect.runbrowser.dev/mcp` — Model Context Protocol over
-Streamable HTTP. Nine tools. See [mcp.md](mcp.md).
+Streamable HTTP. Thirteen tools. See [mcp.md](mcp.md).
 
 ---
 

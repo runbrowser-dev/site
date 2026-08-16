@@ -34,6 +34,7 @@ const OUT = 'docs'
 const NAV = [
   ['quickstart', 'Quickstart'],
   ['concepts', 'Concepts'],
+  ['recipes', 'Recipes'],
   ['guide-sessions', 'Sessions & stable sessions'],
   ['guide-viewer', 'The live viewer'],
   ['guide-extract', 'Structured extraction'],
@@ -333,6 +334,7 @@ function sidebarHtml(currentSlug) {
     <div class="nav-links">
         ${link('quickstart', 'Quickstart')}
         ${link('concepts', 'Concepts')}
+        ${link('recipes', 'Recipes')}
     </div>
 
     <span class="nav-title nav-title-spaced">Guides</span>

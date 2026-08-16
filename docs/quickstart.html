@@ -34,6 +34,7 @@
     <div class="nav-links">
         <a class="nav-link active" href="/docs/quickstart">Quickstart</a>
         <a class="nav-link " href="/docs/concepts">Concepts</a>
+        <a class="nav-link " href="/docs/recipes">Recipes</a>
     </div>
 
     <span class="nav-title nav-title-spaced">Guides</span>
@@ -137,7 +138,7 @@ ends up in git history, and ours grant browser-time that costs real money.</p>
 <div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="import { chromium } from 'playwright';
 
 const browser = await chromium.connectOverCDP(
-  `https://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
+  `wss://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
 );
 const page = await browser.newPage();
 await page.goto('https://example.com');
@@ -145,7 +146,7 @@ await page.screenshot({ path: 'out.png' });
 await browser.close();">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="import { chromium } from 'playwright';
 
 const browser = await chromium.connectOverCDP(
-  `https://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
+  `wss://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
 );
 const page = await browser.newPage();
 await page.goto('https://example.com');
@@ -153,7 +154,7 @@ await page.screenshot({ path: 'out.png' });
 await browser.close();"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> chromium <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'playwright'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>
-  <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://connect.runbrowser.dev?token=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">wss://connect.runbrowser.dev?token=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
 <span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> page <span class="token operator">=</span> <span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">newPage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://example.com'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -163,7 +164,7 @@ from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.connect_over_cdp(
-        f&quot;https://connect.runbrowser.dev?token={os.environ['RUNBROWSER_TOKEN']}&quot;
+        f&quot;wss://connect.runbrowser.dev?token={os.environ['RUNBROWSER_TOKEN']}&quot;
     )
     page = browser.new_page()
     page.goto(&quot;https://example.com&quot;)
@@ -173,7 +174,7 @@ with sync_playwright() as p:
 
 <span class="token keyword">with</span> sync_playwright<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> p<span class="token punctuation">:</span>
     browser <span class="token operator">=</span> p<span class="token punctuation">.</span>chromium<span class="token punctuation">.</span>connect_over_cdp<span class="token punctuation">(</span>
-        <span class="token string-interpolation"><span class="token string">f"https://connect.runbrowser.dev?token=</span><span class="token interpolation"><span class="token punctuation">{</span>os<span class="token punctuation">.</span>environ<span class="token punctuation">[</span><span class="token string">'RUNBROWSER_TOKEN'</span><span class="token punctuation">]</span><span class="token punctuation">}</span></span><span class="token string">"</span></span>
+        <span class="token string-interpolation"><span class="token string">f"wss://connect.runbrowser.dev?token=</span><span class="token interpolation"><span class="token punctuation">{</span>os<span class="token punctuation">.</span>environ<span class="token punctuation">[</span><span class="token string">'RUNBROWSER_TOKEN'</span><span class="token punctuation">]</span><span class="token punctuation">}</span></span><span class="token string">"</span></span>
     <span class="token punctuation">)</span>
     page <span class="token operator">=</span> browser<span class="token punctuation">.</span>new_page<span class="token punctuation">(</span><span class="token punctuation">)</span>
     page<span class="token punctuation">.</span>goto<span class="token punctuation">(</span><span class="token string">"https://example.com"</span><span class="token punctuation">)</span>
@@ -443,7 +444,7 @@ const data = await call('/v1/extract', {
                <span class="token string">"--header"</span><span class="token punctuation">,</span> <span class="token string">"Authorization: Bearer ab_yourkey"</span><span class="token punctuation">]</span>
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre></div><p>Nine tools appear: <code>fetch</code>, <code>search</code>, <code>extract</code>, and a <code>browser_*</code> family
+<span class="token punctuation">}</span></code></pre></div><p>Thirteen tools appear: <code>fetch</code>, <code>search</code>, <code>extract</code>, and a <code>browser_*</code> family
 that drives one persistent browser across calls. See <a href="/docs/mcp">mcp.md</a>.</p>
 <h2 id="what-youre-billed-for">What you&#39;re billed for<a class="anchor" href="#what-youre-billed-for" aria-label="Link to this section">#</a></h2>
 <p><strong>Browser-time, by the second</strong> — from the moment a browser is provisioned
