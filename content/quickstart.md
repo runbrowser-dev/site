@@ -17,7 +17,7 @@ ends up in git history, and ours grant browser-time that costs real money.
 import { chromium } from 'playwright';
 
 const browser = await chromium.connectOverCDP(
-  `https://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
+  `wss://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
 );
 const page = await browser.newPage();
 await page.goto('https://example.com');
@@ -31,7 +31,7 @@ from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.connect_over_cdp(
-        f"https://connect.runbrowser.dev?token={os.environ['RUNBROWSER_TOKEN']}"
+        f"wss://connect.runbrowser.dev?token={os.environ['RUNBROWSER_TOKEN']}"
     )
     page = browser.new_page()
     page.goto("https://example.com")
@@ -216,7 +216,7 @@ If you're building with an MCP-aware agent, skip the code entirely:
 }
 ```
 
-Nine tools appear: `fetch`, `search`, `extract`, and a `browser_*` family
+Thirteen tools appear: `fetch`, `search`, `extract`, and a `browser_*` family
 that drives one persistent browser across calls. See [mcp.md](mcp.md).
 
 ## What you're billed for

@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipes — runbrowser docs</title>
+<meta name="description" content="Complete, runnable answers to the jobs people actually bring here. Each one says what it costs and where it usually goes wrong.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
+  </a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
+</header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Get started</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/quickstart">Quickstart</a>
+        <a class="nav-link " href="/docs/concepts">Concepts</a>
+        <a class="nav-link active" href="/docs/recipes">Recipes</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
+        <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
+        <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
+        <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
+        <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
+        <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
+        <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
+        <a class="nav-link " href="/docs/guide-unblocking">Getting through walls</a>
+    </div>
+
+    <details class="nav-group" >
+      <summary class="nav-title nav-title-spaced">API reference</summary>
+      <div class="nav-api">
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#connecting-a-browser">Connecting a browser</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#sessions">Sessions</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#rest-shortcuts">REST shortcuts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-screenshot-imagepngjpegwebp"><span class="m m-post">POST</span><span class="ep-path">/screenshot</span></a>
+            <a class="ep" href="/docs/api-reference#post-pdf-applicationpdf"><span class="m m-post">POST</span><span class="ep-path">/pdf</span></a>
+            <a class="ep" href="/docs/api-reference#post-content-texthtml"><span class="m m-post">POST</span><span class="ep-path">/content</span></a>
+            <a class="ep" href="/docs/api-reference#post-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-function-json"><span class="m m-post">POST</span><span class="ep-path">/function</span></a>
+            <a class="ep" href="/docs/api-reference#post-export-the-resource-as-is"><span class="m m-post">POST</span><span class="ep-path">/export</span></a>
+            <a class="ep" href="/docs/api-reference#post-smart-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/smart-scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
+            <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
+            <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+            <a class="ep" href="/docs/api-reference#post-unblock-json"><span class="m m-post">POST</span><span class="ep-path">/unblock</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#mcp">MCP</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#metrics">Metrics</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#errors">Errors</a>
+          
+        </div>
+      </div>
+    </details>
+
+    <span class="nav-title nav-title-spaced">Integrations</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sdk">SDKs</a>
+        <a class="nav-link " href="/docs/guide-integrations">LangChain &amp; n8n</a>
+        <a class="nav-link " href="/docs/mcp">MCP server</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Migrating</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
+        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/errors">Errors</a>
+        <a class="nav-link" href="/#pricing">Pricing</a>
+        <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
+  </nav>
+  <main class="prose">
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Recipes</span></div>
+<h1 id="recipes">Recipes</h1>
+<p>Complete, runnable answers to the jobs people actually bring here. Each one
+says what it costs and where it usually goes wrong.</p>
+<p>The guides explain features; these solve tasks. If your job isn&#39;t here,
+<a href="mailto:hi@runbrowser.dev">tell us</a> — the gaps in this page are the most
+useful bug reports we get.</p>
+<hr>
+<h2 id="log-in-once-then-scrape-behind-the-login">Log in once, then scrape behind the login<a class="anchor" href="#log-in-once-then-scrape-behind-the-login" aria-label="Link to this section">#</a></h2>
+<p>The most common real job, and the one where the naive version quietly burns
+money: signing in on every run costs a fresh login every time, and some sites
+start challenging you for it.</p>
+<p>Sign in once into a <a href="/docs/guide-sessions">stable session</a>, then reconnect to
+that same browser for as many runs as you need.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="import { chromium } from 'playwright'
+import { RunBrowser } from 'runbrowser'
+
+const rb = new RunBrowser()
+
+// One session, alive between connections.
+const session = await rb.sessions.create({ keepAlive: true, maxIdleSeconds: 900 })
+
+// --- run 1: sign in -------------------------------------------------------
+{
+  const browser = await chromium.connectOverCDP(session.connectUrl)
+  const page = browser.contexts()[0].pages()[0]        // reuse the open tab
+
+  await page.goto('https://app.example.com/login')
+  await page.fill('#email', process.env.APP_USER!)
+  await page.fill('#password', process.env.APP_PASS!)
+  await page.click('button[type=submit]')
+  await page.waitForURL('**/dashboard')
+
+  await browser.close()      // your connection drops; the browser stays alive
+}
+
+// --- run 2: minutes later, a different process ---------------------------
+{
+  const browser = await chromium.connectOverCDP(session.connectUrl)
+  const page = browser.contexts()[0].pages()[0]
+  // Still signed in. Still on the dashboard.
+  await page.goto('https://app.example.com/reports')
+  console.log(await page.textContent('.report-total'))
+  await browser.close()
+}
+
+await session.close()        // stops the meter">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="import { chromium } from 'playwright'
+import { RunBrowser } from 'runbrowser'
+
+const rb = new RunBrowser()
+
+// One session, alive between connections.
+const session = await rb.sessions.create({ keepAlive: true, maxIdleSeconds: 900 })
+
+// --- run 1: sign in -------------------------------------------------------
+{
+  const browser = await chromium.connectOverCDP(session.connectUrl)
+  const page = browser.contexts()[0].pages()[0]        // reuse the open tab
+
+  await page.goto('https://app.example.com/login')
+  await page.fill('#email', process.env.APP_USER!)
+  await page.fill('#password', process.env.APP_PASS!)
+  await page.click('button[type=submit]')
+  await page.waitForURL('**/dashboard')
+
+  await browser.close()      // your connection drops; the browser stays alive
+}
+
+// --- run 2: minutes later, a different process ---------------------------
+{
+  const browser = await chromium.connectOverCDP(session.connectUrl)
+  const page = browser.contexts()[0].pages()[0]
+  // Still signed in. Still on the dashboard.
+  await page.goto('https://app.example.com/reports')
+  console.log(await page.textContent('.report-total'))
+  await browser.close()
+}
+
+await session.close()        // stops the meter"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> chromium <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'playwright'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> RunBrowser <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'runbrowser'</span>
+
+<span class="token keyword">const</span> rb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// One session, alive between connections.</span>
+<span class="token keyword">const</span> session <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span>sessions<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">{</span> keepAlive<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> maxIdleSeconds<span class="token operator">:</span> <span class="token number">900</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// --- run 1: sign in -------------------------------------------------------</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>session<span class="token punctuation">.</span>connectUrl<span class="token punctuation">)</span>
+  <span class="token keyword">const</span> page <span class="token operator">=</span> browser<span class="token punctuation">.</span><span class="token function">contexts</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">pages</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>        <span class="token comment">// reuse the open tab</span>
+
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://app.example.com/login'</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">fill</span><span class="token punctuation">(</span><span class="token string">'#email'</span><span class="token punctuation">,</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">APP_USER</span><span class="token operator">!</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">fill</span><span class="token punctuation">(</span><span class="token string">'#password'</span><span class="token punctuation">,</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">APP_PASS</span><span class="token operator">!</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">click</span><span class="token punctuation">(</span><span class="token string">'button[type=submit]'</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">waitForURL</span><span class="token punctuation">(</span><span class="token string">'**/dashboard'</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>      <span class="token comment">// your connection drops; the browser stays alive</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// --- run 2: minutes later, a different process ---------------------------</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>session<span class="token punctuation">.</span>connectUrl<span class="token punctuation">)</span>
+  <span class="token keyword">const</span> page <span class="token operator">=</span> browser<span class="token punctuation">.</span><span class="token function">contexts</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">pages</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+  <span class="token comment">// Still signed in. Still on the dashboard.</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://app.example.com/reports'</span><span class="token punctuation">)</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">textContent</span><span class="token punctuation">(</span><span class="token string">'.report-total'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">await</span> session<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>        <span class="token comment">// stops the meter</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="from playwright.sync_api import sync_playwright
+from runbrowser import RunBrowser
+import os
+
+rb = RunBrowser()
+
+with rb.create_session(keepAlive=True, maxIdleSeconds=900) as session:
+    with sync_playwright() as p:
+        # --- run 1: sign in ---
+        browser = p.chromium.connect_over_cdp(session.connect_url)
+        page = browser.contexts[0].pages[0]            # reuse the open tab
+        page.goto(&quot;https://app.example.com/login&quot;)
+        page.fill(&quot;#email&quot;, os.environ[&quot;APP_USER&quot;])
+        page.fill(&quot;#password&quot;, os.environ[&quot;APP_PASS&quot;])
+        page.click(&quot;button[type=submit]&quot;)
+        page.wait_for_url(&quot;**/dashboard&quot;)
+        browser.close()      # connection drops; browser stays alive
+
+        # --- run 2 ---
+        browser = p.chromium.connect_over_cdp(session.connect_url)
+        page = browser.contexts[0].pages[0]
+        page.goto(&quot;https://app.example.com/reports&quot;)   # still signed in
+        print(page.text_content(&quot;.report-total&quot;))
+        browser.close()
+# session closed here — the meter stops"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">from</span> playwright<span class="token punctuation">.</span>sync_api <span class="token keyword">import</span> sync_playwright
+<span class="token keyword">from</span> runbrowser <span class="token keyword">import</span> RunBrowser
+<span class="token keyword">import</span> os
+
+rb <span class="token operator">=</span> RunBrowser<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">with</span> rb<span class="token punctuation">.</span>create_session<span class="token punctuation">(</span>keepAlive<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">,</span> maxIdleSeconds<span class="token operator">=</span><span class="token number">900</span><span class="token punctuation">)</span> <span class="token keyword">as</span> session<span class="token punctuation">:</span>
+    <span class="token keyword">with</span> sync_playwright<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> p<span class="token punctuation">:</span>
+        <span class="token comment"># --- run 1: sign in ---</span>
+        browser <span class="token operator">=</span> p<span class="token punctuation">.</span>chromium<span class="token punctuation">.</span>connect_over_cdp<span class="token punctuation">(</span>session<span class="token punctuation">.</span>connect_url<span class="token punctuation">)</span>
+        page <span class="token operator">=</span> browser<span class="token punctuation">.</span>contexts<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>pages<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>            <span class="token comment"># reuse the open tab</span>
+        page<span class="token punctuation">.</span>goto<span class="token punctuation">(</span><span class="token string">"https://app.example.com/login"</span><span class="token punctuation">)</span>
+        page<span class="token punctuation">.</span>fill<span class="token punctuation">(</span><span class="token string">"#email"</span><span class="token punctuation">,</span> os<span class="token punctuation">.</span>environ<span class="token punctuation">[</span><span class="token string">"APP_USER"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+        page<span class="token punctuation">.</span>fill<span class="token punctuation">(</span><span class="token string">"#password"</span><span class="token punctuation">,</span> os<span class="token punctuation">.</span>environ<span class="token punctuation">[</span><span class="token string">"APP_PASS"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+        page<span class="token punctuation">.</span>click<span class="token punctuation">(</span><span class="token string">"button[type=submit]"</span><span class="token punctuation">)</span>
+        page<span class="token punctuation">.</span>wait_for_url<span class="token punctuation">(</span><span class="token string">"**/dashboard"</span><span class="token punctuation">)</span>
+        browser<span class="token punctuation">.</span>close<span class="token punctuation">(</span><span class="token punctuation">)</span>      <span class="token comment"># connection drops; browser stays alive</span>
+
+        <span class="token comment"># --- run 2 ---</span>
+        browser <span class="token operator">=</span> p<span class="token punctuation">.</span>chromium<span class="token punctuation">.</span>connect_over_cdp<span class="token punctuation">(</span>session<span class="token punctuation">.</span>connect_url<span class="token punctuation">)</span>
+        page <span class="token operator">=</span> browser<span class="token punctuation">.</span>contexts<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>pages<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+        page<span class="token punctuation">.</span>goto<span class="token punctuation">(</span><span class="token string">"https://app.example.com/reports"</span><span class="token punctuation">)</span>   <span class="token comment"># still signed in</span>
+        <span class="token keyword">print</span><span class="token punctuation">(</span>page<span class="token punctuation">.</span>text_content<span class="token punctuation">(</span><span class="token string">".report-total"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        browser<span class="token punctuation">.</span>close<span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment"># session closed here — the meter stops</span></code></pre></div></div><blockquote>
+<p><strong>The mistake everyone makes:</strong> calling <code>newPage()</code> instead of taking
+<code>pages()[0]</code>. A page <em>you</em> create is closed when your connection drops, and
+its state goes with it — which defeats the entire point. Reuse the tab that
+is already there.</p>
+</blockquote>
+<p><strong>Cost:</strong> the browser bills for the whole time it is alive, <em>including while
+parked between runs</em>. That trade is the feature, but set <code>maxIdleSeconds</code> so a
+forgotten session can&#39;t run all night. If your runs are hours apart, sign in
+each time instead — it&#39;s cheaper.</p>
+<hr>
+<h2 id="turn-a-whole-site-into-typed-data">Turn a whole site into typed data<a class="anchor" href="#turn-a-whole-site-into-typed-data" aria-label="Link to this section">#</a></h2>
+<p>Two steps: find the pages, then extract each one against a schema. Don&#39;t crawl
+when a sitemap will do — <a href="/docs/guide-crawling"><code>/map</code></a> reads the sitemap <em>and</em>
+the on-page links, and tells you which gave what.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="const rb = new RunBrowser()
+
+// 1. Discover. Cheap — one page load.
+const { urls, sources, total } = await rb.map({
+  url: 'https://shop.example.com',
+  limit: 500,
+})
+console.log(`${total} urls (${sources.sitemap} from sitemap, ${sources.page} from links)`)
+
+// 2. Keep only what you want.
+const products = urls.filter((u) =&gt; u.includes('/product/'))
+
+// 3. Extract each against one schema, a few at a time.
+const schema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string' },
+    priceEur: { type: 'number' },
+    inStock: { type: 'boolean' },
+  },
+  required: ['name', 'priceEur'],
+}
+
+const results = []
+for (let i = 0; i &lt; products.length; i += 5) {
+  const batch = products.slice(i, i + 5)
+  results.push(
+    ...(await Promise.all(
+      batch.map((url) =&gt;
+        rb.extract({ url, schema, contentFormat: 'markdown-full' })
+          .then((r) =&gt; ({ url, ...r.data }))
+          .catch((err) =&gt; ({ url, error: err.code ?? String(err) })),
+      ),
+    )),
+  )
+}">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="const rb = new RunBrowser()
+
+// 1. Discover. Cheap — one page load.
+const { urls, sources, total } = await rb.map({
+  url: 'https://shop.example.com',
+  limit: 500,
+})
+console.log(`${total} urls (${sources.sitemap} from sitemap, ${sources.page} from links)`)
+
+// 2. Keep only what you want.
+const products = urls.filter((u) =&gt; u.includes('/product/'))
+
+// 3. Extract each against one schema, a few at a time.
+const schema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string' },
+    priceEur: { type: 'number' },
+    inStock: { type: 'boolean' },
+  },
+  required: ['name', 'priceEur'],
+}
+
+const results = []
+for (let i = 0; i &lt; products.length; i += 5) {
+  const batch = products.slice(i, i + 5)
+  results.push(
+    ...(await Promise.all(
+      batch.map((url) =&gt;
+        rb.extract({ url, schema, contentFormat: 'markdown-full' })
+          .then((r) =&gt; ({ url, ...r.data }))
+          .catch((err) =&gt; ({ url, error: err.code ?? String(err) })),
+      ),
+    )),
+  )
+}"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">const</span> rb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// 1. Discover. Cheap — one page load.</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> urls<span class="token punctuation">,</span> sources<span class="token punctuation">,</span> total <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  url<span class="token operator">:</span> <span class="token string">'https://shop.example.com'</span><span class="token punctuation">,</span>
+  limit<span class="token operator">:</span> <span class="token number">500</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>total<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> urls (</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>sources<span class="token punctuation">.</span>sitemap<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> from sitemap, </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>sources<span class="token punctuation">.</span>page<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> from links)</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span>
+
+<span class="token comment">// 2. Keep only what you want.</span>
+<span class="token keyword">const</span> products <span class="token operator">=</span> urls<span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span><span class="token punctuation">(</span>u<span class="token punctuation">)</span> <span class="token operator">=></span> u<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'/product/'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token comment">// 3. Extract each against one schema, a few at a time.</span>
+<span class="token keyword">const</span> schema <span class="token operator">=</span> <span class="token punctuation">{</span>
+  type<span class="token operator">:</span> <span class="token string">'object'</span><span class="token punctuation">,</span>
+  properties<span class="token operator">:</span> <span class="token punctuation">{</span>
+    name<span class="token operator">:</span> <span class="token punctuation">{</span> type<span class="token operator">:</span> <span class="token string">'string'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    priceEur<span class="token operator">:</span> <span class="token punctuation">{</span> type<span class="token operator">:</span> <span class="token string">'number'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    inStock<span class="token operator">:</span> <span class="token punctuation">{</span> type<span class="token operator">:</span> <span class="token string">'boolean'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  required<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token string">'priceEur'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> results <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> products<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i <span class="token operator">+=</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> batch <span class="token operator">=</span> products<span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> i <span class="token operator">+</span> <span class="token number">5</span><span class="token punctuation">)</span>
+  results<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>
+    <span class="token operator">...</span><span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>
+      batch<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span> <span class="token operator">=></span>
+        rb<span class="token punctuation">.</span><span class="token function">extract</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token punctuation">,</span> schema<span class="token punctuation">,</span> contentFormat<span class="token operator">:</span> <span class="token string">'markdown-full'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+          <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span>r<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token punctuation">,</span> <span class="token operator">...</span>r<span class="token punctuation">.</span>data <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+          <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token punctuation">,</span> error<span class="token operator">:</span> err<span class="token punctuation">.</span>code <span class="token operator">??</span> <span class="token function">String</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="rb = RunBrowser()
+
+found = rb.map(url=&quot;https://shop.example.com&quot;, limit=500)
+print(f&quot;{found['total']} urls &quot;
+      f&quot;({found['sources']['sitemap']} sitemap, {found['sources']['page']} links)&quot;)
+
+products = [u for u in found[&quot;urls&quot;] if &quot;/product/&quot; in u]
+
+schema = {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+        &quot;name&quot;: {&quot;type&quot;: &quot;string&quot;},
+        &quot;priceEur&quot;: {&quot;type&quot;: &quot;number&quot;},
+        &quot;inStock&quot;: {&quot;type&quot;: &quot;boolean&quot;},
+    },
+    &quot;required&quot;: [&quot;name&quot;, &quot;priceEur&quot;],
+}
+
+results = []
+for url in products:
+    try:
+        r = rb.extract(url=url, schema=schema, contentFormat=&quot;markdown-full&quot;)
+        results.append({&quot;url&quot;: url, **r[&quot;data&quot;]})
+    except Exception as err:
+        results.append({&quot;url&quot;: url, &quot;error&quot;: str(err)})"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code>rb <span class="token operator">=</span> RunBrowser<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+found <span class="token operator">=</span> rb<span class="token punctuation">.</span><span class="token builtin">map</span><span class="token punctuation">(</span>url<span class="token operator">=</span><span class="token string">"https://shop.example.com"</span><span class="token punctuation">,</span> limit<span class="token operator">=</span><span class="token number">500</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string-interpolation"><span class="token string">f"</span><span class="token interpolation"><span class="token punctuation">{</span>found<span class="token punctuation">[</span><span class="token string">'total'</span><span class="token punctuation">]</span><span class="token punctuation">}</span></span><span class="token string"> urls "</span></span>
+      <span class="token string-interpolation"><span class="token string">f"(</span><span class="token interpolation"><span class="token punctuation">{</span>found<span class="token punctuation">[</span><span class="token string">'sources'</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string">'sitemap'</span><span class="token punctuation">]</span><span class="token punctuation">}</span></span><span class="token string"> sitemap, </span><span class="token interpolation"><span class="token punctuation">{</span>found<span class="token punctuation">[</span><span class="token string">'sources'</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string">'page'</span><span class="token punctuation">]</span><span class="token punctuation">}</span></span><span class="token string"> links)"</span></span><span class="token punctuation">)</span>
+
+products <span class="token operator">=</span> <span class="token punctuation">[</span>u <span class="token keyword">for</span> u <span class="token keyword">in</span> found<span class="token punctuation">[</span><span class="token string">"urls"</span><span class="token punctuation">]</span> <span class="token keyword">if</span> <span class="token string">"/product/"</span> <span class="token keyword">in</span> u<span class="token punctuation">]</span>
+
+schema <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"object"</span><span class="token punctuation">,</span>
+    <span class="token string">"properties"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"string"</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token string">"priceEur"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"number"</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token string">"inStock"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"boolean"</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">"required"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"name"</span><span class="token punctuation">,</span> <span class="token string">"priceEur"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span>
+
+results <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token keyword">for</span> url <span class="token keyword">in</span> products<span class="token punctuation">:</span>
+    <span class="token keyword">try</span><span class="token punctuation">:</span>
+        r <span class="token operator">=</span> rb<span class="token punctuation">.</span>extract<span class="token punctuation">(</span>url<span class="token operator">=</span>url<span class="token punctuation">,</span> schema<span class="token operator">=</span>schema<span class="token punctuation">,</span> contentFormat<span class="token operator">=</span><span class="token string">"markdown-full"</span><span class="token punctuation">)</span>
+        results<span class="token punctuation">.</span>append<span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token string">"url"</span><span class="token punctuation">:</span> url<span class="token punctuation">,</span> <span class="token operator">**</span>r<span class="token punctuation">[</span><span class="token string">"data"</span><span class="token punctuation">]</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token keyword">except</span> Exception <span class="token keyword">as</span> err<span class="token punctuation">:</span>
+        results<span class="token punctuation">.</span>append<span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token string">"url"</span><span class="token punctuation">:</span> url<span class="token punctuation">,</span> <span class="token string">"error"</span><span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span><span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div></div><blockquote>
+<p><strong>Use <code>contentFormat: &quot;markdown-full&quot;</code> for listings and product grids.</strong> The
+default (<code>markdown</code>) runs article extraction, which is right for prose and
+wrong here — it strips the navigation and repeated blocks that a product page
+keeps its data in.</p>
+</blockquote>
+<p><strong>Cost:</strong> <code>/map</code> is one page load. <code>/extract</code> renders a browser <em>and</em> spends
+model tokens, so it draws on a separate allowance — batch it, cache the
+results, and don&#39;t re-extract pages that haven&#39;t changed.</p>
+<p><strong>When the link graph matters more than the sitemap</strong> — docs sites, wikis,
+anything without a sitemap — use <a href="/docs/guide-crawling"><code>/crawl</code></a> instead, and
+always read <code>stoppedBecause</code>. A short result with <code>stoppedBecause: &quot;maxPages&quot;</code>
+is a truncated crawl, not a small site.</p>
+<hr>
+<h2 id="watch-a-page-and-tell-me-when-it-changes">Watch a page and tell me when it changes<a class="anchor" href="#watch-a-page-and-tell-me-when-it-changes" aria-label="Link to this section">#</a></h2>
+<p>Monitoring doesn&#39;t need a browser most of the time, and using one is the
+difference between pennies and real money at hourly frequency.</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="import { createHash } from 'node:crypto'
+
+const rb = new RunBrowser()
+
+async function check(url: string, lastHash: string | null) {
+  const res = await rb.fetch({ url, format: 'markdown' })
+
+  // Check this BEFORE trusting the body, or you'll diff a bot wall against
+  // yesterday's real content and alert on nothing.
+  if (res.blocked) {
+    return { changed: false, blocked: true, provider: res.blockProvider }
+  }
+
+  const hash = createHash('sha256').update(res.body).digest('hex')
+  return { changed: lastHash !== null &amp;&amp; hash !== lastHash, hash, body: res.body }
+}">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="import { createHash } from 'node:crypto'
+
+const rb = new RunBrowser()
+
+async function check(url: string, lastHash: string | null) {
+  const res = await rb.fetch({ url, format: 'markdown' })
+
+  // Check this BEFORE trusting the body, or you'll diff a bot wall against
+  // yesterday's real content and alert on nothing.
+  if (res.blocked) {
+    return { changed: false, blocked: true, provider: res.blockProvider }
+  }
+
+  const hash = createHash('sha256').update(res.body).digest('hex')
+  return { changed: lastHash !== null &amp;&amp; hash !== lastHash, hash, body: res.body }
+}"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> createHash <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'node:crypto'</span>
+
+<span class="token keyword">const</span> rb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">check</span><span class="token punctuation">(</span>url<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> lastHash<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token punctuation">,</span> format<span class="token operator">:</span> <span class="token string">'markdown'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+  <span class="token comment">// Check this BEFORE trusting the body, or you'll diff a bot wall against</span>
+  <span class="token comment">// yesterday's real content and alert on nothing.</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>res<span class="token punctuation">.</span>blocked<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span> changed<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> blocked<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> provider<span class="token operator">:</span> res<span class="token punctuation">.</span>blockProvider <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">const</span> hash <span class="token operator">=</span> <span class="token function">createHash</span><span class="token punctuation">(</span><span class="token string">'sha256'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>res<span class="token punctuation">.</span>body<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">digest</span><span class="token punctuation">(</span><span class="token string">'hex'</span><span class="token punctuation">)</span>
+  <span class="token keyword">return</span> <span class="token punctuation">{</span> changed<span class="token operator">:</span> lastHash <span class="token operator">!==</span> <span class="token keyword">null</span> <span class="token operator">&amp;&amp;</span> hash <span class="token operator">!==</span> lastHash<span class="token punctuation">,</span> hash<span class="token punctuation">,</span> body<span class="token operator">:</span> res<span class="token punctuation">.</span>body <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="import hashlib
+
+rb = RunBrowser()
+
+def check(url: str, last_hash: str | None):
+    res = rb.fetch(url=url, format=&quot;markdown&quot;)
+
+    # Check this BEFORE trusting the body.
+    if res.get(&quot;blocked&quot;):
+        return {&quot;changed&quot;: False, &quot;blocked&quot;: True, &quot;provider&quot;: res.get(&quot;blockProvider&quot;)}
+
+    digest = hashlib.sha256(res[&quot;body&quot;].encode()).hexdigest()
+    return {&quot;changed&quot;: last_hash is not None and digest != last_hash,
+            &quot;hash&quot;: digest, &quot;body&quot;: res[&quot;body&quot;]}"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">import</span> hashlib
+
+rb <span class="token operator">=</span> RunBrowser<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">def</span> <span class="token function">check</span><span class="token punctuation">(</span>url<span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">,</span> last_hash<span class="token punctuation">:</span> <span class="token builtin">str</span> <span class="token operator">|</span> <span class="token boolean">None</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    res <span class="token operator">=</span> rb<span class="token punctuation">.</span>fetch<span class="token punctuation">(</span>url<span class="token operator">=</span>url<span class="token punctuation">,</span> <span class="token builtin">format</span><span class="token operator">=</span><span class="token string">"markdown"</span><span class="token punctuation">)</span>
+
+    <span class="token comment"># Check this BEFORE trusting the body.</span>
+    <span class="token keyword">if</span> res<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"blocked"</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token punctuation">{</span><span class="token string">"changed"</span><span class="token punctuation">:</span> <span class="token boolean">False</span><span class="token punctuation">,</span> <span class="token string">"blocked"</span><span class="token punctuation">:</span> <span class="token boolean">True</span><span class="token punctuation">,</span> <span class="token string">"provider"</span><span class="token punctuation">:</span> res<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"blockProvider"</span><span class="token punctuation">)</span><span class="token punctuation">}</span>
+
+    digest <span class="token operator">=</span> hashlib<span class="token punctuation">.</span>sha256<span class="token punctuation">(</span>res<span class="token punctuation">[</span><span class="token string">"body"</span><span class="token punctuation">]</span><span class="token punctuation">.</span>encode<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span>hexdigest<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span><span class="token string">"changed"</span><span class="token punctuation">:</span> last_hash <span class="token keyword">is</span> <span class="token keyword">not</span> <span class="token boolean">None</span> <span class="token keyword">and</span> digest <span class="token operator">!=</span> last_hash<span class="token punctuation">,</span>
+            <span class="token string">"hash"</span><span class="token punctuation">:</span> digest<span class="token punctuation">,</span> <span class="token string">"body"</span><span class="token punctuation">:</span> res<span class="token punctuation">[</span><span class="token string">"body"</span><span class="token punctuation">]</span><span class="token punctuation">}</span></code></pre></div></div><blockquote>
+<p><strong>Hash the markdown, not the HTML.</strong> Raw HTML changes on every request —
+CSRF tokens, build hashes, timestamps, ad slots — so an HTML diff alerts
+constantly and you stop reading the alerts. <code>format: &quot;markdown&quot;</code> strips all
+of that and leaves the content a human would notice changing.</p>
+</blockquote>
+<p><strong>If the page needs JavaScript</strong>, swap <code>fetch</code> for
+<a href="/docs/guide-crawling"><code>/smart-scrape</code></a>, which tries plain HTTP first and only
+pays for a browser when the cheap path comes back thin or blocked. It reports
+which path it took in <code>method</code>, so you can see what you&#39;re spending on.</p>
+<p><strong>Cost:</strong> <code>/v1/fetch</code> draws on a monthly call allowance and uses <strong>no
+browser-time at all</strong>. Hourly checks on a hundred pages is well inside Hobby.</p>
+<hr>
+<h2 id="fill-in-a-form-and-grab-the-file-it-generates">Fill in a form and grab the file it generates<a class="anchor" href="#fill-in-a-form-and-grab-the-file-it-generates" aria-label="Link to this section">#</a></h2>
+<p>Invoices, exports, reports — the file is behind a form, and often behind a
+login too, so a plain HTTP fetch of the download URL returns a login page.
+Driving the page keeps the session that authorises the file.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="const rb = new RunBrowser()
+const { page, close } = await rb.connect({ chromium, keepAlive: true })
+
+try {
+  await page.goto('https://portal.example.com/reports')
+  await page.selectOption('#period', '2026-07')
+  await page.click('#generate')
+  await page.waitForSelector('a.download-ready', { timeout: 60_000 })
+
+  // Pull the file through the page's own session — no cookie replay needed.
+  const pdf = await rb.download({
+    url: page.url(),
+    selector: 'a.download-ready',
+  })
+  await fs.writeFile('report-2026-07.pdf', pdf)
+} finally {
+  await close()
+}">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">const</span> rb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> page<span class="token punctuation">,</span> close <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">{</span> chromium<span class="token punctuation">,</span> keepAlive<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">try</span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://portal.example.com/reports'</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">selectOption</span><span class="token punctuation">(</span><span class="token string">'#period'</span><span class="token punctuation">,</span> <span class="token string">'2026-07'</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">click</span><span class="token punctuation">(</span><span class="token string">'#generate'</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">waitForSelector</span><span class="token punctuation">(</span><span class="token string">'a.download-ready'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> timeout<span class="token operator">:</span> <span class="token number">60_000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+  <span class="token comment">// Pull the file through the page's own session — no cookie replay needed.</span>
+  <span class="token keyword">const</span> pdf <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">download</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    url<span class="token operator">:</span> page<span class="token punctuation">.</span><span class="token function">url</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    selector<span class="token operator">:</span> <span class="token string">'a.download-ready'</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token keyword">await</span> fs<span class="token punctuation">.</span><span class="token function">writeFile</span><span class="token punctuation">(</span><span class="token string">'report-2026-07.pdf'</span><span class="token punctuation">,</span> pdf<span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">finally</span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre></div><blockquote>
+<p><strong><code>/download</code> follows the link from the page it landed on</strong>, including
+cross-origin redirects, so a link to <code>files.example.com</code> that bounces to a
+CDN still resolves. What it cannot do is fetch a download built entirely in
+JavaScript with no URL behind it — a blob assembled in the page. You get a
+clear <code>404</code> saying so rather than an empty file.</p>
+</blockquote>
+<p>If the link needs computing rather than reading, pass <code>code</code> instead of
+<code>selector</code>:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;…&quot;, &quot;code&quot;: &quot;return document.querySelector('[data-file]').dataset.file&quot; }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"code"</span><span class="token operator">:</span> <span class="token string">"return document.querySelector('[data-file]').dataset.file"</span> <span class="token punctuation">}</span></code></pre></div><hr>
+<h2 id="get-past-a-wall-then-keep-the-clearance">Get past a wall, then keep the clearance<a class="anchor" href="#get-past-a-wall-then-keep-the-clearance" aria-label="Link to this section">#</a></h2>
+<p>When a site puts up an interstitial, don&#39;t fight it in a loop — clear it once
+and carry the cookies into the calls that do the real work.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="const rb = new RunBrowser()
+
+const wall = await rb.unblock({ url: 'https://shop.example.com' })
+
+if (!wall.unblocked) {
+  // It tells you which kind of wall, because they need different answers.
+  console.error(wall.challenge?.type, '→', wall.advice)
+  //   interstitial  → waiting; already done for you
+  //   turnstile     → pass solver.provider + solver.apiKey
+  //   scoring       → nothing solvable; you need a residential exit IP
+  process.exit(1)
+}
+
+// The clearance carries into anything else you call.
+const data = await rb.scrape({
+  url: 'https://shop.example.com/products',
+  cookies: wall.cookies,
+  elements: [{ selector: '.product-title' }, { selector: '.price' }],
+})">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">const</span> rb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> wall <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">unblock</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token operator">:</span> <span class="token string">'https://shop.example.com'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>wall<span class="token punctuation">.</span>unblocked<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// It tells you which kind of wall, because they need different answers.</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>wall<span class="token punctuation">.</span>challenge<span class="token operator">?.</span>type<span class="token punctuation">,</span> <span class="token string">'→'</span><span class="token punctuation">,</span> wall<span class="token punctuation">.</span>advice<span class="token punctuation">)</span>
+  <span class="token comment">//   interstitial  → waiting; already done for you</span>
+  <span class="token comment">//   turnstile     → pass solver.provider + solver.apiKey</span>
+  <span class="token comment">//   scoring       → nothing solvable; you need a residential exit IP</span>
+  process<span class="token punctuation">.</span><span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// The clearance carries into anything else you call.</span>
+<span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">scrape</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  url<span class="token operator">:</span> <span class="token string">'https://shop.example.com/products'</span><span class="token punctuation">,</span>
+  cookies<span class="token operator">:</span> wall<span class="token punctuation">.</span>cookies<span class="token punctuation">,</span>
+  elements<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> selector<span class="token operator">:</span> <span class="token string">'.product-title'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> selector<span class="token operator">:</span> <span class="token string">'.price'</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div><blockquote>
+<p><strong>A <code>scoring</code> result is not a retry.</strong> reCAPTCHA v3, DataDome and PerimeterX
+score your session rather than posing a question, so no solver clears them
+and no amount of waiting helps. It comes back in milliseconds naming the exit
+IP as the actual lever — see <a href="/docs/guide-proxies">Proxies</a>. Retrying that
+call just spends money to be told the same thing.</p>
+</blockquote>
+<p><strong>Most walls need no solver.</strong> A passive interstitial resolves itself in a real
+browser and <code>/unblock</code> waits it out for you at no extra cost. Solving only
+enters the picture for a challenge that literally asks a question, and then
+<a href="/docs/guide-unblocking">the provider account is yours</a>.</p>
+<hr>
+<h2 id="give-an-agent-the-browser-as-a-tool">Give an agent the browser as a tool<a class="anchor" href="#give-an-agent-the-browser-as-a-tool" aria-label="Link to this section">#</a></h2>
+<p>No glue code: point an MCP-aware agent at the server and it gets thirteen tools.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;mcpServers&quot;: {
+    &quot;runbrowser&quot;: {
+      &quot;command&quot;: &quot;npx&quot;,
+      &quot;args&quot;: [&quot;-y&quot;, &quot;mcp-remote&quot;, &quot;https://connect.runbrowser.dev/mcp&quot;,
+               &quot;--header&quot;, &quot;Authorization: Bearer ab_yourkey&quot;]
+    }
+  }
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"mcpServers"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"runbrowser"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"command"</span><span class="token operator">:</span> <span class="token string">"npx"</span><span class="token punctuation">,</span>
+      <span class="token property">"args"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"-y"</span><span class="token punctuation">,</span> <span class="token string">"mcp-remote"</span><span class="token punctuation">,</span> <span class="token string">"https://connect.runbrowser.dev/mcp"</span><span class="token punctuation">,</span>
+               <span class="token string">"--header"</span><span class="token punctuation">,</span> <span class="token string">"Authorization: Bearer ab_yourkey"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre></div><p>Building the loop yourself with LangChain instead:</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button></div><button class="copy tabs-copy" type="button" data-code="from runbrowser.langchain import get_runbrowser_tools
+
+tools = get_runbrowser_tools()                 # reads RUNBROWSER_API_KEY
+agent = create_react_agent(llm, tools)">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="from runbrowser.langchain import get_runbrowser_tools
+
+tools = get_runbrowser_tools()                 # reads RUNBROWSER_API_KEY
+agent = create_react_agent(llm, tools)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">from</span> runbrowser<span class="token punctuation">.</span>langchain <span class="token keyword">import</span> get_runbrowser_tools
+
+tools <span class="token operator">=</span> get_runbrowser_tools<span class="token punctuation">(</span><span class="token punctuation">)</span>                 <span class="token comment"># reads RUNBROWSER_API_KEY</span>
+agent <span class="token operator">=</span> create_react_agent<span class="token punctuation">(</span>llm<span class="token punctuation">,</span> tools<span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="import { getRunBrowserTools } from 'runbrowser/langchain'
+
+const tools = getRunBrowserTools()"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> getRunBrowserTools <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'runbrowser/langchain'</span>
+
+<span class="token keyword">const</span> tools <span class="token operator">=</span> <span class="token function">getRunBrowserTools</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre></div></div><blockquote>
+<p><strong>Give the model fewer tools than you have.</strong> <code>include=[&quot;browse_page&quot;]</code>
+reliably beats handing it all four — a model choosing between two clearly
+different tools picks correctly far more often than one choosing between
+four similar ones.</p>
+</blockquote>
+<p>The tools report failures in terms a model can act on: <em>&quot;the account is out of
+quota, do not retry&quot;</em>, or <em>&quot;this site scores the session, no solver clears it —
+move on&quot;</em>. An agent told the truth changes plan; one told <code>403</code> retries until
+it runs out of steps. See <a href="/docs/guide-integrations">Integrations</a>.</p>
+<hr>
+<h2 id="watch-it-happen">Watch it happen<a class="anchor" href="#watch-it-happen" aria-label="Link to this section">#</a></h2>
+<p>Any session can be watched live, which is usually faster than adding logging:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">TypeScript</span><button class="copy" type="button" data-code="const session = await rb.sessions.create({ keepAlive: true })
+console.log('watch:', await session.viewerUrl(900))   // signed, expiring, no key inside">Copy</button></div><pre class="language-typescript"><code><span class="token keyword">const</span> session <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span>sessions<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">{</span> keepAlive<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'watch:'</span><span class="token punctuation">,</span> <span class="token keyword">await</span> session<span class="token punctuation">.</span><span class="token function">viewerUrl</span><span class="token punctuation">(</span><span class="token number">900</span><span class="token punctuation">)</span><span class="token punctuation">)</span>   <span class="token comment">// signed, expiring, no key inside</span></code></pre></div><p>Safe to paste into a ticket or a Slack thread — the URL carries a signature,
+not your API key. See <a href="/docs/guide-viewer">the live viewer</a>.</p>
+<hr>
+<p>See also: <a href="/docs/guide-sessions">Sessions</a> · <a href="/docs/guide-crawling">Crawling</a> ·
+<a href="/docs/guide-unblocking">Getting through walls</a> · <a href="/docs/errors">Errors</a></p>
+
+    <nav class="pager">
+      <a class="prev" href="/docs/concepts"><span>Previous</span>Concepts</a>
+      <a class="next" href="/docs/guide-sessions"><span>Next</span>Sessions &amp; stable sessions</a>
+    </nav>
+    <hr>
+    <p class="foot">
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Recipes">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+    <p class="updated">Last updated 2026-08-16</p>
+  </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#log-in-once-then-scrape-behind-the-login">Log in once, then scrape behind the login</a>
+    <a class="toc-2" href="#turn-a-whole-site-into-typed-data">Turn a whole site into typed data</a>
+    <a class="toc-2" href="#watch-a-page-and-tell-me-when-it-changes">Watch a page and tell me when it changes</a>
+    <a class="toc-2" href="#fill-in-a-form-and-grab-the-file-it-generates">Fill in a form and grab the file it generates</a>
+    <a class="toc-2" href="#get-past-a-wall-then-keep-the-clearance">Get past a wall, then keep the clearance</a>
+    <a class="toc-2" href="#give-an-agent-the-browser-as-a-tool">Give an agent the browser as a tool</a>
+    <a class="toc-2" href="#watch-it-happen">Watch it happen</a>
+  </aside>
+</div>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>

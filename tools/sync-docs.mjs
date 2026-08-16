@@ -16,6 +16,7 @@ import { execSync } from 'node:child_process'
 const PUBLIC_DOCS = [
   'quickstart.md',
   'concepts.md',
+  'recipes.md',
   'guide-sessions.md',
   'guide-viewer.md',
   'guide-extract.md',
