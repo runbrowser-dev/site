@@ -13,7 +13,7 @@ status you got instead of guessing.
 
 `connect.runbrowser.dev` (browsers, sessions, the REST shortcuts, MCP)
 answers with **plain text**. `api.runbrowser.dev` (`/v1/fetch`,
-`/v1/search`, `/v1/extract`) answers with **JSON**.
+`/v1/extract`) answers with **JSON**.
 
 If you write one error handler that assumes JSON everywhere, it will throw
 a parse error on the exact request that was already failing, and you'll
@@ -198,20 +198,6 @@ code is the whole answer.
 A response over 10 MB comes back as a **success** with `truncated: true`.
 It is not an error.
 
-## /v1/search
-
-| Status | `error` | Cause | What to do |
-|---|---|---|---|
-| 400 | `validation_failed` | Bad `includeHosts`/`excludeHosts`. Max 50 entries, 200 chars each | See `message` for which |
-| **402** | `spend_cap_exceeded` | Your account has reached its monthly third-party spend ceiling | Wait for month rollover, or contact us to raise it |
-| 400 | `invalid_query` | Empty `q` | Supply a query |
-| **504** | `search_provider_timeout` | The search backend was too slow | Retry |
-| 502 | `search_provider_unavailable` | The backend failed or returned nonsense | Retry with backoff |
-| 502 | `search_provider_error` | The backend rejected the query | Retry; tell us if it persists |
-| 429 | `monthly_quota_exceeded` | Search allowance exhausted | Upgrade or wait |
-
-**Zero results is a 200 with an empty array**, not a 404 and not an error.
-
 ## /v1/extract
 
 Extract is the one endpoint where two different things both return `429`,
@@ -348,7 +334,7 @@ timezone, not your billing date.
 |---|---|
 | Concurrent sessions | Requests **wait ~20 seconds** for a free slot, then `429`. A short burst usually resolves itself |
 | Monthly browser-seconds | `429 monthly_quota_exceeded` with `used_seconds`/`limit_seconds` |
-| Monthly fetches, searches, extracts | `429 monthly_quota_exceeded` with `type`/`used`/`limit` |
+| Monthly fetches, extracts | `429 monthly_quota_exceeded` with `type`/`used`/`limit` |
 | Fleet capacity | `503` with `Retry-After: 30` |
 
 The difference between `429` and `503` is worth keeping straight: `429`

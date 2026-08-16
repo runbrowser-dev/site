@@ -41,7 +41,6 @@ same header.
 | Tool | Browser? | What it's for |
 |---|---|---|
 | `fetch` | no | Read one URL over plain HTTP. Fast, but no JavaScript runs. |
-| `search` | no | Web search: titles, URLs, snippets. |
 | `extract` | no | URL + JSON Schema → structured JSON. Renders the page first, so it handles JS-heavy sites. |
 | `browser_navigate` | yes | Open a URL in this session's persistent browser. |
 | `browser_click` | yes | Click the first element matching a CSS selector. |
@@ -55,7 +54,7 @@ same header.
 | `browser_close` | yes | Release the browser and stop the meter. |
 
 The tool descriptions deliberately steer a model toward `fetch` /
-`search` / `extract` first. Those are stateless, fast, and don't hold a
+`extract` first. Those are stateless, fast, and don't hold a
 container; the `browser_*` family exists for the cases they can't
 handle — logging in, clicking through a flow, filling a form.
 
@@ -145,7 +144,7 @@ clicked instead.
 request; the server ties it to one browser.
 
 The browser is created **lazily**, on the first `browser_*` call — an
-agent that only ever calls `fetch` and `search` never starts one, and
+agent that only ever calls `fetch` never starts one, and
 never pays for one. It's a normal keepAlive session from the same fleet
 customers drive directly, so per-org concurrency caps, monthly
 browser-time quotas, idle timers and metering all apply unchanged.

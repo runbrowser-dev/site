@@ -85,7 +85,6 @@
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
-            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
             <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
           </div>
         </div>
@@ -141,7 +140,7 @@
 </tr>
 <tr>
 <td><code>api.runbrowser.dev</code></td>
-<td><code>/v1</code> primitives (fetch, search, extract)</td>
+<td><code>/v1</code> primitives (fetch, extract)</td>
 </tr>
 <tr>
 <td><code>app.runbrowser.dev</code></td>
@@ -602,11 +601,6 @@ listings, product grids, search results, and anything you intend to walk.</p>
 page is a Cloudflare wall&quot; from &quot;this page is empty&quot; from &quot;this page is a
 404&quot; without guessing. Check <code>status</code>: an error page is still a page, and
 its body reads like ordinary content.</p>
-<h3 id="post-v1search"><code>POST /v1/search</code><a class="anchor" href="#post-v1search" aria-label="Link to this section">#</a></h3>
-<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;q&quot;: &quot;browser automation&quot;, &quot;count&quot;: 10, &quot;lang&quot;: &quot;en&quot;,
-  &quot;phrase&quot;: false, &quot;include_hosts&quot;: [&quot;example.com&quot;], &quot;exclude_hosts&quot;: [&quot;spam.example&quot;] }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"q"</span><span class="token operator">:</span> <span class="token string">"browser automation"</span><span class="token punctuation">,</span> <span class="token property">"count"</span><span class="token operator">:</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"en"</span><span class="token punctuation">,</span>
-  <span class="token property">"phrase"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token property">"include_hosts"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"example.com"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token property">"exclude_hosts"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"spam.example"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span></code></pre></div><p>Note the field names: <code>q</code> and <code>count</code>, not <code>query</code> and <code>limit</code>.
-<code>count</code> maxes at 20.</p>
 <h3 id="post-v1extract"><code>POST /v1/extract</code><a class="anchor" href="#post-v1extract" aria-label="Link to this section">#</a></h3>
 <p>Renders the page in a real browser, then asks an LLM for exactly the
 shape you asked for.</p>
@@ -661,7 +655,7 @@ stored. See
 <hr>
 <h2 id="mcp">MCP<a class="anchor" href="#mcp" aria-label="Link to this section">#</a></h2>
 <p><code>POST https://connect.runbrowser.dev/mcp</code> — Model Context Protocol over
-Streamable HTTP. Thirteen tools. See <a href="/docs/mcp">mcp.md</a>.</p>
+Streamable HTTP. Twelve tools. See <a href="/docs/mcp">mcp.md</a>.</p>
 <hr>
 <h2 id="metrics">Metrics<a class="anchor" href="#metrics" aria-label="Link to this section">#</a></h2>
 <p><code>GET /metrics</code> on the gateway and <code>/actuator/prometheus</code> on the control
@@ -751,7 +745,6 @@ waiting out a cache TTL.</p>
     <a class="toc-3" href="#post-unblock-json">POST /unblock → JSON</a>
     <a class="toc-2" href="#primitives">Primitives</a>
     <a class="toc-3" href="#post-v1fetch">POST /v1/fetch</a>
-    <a class="toc-3" href="#post-v1search">POST /v1/search</a>
     <a class="toc-3" href="#post-v1extract">POST /v1/extract</a>
     <a class="toc-3" href="#captchas">CAPTCHAs</a>
     <a class="toc-2" href="#mcp">MCP</a>

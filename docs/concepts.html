@@ -85,7 +85,6 @@
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
-            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
             <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
           </div>
         </div>
@@ -144,61 +143,13 @@ session-count pricing. Under per-session billing, the cheapest thing you
 can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.</p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>Tier</th>
-<th>Price</th>
-<th>Concurrent</th>
-<th>Browser hours/mo</th>
-<th>Max session</th>
-<th>/fetch</th>
-<th>/search</th>
-<th>/extract</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Free</td>
-<td>€0</td>
-<td>3</td>
-<td>1</td>
-<td>15 min</td>
-<td>1,000</td>
-<td>1,000</td>
-<td>25</td>
-</tr>
-<tr>
-<td>Hobby</td>
-<td>€19/mo</td>
-<td>10</td>
-<td>150</td>
-<td>60 min</td>
-<td>5,000</td>
-<td>5,000</td>
-<td>100</td>
-</tr>
-<tr>
-<td>Startup</td>
-<td>€99/mo</td>
-<td>25</td>
-<td>600</td>
-<td>180 min</td>
-<td>25,000</td>
-<td>25,000</td>
-<td>600</td>
-</tr>
-<tr>
-<td>Scale</td>
-<td>€499/mo</td>
-<td>50</td>
-<td>2,500</td>
-<td>360 min</td>
-<td>100,000</td>
-<td>100,000</td>
-<td>3,000</td>
-</tr>
-</tbody></table>
-</div><p>Browser time is metered <strong>while the session runs</strong>, not only when it ends, so
+<p>| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /extract |
+|---|---|---|---|---|---|---|---|
+| Free | €0 | 3 | 1 | 15 min | 1,000 | 1,000 | 25 |
+| Hobby | €19/mo | 10 | 150 | 60 min | 5,000 | 5,000 | 100 |
+| Startup | €99/mo | 25 | 600 | 180 min | 25,000 | 25,000 | 600 |
+| Scale | €499/mo | 50 | 2,500 | 360 min | 100,000 | 100,000 | 3,000 |</p>
+<p>Browser time is metered <strong>while the session runs</strong>, not only when it ends, so
 your usage and your remaining allowance reflect what you are burning right
 now. A session that runs past your monthly allowance is stopped during the
 session rather than after you disconnect.</p>
