@@ -204,6 +204,11 @@ as all potentially absent.</p>
 <td>Your request is wrong. Retrying sends the same wrong request</td>
 </tr>
 <tr>
+<td>421</td>
+<td><strong>No</strong> — retry elsewhere</td>
+<td>Right session, wrong machine. Use the <code>connectUrl</code> you were given; the body names the host</td>
+</tr>
+<tr>
 <td>401</td>
 <td><strong>No</strong></td>
 <td>Fix the key</td>
@@ -310,6 +315,12 @@ status and a plain-text body. Playwright and Puppeteer surface this as
 <td><code>session is currently attached; close the existing CDP connection first</code></td>
 <td>One CDP client per session</td>
 <td>Close the other connection first</td>
+</tr>
+<tr>
+<td>421</td>
+<td><code>this session is running on &lt;host&gt;; …</code></td>
+<td>The session exists but its browser is on a different machine, and browsers don&#39;t move</td>
+<td>Reconnect using the <code>connectUrl</code> you were given. The message names the host if you built the URL yourself</td>
 </tr>
 <tr>
 <td>429</td>

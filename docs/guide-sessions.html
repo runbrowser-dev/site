@@ -235,6 +235,13 @@ credential, because a session you reconnect to for an hour can&#39;t be
 expressed as one-use. Add your key: <code>?session=&lt;sessionId&gt;&amp;token=&lt;key&gt;</code>.
 Handed to <code>connectOverCDP</code> without it, you get a <code>401</code>.</li>
 </ul>
+<p><strong>Keep the whole URL, not just the id.</strong> The host in a stable session&#39;s
+<code>connectUrl</code> identifies the machine holding that browser, and a browser cannot
+move between machines. Rebuilding the URL from the id against a generic
+hostname can reach a machine that isn&#39;t holding it, which answers
+<a href="/docs/errors#connecting-a-browser"><code>421</code></a> and names the host you actually
+want. Storing <code>connectUrl</code> alongside <code>sessionId</code> avoids the round trip
+entirely.</p>
 <p>The <a href="/docs/guide-sdk">SDK</a> hands you a URL that already works in both cases, so
 this distinction never reaches your code.</p>
 <p><strong>Reuse the existing page; don&#39;t call <code>newPage()</code>.</strong> The example above takes
