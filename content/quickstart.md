@@ -114,6 +114,11 @@ curl -X POST https://api.runbrowser.dev/v1/fetch \
   -H 'Content-Type: application/json' \
   -d '{"url": "https://example.com", "format": "markdown"}'
 
+# Search the web
+curl -X POST https://api.runbrowser.dev/v1/search \
+  -H "Authorization: Bearer $RUNBROWSER_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"q": "browser automation", "count": 5}'
 
 # Pull structured data out of a page (renders it in a real browser first)
 curl -X POST https://api.runbrowser.dev/v1/extract \
@@ -141,6 +146,11 @@ page = requests.post(
     json={"url": "https://example.com", "format": "markdown"},
 ).json()
 
+# Search the web
+hits = requests.post(
+    f"{API}/v1/search", headers=auth,
+    json={"q": "browser automation", "count": 5},
+).json()
 
 # Pull structured data out of a page (renders it in a real browser first)
 data = requests.post(
@@ -176,6 +186,8 @@ const call = async (path: string, body: unknown) => {
 // Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
 const page = await call('/v1/fetch', { url: 'https://example.com', format: 'markdown' });
 
+// Search the web
+const hits = await call('/v1/search', { q: 'browser automation', count: 5 });
 
 // Pull structured data out of a page (renders it in a real browser first)
 const data = await call('/v1/extract', {
@@ -204,7 +216,7 @@ If you're building with an MCP-aware agent, skip the code entirely:
 }
 ```
 
-Twelve tools appear: `fetch`, `extract`, and a `browser_*` family
+Thirteen tools appear: `fetch`, `search`, `extract`, and a `browser_*` family
 that drives one persistent browser across calls. See [mcp.md](mcp.md).
 
 ## What you're billed for
@@ -214,8 +226,8 @@ to the moment it's released. Not per session, so a script that opens one
 browser and drives it for an hour costs the same as sixty scripts that
 each take a minute.
 
-`/v1/fetch` is billed per call against a separate monthly allowance and
-consumes no browser-time at all. `/v1/extract` uses a
+`/v1/fetch` and `/v1/search` are billed per call against a separate
+monthly allowance and consume no browser-time at all. `/v1/extract` uses a
 browser, so it does.
 
 The meter stops when your CDP connection closes — unless you asked for a

@@ -85,6 +85,7 @@
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
             <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
           </div>
         </div>
@@ -143,16 +144,76 @@ session-count pricing. Under per-session billing, the cheapest thing you
 can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.</p>
-<p>| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /extract |
-|---|---|---|---|---|---|---|---|
-| Free | €0 | 3 | 1 | 15 min | 1,000 | 1,000 | 25 |
-| Hobby | €19/mo | 10 | 150 | 60 min | 5,000 | 5,000 | 100 |
-| Startup | €99/mo | 25 | 600 | 180 min | 25,000 | 25,000 | 600 |
-| Scale | €499/mo | 50 | 2,500 | 360 min | 100,000 | 100,000 | 3,000 |</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Price</th>
+<th>Concurrent</th>
+<th>Browser hours/mo</th>
+<th>Max session</th>
+<th>/fetch</th>
+<th>/search</th>
+<th>/extract</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Free</td>
+<td>€0</td>
+<td>3</td>
+<td>1</td>
+<td>15 min</td>
+<td>1,000</td>
+<td>100</td>
+<td>25</td>
+</tr>
+<tr>
+<td>Hobby</td>
+<td>€19/mo</td>
+<td>10</td>
+<td>200</td>
+<td>60 min</td>
+<td>5,000</td>
+<td>1,000</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Startup</td>
+<td>€99/mo</td>
+<td>25</td>
+<td>1,200</td>
+<td>180 min</td>
+<td>25,000</td>
+<td>4,000</td>
+<td>600</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>Contact us</td>
+<td>50</td>
+<td>6,500</td>
+<td>360 min</td>
+<td>100,000</td>
+<td>20,000</td>
+<td>3,000</td>
+</tr>
+</tbody></table>
+</div><p>Free, Hobby and Startup are self-serve — sign up and start. Scale is priced
+per deal, because at 50 concurrent browsers it is a conversation about
+capacity rather than a checkout: we size hardware to it before we sell it.
+Email <a href="mailto:sales@runbrowser.dev">sales@runbrowser.dev</a> and we will quote
+against what you actually intend to run.</p>
 <p>Browser time is metered <strong>while the session runs</strong>, not only when it ends, so
 your usage and your remaining allowance reflect what you are burning right
 now. A session that runs past your monthly allowance is stopped during the
 session rather than after you disconnect.</p>
+<p><code>/search</code> returns up to 3 results per query on Free, 10 on Hobby, and 20 on
+Startup and Scale. Search is the one primitive we buy rather than run — every
+query is a purchase from an upstream provider — which is why its allowances
+are smaller than <code>/fetch</code>, which runs on our own hardware and is priced
+accordingly. Ask for more results than your tier allows and you get your
+tier&#39;s maximum, not an error; the <code>X-RunBrowser-Max-Results</code> response header
+tells you what that was.</p>
 <p><code>/extract</code> has its own allowance because it costs twice — browser-time to
 render the page, plus LLM tokens to read it. The numbers are sized against
 worst-case content (a full 200k-char page); typical pages are a fraction of

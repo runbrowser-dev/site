@@ -23,17 +23,31 @@ can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.
 
-| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /extract |
+| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract |
 |---|---|---|---|---|---|---|---|
-| Free | €0 | 3 | 1 | 15 min | 1,000 | 1,000 | 25 |
-| Hobby | €19/mo | 10 | 150 | 60 min | 5,000 | 5,000 | 100 |
-| Startup | €99/mo | 25 | 600 | 180 min | 25,000 | 25,000 | 600 |
-| Scale | €499/mo | 50 | 2,500 | 360 min | 100,000 | 100,000 | 3,000 |
+| Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 |
+| Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 |
+| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 |
+| Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 |
+
+Free, Hobby and Startup are self-serve — sign up and start. Scale is priced
+per deal, because at 50 concurrent browsers it is a conversation about
+capacity rather than a checkout: we size hardware to it before we sell it.
+Email [sales@runbrowser.dev](mailto:sales@runbrowser.dev) and we will quote
+against what you actually intend to run.
 
 Browser time is metered **while the session runs**, not only when it ends, so
 your usage and your remaining allowance reflect what you are burning right
 now. A session that runs past your monthly allowance is stopped during the
 session rather than after you disconnect.
+
+`/search` returns up to 3 results per query on Free, 10 on Hobby, and 20 on
+Startup and Scale. Search is the one primitive we buy rather than run — every
+query is a purchase from an upstream provider — which is why its allowances
+are smaller than `/fetch`, which runs on our own hardware and is priced
+accordingly. Ask for more results than your tier allows and you get your
+tier's maximum, not an error; the `X-RunBrowser-Max-Results` response header
+tells you what that was.
 
 `/extract` has its own allowance because it costs twice — browser-time to
 render the page, plus LLM tokens to read it. The numbers are sized against

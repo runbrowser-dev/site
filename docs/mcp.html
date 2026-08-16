@@ -85,6 +85,7 @@
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
             <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
           </div>
         </div>
@@ -175,6 +176,11 @@ same header.</p>
 <td>Read one URL over plain HTTP. Fast, but no JavaScript runs.</td>
 </tr>
 <tr>
+<td><code>search</code></td>
+<td>no</td>
+<td>Web search: titles, URLs, snippets.</td>
+</tr>
+<tr>
 <td><code>extract</code></td>
 <td>no</td>
 <td>URL + JSON Schema → structured JSON. Renders the page first, so it handles JS-heavy sites.</td>
@@ -231,7 +237,7 @@ same header.</p>
 </tr>
 </tbody></table>
 </div><p>The tool descriptions deliberately steer a model toward <code>fetch</code> /
-<code>extract</code> first. Those are stateless, fast, and don&#39;t hold a
+<code>search</code> / <code>extract</code> first. Those are stateless, fast, and don&#39;t hold a
 container; the <code>browser_*</code> family exists for the cases they can&#39;t
 handle — logging in, clicking through a flow, filling a form.</p>
 <p>Note the split inside that group: <code>fetch</code> is plain HTTP and runs no
@@ -296,7 +302,7 @@ clicked instead.</p>
 <p><code>initialize</code> returns an <code>Mcp-Session-Id</code>. Send it on every subsequent
 request; the server ties it to one browser.</p>
 <p>The browser is created <strong>lazily</strong>, on the first <code>browser_*</code> call — an
-agent that only ever calls <code>fetch</code> never starts one, and
+agent that only ever calls <code>fetch</code> and <code>search</code> never starts one, and
 never pays for one. It&#39;s a normal keepAlive session from the same fleet
 customers drive directly, so per-org concurrency caps, monthly
 browser-time quotas, idle timers and metering all apply unchanged.</p>

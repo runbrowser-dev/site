@@ -85,6 +85,7 @@
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
             <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
           </div>
         </div>
@@ -200,7 +201,7 @@ existing calls generally work untouched.</p>
 </tr>
 <tr>
 <td><code>/search</code></td>
-<td><strong>No.</strong> We give you browsers, not a web index — bring your own provider.</td>
+<td>Different shape: ours is <code>POST /v1/search</code> on the API host with <code>{q, count}</code>. Results per query are capped by plan, as theirs are.</td>
 </tr>
 </tbody></table>
 </div><p>If you depend on BrowserQL or need a non-Chromium engine, this isn&#39;t a
@@ -259,7 +260,7 @@ tends to persist — not to score a point on the numbers.</p>
 <p>Browserless bills in <strong>units</strong>, where a unit covers a block of browser
 time and partial blocks round <strong>up</strong>. We bill <strong>browser-seconds</strong>, floored
 at 10 seconds per session, plus separate monthly allowances for
-<code>/v1/fetch</code> and <code>/v1/extract</code>. Proxy traffic and CAPTCHA
+<code>/v1/fetch</code>, <code>/v1/search</code> and <code>/v1/extract</code>. Proxy traffic and CAPTCHA
 solving stay on your providers&#39; bills rather than ours.</p>
 <p>The practical consequences:</p>
 <ul>
@@ -284,7 +285,8 @@ worth knowing before you leave one open overnight.</li>
 <strong>queue</strong> for about 20 seconds before returning 429, where a hard cap
 would reject immediately. Retry logic written against a strict cap still
 works — it&#39;ll just fire less often.</p>
-<p>Concurrency by tier: Free 3, Hobby 10, Startup 25, Scale 50.</p>
+<p>Concurrency by tier: Free 3, Hobby 10, Startup 25 — and 50 on Scale,
+which is quoted rather than listed (<a href="mailto:sales@runbrowser.dev">sales@runbrowser.dev</a>).</p>
 <p>There are two limits, and they return different codes:</p>
 <div class="table-wrap"><table>
 <thead>

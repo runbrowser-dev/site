@@ -53,8 +53,7 @@ Same two-step, no SDK required.
 | Extensions, file uploads | Via CDP, no dedicated API |
 | File downloads | [`POST /download`](/docs/api-reference#post-download-the-file-as-is), or CDP |
 | Multiple regions | EU only |
-| Fetch | `POST /v1/fetch` — comparable, separate allowance |
-| Search | **No equivalent.** We give you browsers, not a web index |
+| Fetch, Search | `POST /v1/fetch`, `POST /v1/search` — comparable, separate allowance |
 | Agents, Functions, Model Gateway | **No equivalent.** We're infrastructure; the agent framework is yours. |
 
 ## Contexts vs stable sessions — the one real difference
@@ -93,8 +92,8 @@ Be honest about which one you actually have.
 
 Browserbase's structure is a monthly plan plus browser-hours, with some
 capabilities associated with higher tiers. Ours is a plan plus
-browser-hours too (€0 / €19 / €99 / €499), with two structural
-differences:
+browser-hours too — €0, €19 and €99 self-serve, with a larger Scale tier
+priced per deal — and two structural differences:
 
 - **A realistic device profile isn't a tier here.** Free-tier browsers get
   exactly what Scale gets. There is nothing to upgrade into — see
@@ -108,7 +107,8 @@ We deliberately don't publish a "cheaper by X%" claim: their pricing moves,
 and per-tier comparisons depend on your mix of browser-hours, solves and
 proxy traffic. Price both against your own workload.
 
-Concurrency runs 3 / 10 / 25 / 50 across Free → Scale. Browserbase sells
+Concurrency runs 3 / 10 / 25 across the self-serve tiers, and 50 on Scale.
+Browserbase sells
 higher ceilings than that; if you genuinely need hundreds of simultaneous
 browsers, they have the fleet for it today and we don't. That is a real
 capacity difference, not a pricing one.
@@ -132,13 +132,13 @@ for.
 
 ## What you get instead
 
-- **An MCP server** — twelve tools, no integration code. [Details](mcp.md).
-- **`/v1/fetch`**, billed against a separate monthly
+- **An MCP server** — thirteen tools, no integration code. [Details](mcp.md).
+- **`/v1/fetch` and `/v1/search`**, billed against separate monthly
   allowances rather than browser-time, so agent loops stop burning
-  browser-seconds on cheap operations. Browserbase ships Fetch too — this
-  isn't a capability we have and they don't. Compare the billing rather
-  than the feature list: what matters is whether those calls draw from the
-  same balance as your browser time.
+  browser-seconds on cheap operations. Browserbase ships Fetch and Search
+  too — this isn't a capability we have and they don't. Compare the
+  billing rather than the feature list: what matters is whether those
+  calls draw from the same balance as your browser time.
 - **EU residency** by default.
 - **No proprietary SDK to unpick.** There are [typed clients](/docs/guide-sdk)
   if you want them, but they are optional and thin: you connect over standard CDP, so the

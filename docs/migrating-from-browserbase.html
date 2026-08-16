@@ -85,6 +85,7 @@
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
             <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
           </div>
         </div>
@@ -220,12 +221,8 @@ const { sessionId, connectUrl } = await res.json();">Copy</button></div><pre cla
 <td>EU only</td>
 </tr>
 <tr>
-<td>Fetch</td>
-<td><code>POST /v1/fetch</code> — comparable, separate allowance</td>
-</tr>
-<tr>
-<td>Search</td>
-<td><strong>No equivalent.</strong> We give you browsers, not a web index</td>
+<td>Fetch, Search</td>
+<td><code>POST /v1/fetch</code>, <code>POST /v1/search</code> — comparable, separate allowance</td>
 </tr>
 <tr>
 <td>Agents, Functions, Model Gateway</td>
@@ -261,8 +258,8 @@ difference, which is what tends to persist.</p>
 </blockquote>
 <p>Browserbase&#39;s structure is a monthly plan plus browser-hours, with some
 capabilities associated with higher tiers. Ours is a plan plus
-browser-hours too (€0 / €19 / €99 / €499), with two structural
-differences:</p>
+browser-hours too — €0, €19 and €99 self-serve, with a larger Scale tier
+priced per deal — and two structural differences:</p>
 <ul>
 <li><strong>A realistic device profile isn&#39;t a tier here.</strong> Free-tier browsers get
 exactly what Scale gets. There is nothing to upgrade into — see
@@ -275,7 +272,8 @@ one line, we&#39;re the wrong choice today.</li>
 <p>We deliberately don&#39;t publish a &quot;cheaper by X%&quot; claim: their pricing moves,
 and per-tier comparisons depend on your mix of browser-hours, solves and
 proxy traffic. Price both against your own workload.</p>
-<p>Concurrency runs 3 / 10 / 25 / 50 across Free → Scale. Browserbase sells
+<p>Concurrency runs 3 / 10 / 25 across the self-serve tiers, and 50 on Scale.
+Browserbase sells
 higher ceilings than that; if you genuinely need hundreds of simultaneous
 browsers, they have the fleet for it today and we don&#39;t. That is a real
 capacity difference, not a pricing one.</p>
@@ -297,13 +295,13 @@ tiers mostly for stealth and stable sessions, that&#39;s the trade we&#39;re bui
 for.</p>
 <h2 id="what-you-get-instead">What you get instead<a class="anchor" href="#what-you-get-instead" aria-label="Link to this section">#</a></h2>
 <ul>
-<li><strong>An MCP server</strong> — twelve tools, no integration code. <a href="/docs/mcp">Details</a>.</li>
-<li><strong><code>/v1/fetch</code></strong>, billed against a separate monthly
+<li><strong>An MCP server</strong> — thirteen tools, no integration code. <a href="/docs/mcp">Details</a>.</li>
+<li><strong><code>/v1/fetch</code> and <code>/v1/search</code></strong>, billed against separate monthly
 allowances rather than browser-time, so agent loops stop burning
-browser-seconds on cheap operations. Browserbase ships Fetch too — this
-isn&#39;t a capability we have and they don&#39;t. Compare the billing rather
-than the feature list: what matters is whether those calls draw from the
-same balance as your browser time.</li>
+browser-seconds on cheap operations. Browserbase ships Fetch and Search
+too — this isn&#39;t a capability we have and they don&#39;t. Compare the
+billing rather than the feature list: what matters is whether those
+calls draw from the same balance as your browser time.</li>
 <li><strong>EU residency</strong> by default.</li>
 <li><strong>No proprietary SDK to unpick.</strong> There are <a href="/docs/guide-sdk">typed clients</a>
 if you want them, but they are optional and thin: you connect over standard CDP, so the

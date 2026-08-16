@@ -5,7 +5,7 @@ Three surfaces, three hostnames:
 | Host | What lives there |
 |---|---|
 | `connect.runbrowser.dev` | CDP, REST shortcuts, sessions, viewer, MCP |
-| `api.runbrowser.dev` | `/v1` primitives (fetch, extract) |
+| `api.runbrowser.dev` | `/v1` primitives (fetch, search, extract) |
 | `app.runbrowser.dev` | Dashboard, auth, keys, billing, usage |
 
 Auth everywhere is your API key, as `Authorization: Bearer ab_…` or
@@ -473,6 +473,21 @@ page is a Cloudflare wall" from "this page is empty" from "this page is a
 404" without guessing. Check `status`: an error page is still a page, and
 its body reads like ordinary content.
 
+### `POST /v1/search`
+
+```json
+{ "q": "browser automation", "count": 10, "lang": "en",
+  "phrase": false, "include_hosts": ["example.com"], "exclude_hosts": ["spam.example"] }
+```
+
+Note the field names: `q` and `count`, not `query` and `limit`.
+
+`count` maxes at 20, and your plan caps it further: 3 on Free, 10 on Hobby,
+20 on Startup and Scale. Ask for more than your plan allows and you get your
+plan's maximum rather than an error, so a downgrade never breaks a working
+integration. The `X-RunBrowser-Max-Results` response header carries the cap
+that was applied. Omit `count` entirely and you get your plan's maximum.
+
 ### `POST /v1/extract`
 
 Renders the page in a real browser, then asks an LLM for exactly the
@@ -535,7 +550,7 @@ stored. See
 ## MCP
 
 `POST https://connect.runbrowser.dev/mcp` — Model Context Protocol over
-Streamable HTTP. Twelve tools. See [mcp.md](mcp.md).
+Streamable HTTP. Thirteen tools. See [mcp.md](mcp.md).
 
 ---
 

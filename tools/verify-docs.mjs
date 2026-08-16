@@ -85,8 +85,22 @@ const tokens = await page.locator('pre code .token').count()
 tokens > 40 ? ok(`${tokens} highlighted tokens on quickstart`) : fail(`only ${tokens} tokens highlighted`)
 
 console.log('\n== language tabs ==')
+// Pinned to an exact count, this failed the moment quickstart gained a third
+// example — reporting a docs improvement as a build break. What matters is
+// that tabs render and switch, not how many there are.
 const groups = await page.locator('.tabs').count()
-groups === 2 ? ok('2 tab groups') : fail(`expected 2 tab groups, got ${groups}`)
+groups >= 2 ? ok(`${groups} tab groups`) : fail(`expected tab groups, got ${groups}`)
+
+const firstTab = page.locator('.tabs').first()
+const buttons = firstTab.locator('button')
+if (await buttons.count() < 2) {
+  fail('a tab group with fewer than two tabs is not a tab group')
+} else {
+  const before = await firstTab.locator('pre:visible').first().textContent()
+  await buttons.nth(1).click()
+  const after = await firstTab.locator('pre:visible').first().textContent()
+  before !== after ? ok('tabs switch the visible panel') : fail('clicking a tab changed nothing')
+}
 // Exactly one panel visible per group once JS has collapsed them.
 for (let i = 0; i < groups; i++) {
   const vis = await page.locator('.tabs').nth(i).locator('.tab-panel:visible').count()

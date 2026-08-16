@@ -311,10 +311,16 @@
   .plan .pn { font-family: var(--mono); font-size: 13px; color: var(--muted); letter-spacing: 0.04em; }
   .plan .pp { font-size: 30px; font-family: var(--mono); font-weight: 600; letter-spacing: -0.02em; margin-top: 4px; }
   .plan .pp small { font-size: 13px; color: var(--faint); font-weight: 400; }
+  .plan .pp-word { font-size: 22px; color: var(--muted); }
   .plan ul { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
   .plan li { font-size: 13.5px; color: var(--muted); display: flex; gap: 9px; align-items: baseline; font-variant-numeric: tabular-nums; }
   .plan li b { color: var(--text); font-weight: 600; font-family: var(--mono); }
   .plan li .d { color: var(--live); flex: none; }
+  /* Scale has no price, so its card has no number to end on. The mail link
+     takes the place the price would occupy visually — pushed to the bottom
+     so all four cards still line up along their last row. */
+  .plan .plan-cta { margin-top: auto; padding-top: 18px; font-family: var(--mono); font-size: 12.5px; color: var(--live); text-decoration: none; border-bottom: none; }
+  .plan .plan-cta:hover { text-decoration: underline; }
   .price-note { color: var(--muted); font-size: 14px; line-height: 1.65; margin: 26px auto 0; max-width: 74ch; }
   .price-note b { color: var(--text); font-weight: 600; }
   .price-note .amber { color: var(--amber); }
@@ -602,7 +608,8 @@
           <ul>
             <li><span class="d">›</span><b>3</b> concurrent</li>
             <li><span class="d">›</span><b>1&nbsp;hr</b> browser / mo</li>
-            <li><span class="d">›</span><b>1,000</b> fetches &amp; searches</li>
+            <li><span class="d">›</span><b>1,000</b> fetches</li>
+            <li><span class="d">›</span><b>100</b> searches</li>
             <li><span class="d">›</span><b>25</b> extracts</li>
           </ul>
         </div>
@@ -610,8 +617,9 @@
           <span class="pn">Hobby</span><span class="pp">&euro;19 <small>/mo</small></span>
           <ul>
             <li><span class="d">›</span><b>10</b> concurrent</li>
-            <li><span class="d">›</span><b>150&nbsp;hrs</b> browser / mo</li>
-            <li><span class="d">›</span><b>5,000</b> fetches &amp; searches</li>
+            <li><span class="d">›</span><b>200&nbsp;hrs</b> browser / mo</li>
+            <li><span class="d">›</span><b>5,000</b> fetches</li>
+            <li><span class="d">›</span><b>1,000</b> searches</li>
             <li><span class="d">›</span><b>100</b> extracts</li>
           </ul>
         </div>
@@ -620,26 +628,29 @@
           <span class="pn">Startup</span><span class="pp">&euro;99 <small>/mo</small></span>
           <ul>
             <li><span class="d">›</span><b>25</b> concurrent</li>
-            <li><span class="d">›</span><b>600&nbsp;hrs</b> browser / mo</li>
-            <li><span class="d">›</span><b>25,000</b> fetches &amp; searches</li>
+            <li><span class="d">›</span><b>1,200&nbsp;hrs</b> browser / mo</li>
+            <li><span class="d">›</span><b>25,000</b> fetches</li>
+            <li><span class="d">›</span><b>4,000</b> searches</li>
             <li><span class="d">›</span><b>600</b> extracts</li>
           </ul>
         </div>
         <div class="plan">
-          <span class="pn">Scale</span><span class="pp">&euro;499 <small>/mo</small></span>
+          <span class="pn">Scale</span><span class="pp pp-word">talk to us</span>
           <ul>
-            <li><span class="d">›</span><b>50</b> concurrent</li>
-            <li><span class="d">›</span><b>2,500&nbsp;hrs</b> browser / mo</li>
-            <li><span class="d">›</span><b>100,000</b> fetches &amp; searches</li>
-            <li><span class="d">›</span><b>3,000</b> extracts</li>
+            <li><span class="d">›</span><b>50+</b> concurrent</li>
+            <li><span class="d">›</span><b>6,500&nbsp;hrs</b> browser / mo</li>
+            <li><span class="d">›</span>allowances sized to you</li>
+            <li><span class="d">›</span>capacity reserved</li>
           </ul>
+          <a class="plan-cta" href="mailto:sales@runbrowser.dev?subject=RunBrowser%20capacity">sales@runbrowser.dev</a>
         </div>
       </div>
       <p class="price-note">
         Every plan includes stealth, stable sessions and the live viewer — nothing is gated to a higher tier.
         Browser time is billed <b>per second</b>, floored at 10s, which works out at roughly
-        <span class="amber">$0.14–0.22 an effective browser-hour</span>. Most services bill in 30-second blocks and round up,
+        <span class="amber">$0.08–0.10 an effective browser-hour</span>. Most services bill in 30-second blocks and round up,
         so a 3-second job costs 10 seconds here and half a minute there. Proxies stay yours to buy at wholesale — we don't mark them up.
+        Search returns up to 3 results per query on Free, 10 on Hobby and 20 above that.
       </p>
     </div>
   </section>
