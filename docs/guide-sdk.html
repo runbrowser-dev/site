@@ -140,12 +140,94 @@ rb = RunBrowser()                    # reads RUNBROWSER_API_KEY
 png = rb.screenshot(url=&quot;https://example.com&quot;)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">from</span> runbrowser <span class="token keyword">import</span> RunBrowser
 
 rb <span class="token operator">=</span> RunBrowser<span class="token punctuation">(</span><span class="token punctuation">)</span>                    <span class="token comment"># reads RUNBROWSER_API_KEY</span>
-png <span class="token operator">=</span> rb<span class="token punctuation">.</span>screenshot<span class="token punctuation">(</span>url<span class="token operator">=</span><span class="token string">"https://example.com"</span><span class="token punctuation">)</span></code></pre></div></div><h2 id="what-they-deliberately-dont-do">What they deliberately don&#39;t do<a class="anchor" href="#what-they-deliberately-dont-do" aria-label="Link to this section">#</a></h2>
-<p>They don&#39;t wrap Playwright or Puppeteer. You already know those, and standard
-CDP is the point of the product — a client that hides it behind its own
-vocabulary would make this platform something you have to learn instead of
-something you point your existing code at.</p>
-<p>So the SDK hands you a connect URL and gets out of the way:</p>
+png <span class="token operator">=</span> rb<span class="token punctuation">.</span>screenshot<span class="token punctuation">(</span>url<span class="token operator">=</span><span class="token string">"https://example.com"</span><span class="token punctuation">)</span></code></pre></div></div><h2 id="two-libraries-and-which-does-what">Two libraries, and which does what<a class="anchor" href="#two-libraries-and-which-does-what" aria-label="Link to this section">#</a></h2>
+<p>The most confusing thing about these clients is the split, so here it is
+plainly:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Does what</th>
+<th>Which library</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Control</strong></td>
+<td>Sessions, quotas, proxies, and the one-shot calls — screenshot, extract, unblock, crawl</td>
+<td><strong>RunBrowser SDK</strong></td>
+</tr>
+<tr>
+<td><strong>Driving</strong></td>
+<td>Clicking, typing, waiting, evaluating — everything inside a page</td>
+<td><strong>Playwright</strong> (or Puppeteer)</td>
+</tr>
+</tbody></table>
+</div><p>The SDK does <strong>not</strong> have <code>click()</code> or <code>type()</code>, and that is deliberate rather
+than unfinished. Playwright already does those better than we would, you
+already know it, and standard CDP is the point of the product. A client that
+reimplemented page driving would make this platform something you have to
+learn instead of something you point existing code at — and it would make
+leaving expensive, which is not a thing worth building on purpose.</p>
+<h2 id="connect-the-one-call-path"><code>connect()</code> — the one-call path<a class="anchor" href="#connect-the-one-call-path" aria-label="Link to this section">#</a></h2>
+<p>If you want a browser and a page, you don&#39;t have to do the three-step dance
+yourself:</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="import { chromium } from 'playwright'
+import { RunBrowser } from 'runbrowser'
+
+const rb = new RunBrowser()
+const { page, session, close } = await rb.connect({ chromium, keepAlive: true })
+
+await page.goto('https://example.com')          // ← Playwright's own Page
+console.log('watch it:', await session.viewerUrl())
+
+await close()                                   // browser AND session">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="import { chromium } from 'playwright'
+import { RunBrowser } from 'runbrowser'
+
+const rb = new RunBrowser()
+const { page, session, close } = await rb.connect({ chromium, keepAlive: true })
+
+await page.goto('https://example.com')          // ← Playwright's own Page
+console.log('watch it:', await session.viewerUrl())
+
+await close()                                   // browser AND session"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> chromium <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'playwright'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> RunBrowser <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'runbrowser'</span>
+
+<span class="token keyword">const</span> rb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> page<span class="token punctuation">,</span> session<span class="token punctuation">,</span> close <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">{</span> chromium<span class="token punctuation">,</span> keepAlive<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://example.com'</span><span class="token punctuation">)</span>          <span class="token comment">// ← Playwright's own Page</span>
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'watch it:'</span><span class="token punctuation">,</span> <span class="token keyword">await</span> session<span class="token punctuation">.</span><span class="token function">viewerUrl</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token keyword">await</span> <span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>                                   <span class="token comment">// browser AND session</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="from playwright.sync_api import sync_playwright
+from runbrowser import RunBrowser
+
+rb = RunBrowser()
+
+with sync_playwright() as p:
+    with rb.connect(p.chromium, keepAlive=True) as (browser, page, session):
+        page.goto(&quot;https://example.com&quot;)        # ← Playwright's own Page
+        print(&quot;watch it:&quot;, session.viewer_url())
+# browser and session both closed here"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">from</span> playwright<span class="token punctuation">.</span>sync_api <span class="token keyword">import</span> sync_playwright
+<span class="token keyword">from</span> runbrowser <span class="token keyword">import</span> RunBrowser
+
+rb <span class="token operator">=</span> RunBrowser<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">with</span> sync_playwright<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> p<span class="token punctuation">:</span>
+    <span class="token keyword">with</span> rb<span class="token punctuation">.</span>connect<span class="token punctuation">(</span>p<span class="token punctuation">.</span>chromium<span class="token punctuation">,</span> keepAlive<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">)</span> <span class="token keyword">as</span> <span class="token punctuation">(</span>browser<span class="token punctuation">,</span> page<span class="token punctuation">,</span> session<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        page<span class="token punctuation">.</span>goto<span class="token punctuation">(</span><span class="token string">"https://example.com"</span><span class="token punctuation">)</span>        <span class="token comment"># ← Playwright's own Page</span>
+        <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"watch it:"</span><span class="token punctuation">,</span> session<span class="token punctuation">.</span>viewer_url<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment"># browser and session both closed here</span></code></pre></div></div><p><code>page</code> and <code>browser</code> are Playwright&#39;s own objects — not wrappers — so every
+method you know works unchanged, and the API docs you already read still apply.</p>
+<p>Two things it handles that are easy to get wrong by hand: it reuses the tab
+that is already open (a page <em>you</em> create is closed when the connection drops,
+taking its state with it), and <code>close()</code> shuts the browser <strong>and</strong> the session.
+Closing only the browser leaves a stable session parked and still billing.</p>
+<p>You pass <code>chromium</code> in rather than the SDK importing it, so installing the SDK
+never drags a browser stack into a project that only wanted a screenshot — and
+so it works under pnpm and Yarn PnP, where a library importing its consumer&#39;s
+dependency does not resolve.</p>
+<h2 id="prefer-to-wire-it-yourself">Prefer to wire it yourself<a class="anchor" href="#prefer-to-wire-it-yourself" aria-label="Link to this section">#</a></h2>
+<p><code>connectUrl()</code> hands you a URL and gets out of the way:</p>
 <div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="import { chromium } from 'playwright'
 
 const browser = await chromium.connectOverCDP(rb.connectUrl())
@@ -307,7 +389,9 @@ walls</a>, and the
   </main>
   <aside class="toc">
     <span class="toc-title">On this page</span>
-    <a class="toc-2" href="#what-they-deliberately-dont-do">What they deliberately don't do</a>
+    <a class="toc-2" href="#two-libraries-and-which-does-what">Two libraries, and which does what</a>
+    <a class="toc-2" href="#connect-the-one-call-path">connect — the one-call path</a>
+    <a class="toc-2" href="#prefer-to-wire-it-yourself">Prefer to wire it yourself</a>
     <a class="toc-2" href="#what-theyre-worth-using-for">What they're worth using for</a>
     <a class="toc-2" href="#everything-else-is-the-rest-api">Everything else is the REST API</a>
     <a class="toc-2" href="#self-hosted-and-testing">Self-hosted and testing</a>
