@@ -191,9 +191,55 @@ const browser = await puppeteer.connect({
 existing selectors, waits and assertions are unchanged.</p>
 <p>If the connection is refused, the reason is in the close code — see
 <a href="/docs/errors">Errors</a>.</p>
+<p>Driving a <strong>stable session</strong> instead? Its connect URL carries the session id
+rather than a credential, so it needs your key appended — the
+<a href="/docs/guide-sdk">SDK</a> hands you one that already works, and
+<a href="/docs/guide-sessions">Sessions</a> explains the two shapes.</p>
 <h2 id="3-or-skip-the-browser-entirely">3. Or skip the browser entirely<a class="anchor" href="#3-or-skip-the-browser-entirely" aria-label="Link to this section">#</a></h2>
 <p>Half of what agents do with a browser doesn&#39;t need one. These cost no
-browser-time:</p>
+browser-time.</p>
+<p>The quickest way in is the <a href="/docs/guide-sdk">SDK</a> — one install, no HTTP
+plumbing, and it keeps <code>proxy</code>/<code>country</code> in the query string where the server
+expects them (send those in a JSON body by hand and they are silently
+ignored):</p>
+<div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="npm">npm</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="pip">pip</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button></div><button class="copy tabs-copy" type="button" data-code="npm install runbrowser">Copy</button></div><div class="tab-panel" role="tabpanel" data-lang="npm" data-code="npm install runbrowser"><span class="code-lang panel-lang">npm</span><pre class="language-bash"><code><span class="token function">npm</span> <span class="token function">install</span> runbrowser</code></pre></div><div class="tab-panel" role="tabpanel" data-lang="pip" data-code="pip install runbrowser"><span class="code-lang panel-lang">pip</span><pre class="language-bash"><code>pip <span class="token function">install</span> runbrowser</code></pre></div><div class="tab-panel" role="tabpanel" data-lang="TypeScript" data-code="import { RunBrowser } from 'runbrowser'
+
+const rb = new RunBrowser()                       // reads RUNBROWSER_API_KEY
+
+const page = await rb.fetch({ url: 'https://example.com', format: 'markdown' })
+const { data } = await rb.extract({
+  url: 'https://example.com',
+  schema: { type: 'object', properties: { title: { type: 'string' } } },
+})
+const png = await rb.screenshot({ url: 'https://example.com' })"><span class="code-lang panel-lang">TypeScript</span><pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> RunBrowser <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'runbrowser'</span>
+
+<span class="token keyword">const</span> rb <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RunBrowser</span><span class="token punctuation">(</span><span class="token punctuation">)</span>                       <span class="token comment">// reads RUNBROWSER_API_KEY</span>
+
+<span class="token keyword">const</span> page <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token operator">:</span> <span class="token string">'https://example.com'</span><span class="token punctuation">,</span> format<span class="token operator">:</span> <span class="token string">'markdown'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> data <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">extract</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  url<span class="token operator">:</span> <span class="token string">'https://example.com'</span><span class="token punctuation">,</span>
+  schema<span class="token operator">:</span> <span class="token punctuation">{</span> type<span class="token operator">:</span> <span class="token string">'object'</span><span class="token punctuation">,</span> properties<span class="token operator">:</span> <span class="token punctuation">{</span> title<span class="token operator">:</span> <span class="token punctuation">{</span> type<span class="token operator">:</span> <span class="token string">'string'</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> png <span class="token operator">=</span> <span class="token keyword">await</span> rb<span class="token punctuation">.</span><span class="token function">screenshot</span><span class="token punctuation">(</span><span class="token punctuation">{</span> url<span class="token operator">:</span> <span class="token string">'https://example.com'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre></div><div class="tab-panel" role="tabpanel" data-lang="Python" data-code="from runbrowser import RunBrowser
+
+rb = RunBrowser()                                 # reads RUNBROWSER_API_KEY
+
+page = rb.fetch(url=&quot;https://example.com&quot;, format=&quot;markdown&quot;)
+data = rb.extract(
+    url=&quot;https://example.com&quot;,
+    schema={&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;title&quot;: {&quot;type&quot;: &quot;string&quot;}}},
+)
+png = rb.screenshot(url=&quot;https://example.com&quot;)"><span class="code-lang panel-lang">Python</span><pre class="language-python"><code><span class="token keyword">from</span> runbrowser <span class="token keyword">import</span> RunBrowser
+
+rb <span class="token operator">=</span> RunBrowser<span class="token punctuation">(</span><span class="token punctuation">)</span>                                 <span class="token comment"># reads RUNBROWSER_API_KEY</span>
+
+page <span class="token operator">=</span> rb<span class="token punctuation">.</span>fetch<span class="token punctuation">(</span>url<span class="token operator">=</span><span class="token string">"https://example.com"</span><span class="token punctuation">,</span> <span class="token builtin">format</span><span class="token operator">=</span><span class="token string">"markdown"</span><span class="token punctuation">)</span>
+data <span class="token operator">=</span> rb<span class="token punctuation">.</span>extract<span class="token punctuation">(</span>
+    url<span class="token operator">=</span><span class="token string">"https://example.com"</span><span class="token punctuation">,</span>
+    schema<span class="token operator">=</span><span class="token punctuation">{</span><span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"object"</span><span class="token punctuation">,</span> <span class="token string">"properties"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">"title"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"string"</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span>
+png <span class="token operator">=</span> rb<span class="token punctuation">.</span>screenshot<span class="token punctuation">(</span>url<span class="token operator">=</span><span class="token string">"https://example.com"</span><span class="token punctuation">)</span></code></pre></div></div><p>Neither client has runtime dependencies, and neither wraps Playwright — see
+<a href="/docs/guide-sdk">SDKs</a>. Prefer plain HTTP? Every call above is one request:</p>
 <div class="tabs"><div class="tab-bar" role="tablist"><div class="tab-btns"><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="cURL">cURL</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="Python">Python</button><button class="tab-btn" type="button" role="tab" aria-selected="false" data-lang="TypeScript">TypeScript</button></div><button class="copy tabs-copy" type="button" data-code="# Read a page as markdown (plain HTTP — fast, but no JavaScript runs)
 curl -X POST https://api.runbrowser.dev/v1/fetch \
   -H &quot;Authorization: Bearer $RUNBROWSER_TOKEN&quot; \
