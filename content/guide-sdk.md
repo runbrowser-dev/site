@@ -25,14 +25,70 @@ rb = RunBrowser()                    # reads RUNBROWSER_API_KEY
 png = rb.screenshot(url="https://example.com")
 ```
 
-## What they deliberately don't do
+## Two libraries, and which does what
 
-They don't wrap Playwright or Puppeteer. You already know those, and standard
-CDP is the point of the product — a client that hides it behind its own
-vocabulary would make this platform something you have to learn instead of
-something you point your existing code at.
+The most confusing thing about these clients is the split, so here it is
+plainly:
 
-So the SDK hands you a connect URL and gets out of the way:
+| | Does what | Which library |
+|---|---|---|
+| **Control** | Sessions, quotas, proxies, and the one-shot calls — screenshot, extract, unblock, crawl | **RunBrowser SDK** |
+| **Driving** | Clicking, typing, waiting, evaluating — everything inside a page | **Playwright** (or Puppeteer) |
+
+The SDK does **not** have `click()` or `type()`, and that is deliberate rather
+than unfinished. Playwright already does those better than we would, you
+already know it, and standard CDP is the point of the product. A client that
+reimplemented page driving would make this platform something you have to
+learn instead of something you point existing code at — and it would make
+leaving expensive, which is not a thing worth building on purpose.
+
+## `connect()` — the one-call path
+
+If you want a browser and a page, you don't have to do the three-step dance
+yourself:
+
+```ts tab=TypeScript
+import { chromium } from 'playwright'
+import { RunBrowser } from 'runbrowser'
+
+const rb = new RunBrowser()
+const { page, session, close } = await rb.connect({ chromium, keepAlive: true })
+
+await page.goto('https://example.com')          // ← Playwright's own Page
+console.log('watch it:', await session.viewerUrl())
+
+await close()                                   // browser AND session
+```
+
+```python tab=Python
+from playwright.sync_api import sync_playwright
+from runbrowser import RunBrowser
+
+rb = RunBrowser()
+
+with sync_playwright() as p:
+    with rb.connect(p.chromium, keepAlive=True) as (browser, page, session):
+        page.goto("https://example.com")        # ← Playwright's own Page
+        print("watch it:", session.viewer_url())
+# browser and session both closed here
+```
+
+`page` and `browser` are Playwright's own objects — not wrappers — so every
+method you know works unchanged, and the API docs you already read still apply.
+
+Two things it handles that are easy to get wrong by hand: it reuses the tab
+that is already open (a page *you* create is closed when the connection drops,
+taking its state with it), and `close()` shuts the browser **and** the session.
+Closing only the browser leaves a stable session parked and still billing.
+
+You pass `chromium` in rather than the SDK importing it, so installing the SDK
+never drags a browser stack into a project that only wanted a screenshot — and
+so it works under pnpm and Yarn PnP, where a library importing its consumer's
+dependency does not resolve.
+
+## Prefer to wire it yourself
+
+`connectUrl()` hands you a URL and gets out of the way:
 
 ```ts tab=TypeScript
 import { chromium } from 'playwright'
