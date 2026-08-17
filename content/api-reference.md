@@ -43,9 +43,15 @@ you get a stable session.
 {
   "keepAlive": true,
   "maxIdleSeconds": 600,
+  "record": true,
   "proxy": { "type": "external", "url": "http://user:pass@host:port" }
 }
 ```
+
+`record: true` captures the whole session for replay (Startup and up — a
+Free or Hobby key gets `403`). Also works as `?record=true` on a direct
+connect URL. Retrieve it after the session ends with
+[`GET /v1/sessions/{id}/recording`](#get-v1sessionsidrecording).
 
 ```json
 {
@@ -87,6 +93,30 @@ it idles out, so this is how you see what you're paying for.
 `parked` means no client is attached right now. `idleExpiresAt` is when the
 session releases itself if nobody reconnects; `expiresAt` is the absolute
 ceiling. Whichever comes first wins. Both are absent for a one-shot session.
+
+### `GET /v1/sessions/{id}/recording`
+
+The replay for a recorded session, once it has ended. `404` if the session
+was not recorded or the recording has aged out of retention.
+
+```json
+{
+  "sessionId": "ssn_…",
+  "url": "https://…/recordings/2026-08-17/ssn_….ndjson.gz",
+  "startedAt": "2026-08-17T10:00:00Z",
+  "durationMs": 42000,
+  "frameCount": 84,
+  "sizeBytes": 1048576,
+  "truncated": false,
+  "format": "runbrowser-frames-v1"
+}
+```
+
+`url` is a gzipped newline-delimited log — each line `{ "t": msSinceStart,
+"d": "<base64 JPEG>" }`. Play it in the browser at `/replay?url=<url>`, or
+decode it yourself: the format is stable and named by `format`. `truncated`
+is `true` when a very long session hit the capture size cap and recording
+stopped before the session did.
 
 ### `POST /v1/sessions/{id}/close`
 

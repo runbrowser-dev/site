@@ -33,7 +33,7 @@ Be honest with yourself about this list before you switch:
 | `/performance` (Lighthouse) | **No.** Not planned — pick a browser API for browsers, not SEO audits. |
 | BrowserQL (GraphQL automation language) | **No, and not planned.** We bet on plain Playwright. |
 | Firefox, WebKit | **No.** Chromium only — if you need cross-browser testing, this is the wrong product. |
-| Session replay / recording | **No.** The [live viewer](concepts.md#live-viewer) shows the present, not the past. |
+| Session replay / recording | **Yes** on Startup and up. Pass `record: true` when you create a session; fetch the replay afterwards from `GET /v1/sessions/{id}/recording`. |
 | Bundled proxies | BYO proxy. Wholesale pricing from your provider, no markup from us. |
 | `/search` | Different shape: ours is `POST /v1/search` on the API host with `{q, count}`. Results per query are capped by plan, as theirs are. |
 

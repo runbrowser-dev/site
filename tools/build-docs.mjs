@@ -397,7 +397,9 @@ function layout({ title, body, slug, toc, description, updated }) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)} — runbrowser docs</title>
 <meta name="description" content="${escapeHtml(description || title + ' — runbrowser documentation.')}">
-<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/docs.css">
 </head>
 <body>

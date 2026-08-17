@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>API reference — runbrowser docs</title>
 <meta name="description" content="Three surfaces, three hostnames:">
-<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/docs.css">
 </head>
 <body>
@@ -61,6 +63,7 @@
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
             <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessionsidrecording"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions/{id}/recording</span></a>
             <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
             <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
           </div>
@@ -187,12 +190,18 @@ you get a stable session.</p>
 <div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
   &quot;keepAlive&quot;: true,
   &quot;maxIdleSeconds&quot;: 600,
+  &quot;record&quot;: true,
   &quot;proxy&quot;: { &quot;type&quot;: &quot;external&quot;, &quot;url&quot;: &quot;http://user:pass@host:port&quot; }
 }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
   <span class="token property">"keepAlive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
   <span class="token property">"maxIdleSeconds"</span><span class="token operator">:</span> <span class="token number">600</span><span class="token punctuation">,</span>
+  <span class="token property">"record"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
   <span class="token property">"proxy"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"external"</span><span class="token punctuation">,</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"http://user:pass@host:port"</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+<span class="token punctuation">}</span></code></pre></div><p><code>record: true</code> captures the whole session for replay (Startup and up — a
+Free or Hobby key gets <code>403</code>). Also works as <code>?record=true</code> on a direct
+connect URL. Retrieve it after the session ends with
+<a href="#get-v1sessionsidrecording"><code>GET /v1/sessions/{id}/recording</code></a>.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
   &quot;sessionId&quot;: &quot;ssn_…&quot;,
   &quot;connectUrl&quot;: &quot;wss://connect.runbrowser.dev/connect?session=ssn_…&quot;,
   &quot;expiresAt&quot;: &quot;2026-08-12T12:00:00Z&quot;,
@@ -240,6 +249,31 @@ it idles out, so this is how you see what you&#39;re paying for.</p>
 <span class="token punctuation">}</span></code></pre></div><p><code>parked</code> means no client is attached right now. <code>idleExpiresAt</code> is when the
 session releases itself if nobody reconnects; <code>expiresAt</code> is the absolute
 ceiling. Whichever comes first wins. Both are absent for a one-shot session.</p>
+<h3 id="get-v1sessionsidrecording"><code>GET /v1/sessions/{id}/recording</code><a class="anchor" href="#get-v1sessionsidrecording" aria-label="Link to this section">#</a></h3>
+<p>The replay for a recorded session, once it has ended. <code>404</code> if the session
+was not recorded or the recording has aged out of retention.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;sessionId&quot;: &quot;ssn_…&quot;,
+  &quot;url&quot;: &quot;https://…/recordings/2026-08-17/ssn_….ndjson.gz&quot;,
+  &quot;startedAt&quot;: &quot;2026-08-17T10:00:00Z&quot;,
+  &quot;durationMs&quot;: 42000,
+  &quot;frameCount&quot;: 84,
+  &quot;sizeBytes&quot;: 1048576,
+  &quot;truncated&quot;: false,
+  &quot;format&quot;: &quot;runbrowser-frames-v1&quot;
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"sessionId"</span><span class="token operator">:</span> <span class="token string">"ssn_…"</span><span class="token punctuation">,</span>
+  <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"https://…/recordings/2026-08-17/ssn_….ndjson.gz"</span><span class="token punctuation">,</span>
+  <span class="token property">"startedAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-17T10:00:00Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"durationMs"</span><span class="token operator">:</span> <span class="token number">42000</span><span class="token punctuation">,</span>
+  <span class="token property">"frameCount"</span><span class="token operator">:</span> <span class="token number">84</span><span class="token punctuation">,</span>
+  <span class="token property">"sizeBytes"</span><span class="token operator">:</span> <span class="token number">1048576</span><span class="token punctuation">,</span>
+  <span class="token property">"truncated"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token property">"format"</span><span class="token operator">:</span> <span class="token string">"runbrowser-frames-v1"</span>
+<span class="token punctuation">}</span></code></pre></div><p><code>url</code> is a gzipped newline-delimited log — each line <code>{ &quot;t&quot;: msSinceStart, &quot;d&quot;: &quot;&lt;base64 JPEG&gt;&quot; }</code>. Play it in the browser at <code>/replay?url=&lt;url&gt;</code>, or
+decode it yourself: the format is stable and named by <code>format</code>. <code>truncated</code>
+is <code>true</code> when a very long session hit the capture size cap and recording
+stopped before the session did.</p>
 <h3 id="post-v1sessionsidclose"><code>POST /v1/sessions/{id}/close</code><a class="anchor" href="#post-v1sessionsidclose" aria-label="Link to this section">#</a></h3>
 <p>Force-release. Stops the meter. Call it when you&#39;re done with a stable
 session.</p>
@@ -744,6 +778,7 @@ waiting out a cache TTL.</p>
     <a class="toc-2" href="#sessions">Sessions</a>
     <a class="toc-3" href="#post-v1sessions">POST /v1/sessions</a>
     <a class="toc-3" href="#get-v1sessions">GET /v1/sessions</a>
+    <a class="toc-3" href="#get-v1sessionsidrecording">GET /v1/sessions/{id}/recording</a>
     <a class="toc-3" href="#post-v1sessionsidclose">POST /v1/sessions/{id}/close</a>
     <a class="toc-3" href="#post-v1sessionsidviewer-token">POST /v1/sessions/{id}/viewer-token</a>
     <a class="toc-2" href="#rest-shortcuts">REST shortcuts</a>

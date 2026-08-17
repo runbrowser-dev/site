@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Migrating from Browserbase — runbrowser docs</title>
 <meta name="description" content="Browserbase gives you an SDK that creates a session and hands back a `connectUrl`. We give you a URL. The shapes are close enough that the migration is mos">
-<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/docs.css">
 </head>
 <body>
@@ -61,6 +63,7 @@
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
             <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessionsidrecording"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions/{id}/recording</span></a>
             <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
             <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
           </div>
@@ -190,7 +193,7 @@ const { sessionId, connectUrl } = await res.json();">Copy</button></div><pre cla
 </tr>
 <tr>
 <td>Session recording / replay</td>
-<td><strong>No equivalent.</strong></td>
+<td><strong>Yes</strong> (Startup+). <code>record: true</code> at session create, then <code>GET /v1/sessions/{id}/recording</code>.</td>
 </tr>
 <tr>
 <td>Stagehand</td>
@@ -279,7 +282,6 @@ browsers, they have the fleet for it today and we don&#39;t. That is a real
 capacity difference, not a pricing one.</p>
 <h2 id="what-we-dont-have-plainly">What we don&#39;t have, plainly<a class="anchor" href="#what-we-dont-have-plainly" aria-label="Link to this section">#</a></h2>
 <ul>
-<li>No session recording or replay.</li>
 <li>No Director, no semantic actions (<code>clickByDescription</code>). Stagehand works
 against us, but the vision-based tooling is theirs.</li>
 <li>No Agents, Functions or Model Gateway. They offer a broader platform;

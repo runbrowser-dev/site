@@ -45,7 +45,7 @@ Same two-step, no SDK required.
 | `sessions.create()` → `connectUrl` | Direct connect URL, or `POST /v1/sessions` |
 | Session persistence via **Contexts** | **Stable sessions** — see below, they're different |
 | Live View | [Live viewer](concepts.md#live-viewer), signed expiring URLs |
-| Session recording / replay | **No equivalent.** |
+| Session recording / replay | **Yes** (Startup+). `record: true` at session create, then `GET /v1/sessions/{id}/recording`. |
 | Stagehand | Works — it connects over CDP like anything else |
 | Advanced Stealth | Always-on here, no tier gate |
 | Bundled CAPTCHA solving | **Not bundled.** We orchestrate it with your own solver key via [`/unblock`](/docs/guide-unblocking) — you pay wholesale |
@@ -115,7 +115,6 @@ capacity difference, not a pricing one.
 
 ## What we don't have, plainly
 
-- No session recording or replay.
 - No Director, no semantic actions (`clickByDescription`). Stagehand works
   against us, but the vision-based tooling is theirs.
 - No Agents, Functions or Model Gateway. They offer a broader platform;
