@@ -549,6 +549,71 @@ do not collapse the two.
 
 `costMicros` is micro-USD. Divide by 1,000,000.
 
+## Checks
+
+A journey worked out once and repeated on a schedule. Concepts, the heal rules
+and how to write a good task are in the [checks guide](guide-checks.md).
+
+### `POST /v1/checks`
+
+```json
+{
+  "name": "Checkout still reaches payment",
+  "task": "Go to shop.example.com, add the first product to the basket, go to checkout, and confirm the page shows a total and a card payment option.",
+  "intervalMinutes": 60
+}
+```
+
+```json
+{
+  "checkId": "…", "name": "Checkout still reaches payment",
+  "task": "…", "intervalMinutes": 60, "enabled": true, "learned": false,
+  "lastStatus": null, "lastRunAt": null, "nextRunAt": "2026-08-23T12:00:00Z",
+  "consecutiveFailures": 0, "createdAt": "2026-08-23T12:00:00Z"
+}
+```
+
+`learned` is false until the first run has worked the steps out. A check that
+has not learned has never been able to fail. `intervalMinutes` is 5 at the
+lowest — below that a run has not finished before the next is due.
+
+`GET /v1/checks` lists them. `GET /v1/checks/{checkId}` reads one.
+`PATCH /v1/checks/{checkId}` takes `name`, `intervalMinutes` and `enabled`;
+re-enabling clears the failure count. `DELETE /v1/checks/{checkId}` removes it.
+
+### `POST /v1/checks/{checkId}/run`
+
+Runs it now rather than waiting for the schedule, and returns the result.
+Synchronous, unlike an autopilot run: a replay is seconds, and "is it working
+right now" is worthless as a promise to answer later.
+
+### `GET /v1/checks/{checkId}/runs`
+
+```json
+[
+  {
+    "runId": "…", "checkId": "…", "status": "failed",
+    "detail": "1 assertion(s) no longer hold: page no longer contains \"€98.44\"",
+    "results": "[{\"key\":\"total\",\"held\":false,\"expected\":\"€98.44\",\"detail\":\"…\"}]",
+    "costMicros": 0, "startedAt": "2026-08-23T12:00:00Z", "durationMs": 8400
+  }
+]
+```
+
+`status` is one of:
+
+| Status | Meaning |
+|---|---|
+| `passed` | Every step ran and every assertion held |
+| `failed` | Every step ran; an assertion no longer holds. **This is a finding** |
+| `drifted` | A step could not be carried out and the journey could not be re-derived |
+| `healed` | A step could not be carried out; the journey was re-derived and stored |
+| `error` | Something on our side, or the allowance is spent |
+
+`costMicros` is zero for the overwhelming majority of runs, because a replay
+uses no model. It is non-zero only where a heal happened — which is exactly the
+number worth being able to see.
+
 ## Browser contexts
 
 A saved cookie jar, so a run does not have to log in again every time. A
@@ -804,12 +869,12 @@ can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.
 
-| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract | Autopilot runs |
-|---|---|---|---|---|---|---|---|---|
-| Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 | 3 |
-| Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 | 20 |
-| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 | 50 |
-| Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 | 250 |
+| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract | Autopilot runs | Check runs |
+|---|---|---|---|---|---|---|---|---|---|
+| Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 | 3 | 300 |
+| Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 | 20 | 5,000 |
+| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 | 50 | 20,000 |
+| Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 | 250 | 100,000 |
 
 Free, Hobby and Startup are self-serve — sign up and start. Scale is priced
 per deal, because at 50 concurrent browsers it is a conversation about
@@ -821,6 +886,19 @@ Browser time is metered **while the session runs**, not only when it ends, so
 your usage and your remaining allowance reflect what you are burning right
 now. A session that runs past your monthly allowance is stopped during the
 session rather than after you disconnect.
+
+**Check runs are the number that matters**, and they are generous because a
+check run has no language model in it. Working out how to do something needs
+one and costs real money; repeating it needs neither, so a replay costs
+browser-seconds — which we own — rather than tokens, which we buy. Startup's
+20,000 is about seven checks running every fifteen minutes, or thirty hourly
+ones. Free's 300 is one check every couple of hours: enough to watch one thing
+that matters.
+
+Active checks are capped separately: 1 on Free, 10 on Hobby, 50 on Startup,
+250 on Scale. The two limits stop different mistakes — the run count stops one
+check set to a five-minute interval from eating the month, the check count
+stops a thousand checks all coming due in the same second.
 
 [Autopilot](guide-autopilot.md) runs are counted monthly rather than daily.
 A run is a considered thing you do a few of, not a chat you hold, and a daily
@@ -1624,22 +1702,19 @@ Say what a fact has to be, and the run reports a verdict instead of a value:
 wrong thing have different causes and different fixes, and a check that
 collapses them sends you looking in the wrong place.
 
-## Replaying and exporting
+## Turning a run into a check
 
-Every run keeps its transcript, and — on plans with
-[recording](concepts.md#session-recording) — a frame-by-frame replay of the browser.
+A run answers a question once. A **check** asks it on a schedule.
 
-Any run can also be exported as a **Playwright script**. It is a runnable
-`.mjs` file with the actual steps the run took, pointed at your own key:
+When a run does what you wanted, make it a [check](guide-checks.md): we keep
+the steps it worked out and the assertions it made, and repeat them every N
+minutes. No model is involved after that — the journey is already known — so a
+check costs browser time rather than tokens, which is why the run allowances
+are small and the check allowances are not.
 
-```bash
-RUNBROWSER_TOKEN=ab_… node run.mjs
-```
-
-This is the path out of autopilot rather than deeper into it. Use a run to
-work out what the steps are, export it, and from then on you have ordinary
-code you own and can put in CI — no model in the loop, no per-run cost, and
-nothing of ours in the script but the connect URL.
+Every run also keeps its transcript, and on plans with
+[recording](concepts.md#session-recording) a frame-by-frame replay of the
+browser.
 
 ## What it costs
 
@@ -1671,16 +1746,16 @@ Worth knowing before you point it at something important.
 
 ## Doing it from code
 
-The dashboard is the place to work out whether a task is possible. Once it is,
-you have two ways to run it without a browser tab open, and the second is
+The dashboard is where you work out whether a task is possible. Once it is,
+there are two ways to run it without a browser tab open, and the first is
 usually the right one:
 
-1. **Export the run as Playwright** and run that on a schedule. No model, no
-   per-run cost, and it fails loudly when the site changes — which is what you
-   want from a check.
-2. **Call it as an API.** Better when the page changes shape often enough that
-   a fixed script keeps breaking, and you would rather describe the goal than
-   maintain selectors.
+1. **Make it a [check](guide-checks.md)** and we run it on a schedule. No model
+   after the first run, so it is cheap enough to run hourly forever, and it
+   tells you when the answer changes.
+2. **Call it as an API** with `POST /v1/agents/runs`. Right when the question
+   is different every time — a one-off investigation rather than something
+   worth watching.
 
 See the [API reference](api-reference.md#autopilot) for the endpoints.
 
@@ -1760,6 +1835,148 @@ alone gets you past a consent wall or age gate in the same call.
 See the full option tables in the reference:
 [`/screenshot`](/docs/api-reference#post-screenshot-imagepngjpegwebp) ·
 [`/pdf`](/docs/api-reference#post-pdf-applicationpdf).
+
+---
+
+# Checks
+
+Describe something a browser should be able to do, and how you would know it
+worked. We work out the steps once, then repeat them on a schedule and tell
+you when the answer changes.
+
+```bash
+curl -X POST https://api.runbrowser.dev/v1/checks \
+  -H "Authorization: Bearer ab_…" -H 'Content-Type: application/json' \
+  -d '{
+        "name": "Checkout still reaches payment",
+        "task": "Go to shop.example.com, add the first product to the basket, go to checkout, and confirm the page offers a card payment option and shows a total.",
+        "intervalMinutes": 60
+      }'
+```
+
+That is the whole setup. No selectors, no script, no runner to host.
+
+## Why it is cheap enough to run hourly
+
+The expensive part of automating a website is *discovering* the steps. A
+language model is very good at that and far too expensive to keep in the loop
+afterwards.
+
+So it only runs once. The first execution of a check works the journey out and
+stores it: the actual selectors that worked, and the assertions it established
+along the way. Every run after that replays them with no model involved. That
+is why check runs are measured in tens of thousands per month while autopilot
+runs are measured in tens — a replay costs browser-seconds, not tokens.
+
+## The three outcomes
+
+| Status | What happened | What we do |
+|---|---|---|
+| `passed` | Every step ran, every assertion held | Nothing |
+| `failed` | Every step ran, and an assertion no longer holds | **Tell you.** The check is left exactly as it is |
+| `drifted` → `healed` | A step could not be carried out | Re-derive the journey and carry on |
+
+**The distinction between the last two is the whole design.** A check that
+re-derived itself on every failure would be worse than useless: it would adapt
+around the regression it exists to catch, go green, and report that your site
+is fine — and you would believe it, because it is a check.
+
+So the two failures are treated as the different things they are. A step that
+cannot be carried out means the markup moved under us; your site probably works
+and our stored journey is stale, so re-deriving it is exactly right. An
+assertion that no longer holds means every step ran, the page rendered, and it
+now says something else. That *is* the finding. Healing there would teach the
+check to accept the new value, which is the one thing it must never do.
+
+A check that fails to heal three times running pauses itself, so a check
+pointed at a site that has genuinely gone away stops spending your allowance on
+it. Re-enable it and the counter resets.
+
+## Writing a good task
+
+The task is doing two jobs: it says what to do, and it says what "worked"
+means. It is also what a heal re-derives *from* — so write the intent, not the
+steps.
+
+**Good:**
+
+> Go to status.example.com and confirm every service shows "Operational".
+
+> Sign in at app.example.com with the credentials in the staging context, open
+> Billing, and confirm the plan shows "Startup" and a next invoice date.
+
+**Bad:**
+
+> Click the third button in the header.
+
+The second one describes *our* implementation rather than your intent, so when
+the header changes there is nothing left to re-derive from.
+
+Name the thing that must be true. "Confirm the total is €98.44" gives the check
+something to assert; "check the basket page" does not, and a check with no
+assertions can only ever detect a page that fails to load.
+
+## A check with nothing to assert is not a check
+
+If the first run works out the steps but finds nothing to assert, the check is
+reported as an **error**, not a pass. It would otherwise report green for ever
+while proving only that a page loads.
+
+That is almost always a task that says what to *do* without saying what must be
+*true*:
+
+| | |
+|---|---|
+| ✗ | "Open the basket page" |
+| ✓ | "Open the basket and confirm the total is €98.44" |
+| ✗ | "Go to the status page" |
+| ✓ | "Go to the status page and confirm every service reads Operational" |
+
+Name a value, a word, or a state that has to be there. That is the thing the
+check watches, and it is what a failure will point at.
+
+## Logging in
+
+A check starts signed out, like any session. Point it at a
+[browser context](api-reference.md#browser-contexts) that already holds the
+sign-in:
+
+1. Run one session with `persistContext` that does the login by hand.
+2. Reference that context from the check.
+
+Refresh it when runs start failing at the login wall — you are restoring the
+client half of a session and the server can still expire it.
+
+## Scheduling
+
+`intervalMinutes` is floored at 5. Below that a run has not finished before the
+next is due, and the check spends its whole allowance overlapping with itself.
+
+Runs are claimed before they start, so a slow run never gets a second copy
+started underneath it, and a redeploy mid-run costs you that run rather than the
+schedule — the next tick picks it up from the database.
+
+## Limits
+
+Active checks are capped per plan: 1 on Free, 10 on Hobby, 50 on Startup, 250
+on Scale. Run allowances are in [concepts](concepts.md#browser-time-billing).
+
+Two limits rather than one because they stop different mistakes: the run count
+stops a single five-minute check from eating the month, and the check count
+stops a thousand checks all coming due in the same second.
+
+An org that runs out of check runs has its checks paused rather than failed —
+the check is fine, the month is not.
+
+## What it does not do yet
+
+- **No alerting.** Runs and their outcomes are readable through
+  `GET /v1/checks/{id}/runs`; nothing emails or pages you. Poll it, or watch
+  the dashboard.
+- **No branching.** A check is one linear journey. Something with a decision in
+  it wants two checks.
+- **No CAPTCHAs.** Same as everywhere else — we flag the wall rather than
+  pretending it isn't there.
 
 ---
 
@@ -3350,6 +3567,7 @@ the point of the feature, but know that you're making it.
 
 - [Concepts](concepts.md) — sessions, quotas, stable sessions, the viewer
 - [Autopilot](guide-autopilot.md) — describe a task instead of scripting it
+- [Checks](guide-checks.md) — and have us repeat it on a schedule
 - [API reference](api-reference.md) — every endpoint
 - [Errors](errors.md) — every status code, what causes it, what to do
 

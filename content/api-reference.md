@@ -549,6 +549,71 @@ do not collapse the two.
 
 `costMicros` is micro-USD. Divide by 1,000,000.
 
+## Checks
+
+A journey worked out once and repeated on a schedule. Concepts, the heal rules
+and how to write a good task are in the [checks guide](guide-checks.md).
+
+### `POST /v1/checks`
+
+```json
+{
+  "name": "Checkout still reaches payment",
+  "task": "Go to shop.example.com, add the first product to the basket, go to checkout, and confirm the page shows a total and a card payment option.",
+  "intervalMinutes": 60
+}
+```
+
+```json
+{
+  "checkId": "…", "name": "Checkout still reaches payment",
+  "task": "…", "intervalMinutes": 60, "enabled": true, "learned": false,
+  "lastStatus": null, "lastRunAt": null, "nextRunAt": "2026-08-23T12:00:00Z",
+  "consecutiveFailures": 0, "createdAt": "2026-08-23T12:00:00Z"
+}
+```
+
+`learned` is false until the first run has worked the steps out. A check that
+has not learned has never been able to fail. `intervalMinutes` is 5 at the
+lowest — below that a run has not finished before the next is due.
+
+`GET /v1/checks` lists them. `GET /v1/checks/{checkId}` reads one.
+`PATCH /v1/checks/{checkId}` takes `name`, `intervalMinutes` and `enabled`;
+re-enabling clears the failure count. `DELETE /v1/checks/{checkId}` removes it.
+
+### `POST /v1/checks/{checkId}/run`
+
+Runs it now rather than waiting for the schedule, and returns the result.
+Synchronous, unlike an autopilot run: a replay is seconds, and "is it working
+right now" is worthless as a promise to answer later.
+
+### `GET /v1/checks/{checkId}/runs`
+
+```json
+[
+  {
+    "runId": "…", "checkId": "…", "status": "failed",
+    "detail": "1 assertion(s) no longer hold: page no longer contains \"€98.44\"",
+    "results": "[{\"key\":\"total\",\"held\":false,\"expected\":\"€98.44\",\"detail\":\"…\"}]",
+    "costMicros": 0, "startedAt": "2026-08-23T12:00:00Z", "durationMs": 8400
+  }
+]
+```
+
+`status` is one of:
+
+| Status | Meaning |
+|---|---|
+| `passed` | Every step ran and every assertion held |
+| `failed` | Every step ran; an assertion no longer holds. **This is a finding** |
+| `drifted` | A step could not be carried out and the journey could not be re-derived |
+| `healed` | A step could not be carried out; the journey was re-derived and stored |
+| `error` | Something on our side, or the allowance is spent |
+
+`costMicros` is zero for the overwhelming majority of runs, because a replay
+uses no model. It is non-zero only where a heal happened — which is exactly the
+number worth being able to see.
+
 ## Browser contexts
 
 A saved cookie jar, so a run does not have to log in again every time. A

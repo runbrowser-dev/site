@@ -42,6 +42,7 @@
     <span class="nav-title nav-title-spaced">Guides</span>
     <div class="nav-links">
         <a class="nav-link " href="/docs/guide-autopilot">Autopilot</a>
+        <a class="nav-link " href="/docs/guide-checks">Checks</a>
         <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
         <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
         <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
@@ -90,6 +91,14 @@
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1agentsruns"><span class="m m-post">POST</span><span class="ep-path">/v1/agents/runs</span></a>
             <a class="ep" href="/docs/api-reference#get-v1agentsrunsrunid"><span class="m m-get">GET</span><span class="ep-path">/v1/agents/runs/{runId}</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#checks">Checks</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1checks"><span class="m m-post">POST</span><span class="ep-path">/v1/checks</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1checkscheckidrun"><span class="m m-post">POST</span><span class="ep-path">/v1/checks/{checkId}/run</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1checkscheckidruns"><span class="m m-get">GET</span><span class="ep-path">/v1/checks/{checkId}/runs</span></a>
           </div>
         </div>
         <div class="nav-cat">
@@ -705,6 +714,85 @@ model talking rather than the web answering.</p>
 was found at all, which is a different problem from finding the wrong one —
 do not collapse the two.</p>
 <p><code>costMicros</code> is micro-USD. Divide by 1,000,000.</p>
+<h2 id="checks">Checks<a class="anchor" href="#checks" aria-label="Link to this section">#</a></h2>
+<p>A journey worked out once and repeated on a schedule. Concepts, the heal rules
+and how to write a good task are in the <a href="/docs/guide-checks">checks guide</a>.</p>
+<h3 id="post-v1checks"><code>POST /v1/checks</code><a class="anchor" href="#post-v1checks" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;name&quot;: &quot;Checkout still reaches payment&quot;,
+  &quot;task&quot;: &quot;Go to shop.example.com, add the first product to the basket, go to checkout, and confirm the page shows a total and a card payment option.&quot;,
+  &quot;intervalMinutes&quot;: 60
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"Checkout still reaches payment"</span><span class="token punctuation">,</span>
+  <span class="token property">"task"</span><span class="token operator">:</span> <span class="token string">"Go to shop.example.com, add the first product to the basket, go to checkout, and confirm the page shows a total and a card payment option."</span><span class="token punctuation">,</span>
+  <span class="token property">"intervalMinutes"</span><span class="token operator">:</span> <span class="token number">60</span>
+<span class="token punctuation">}</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;checkId&quot;: &quot;…&quot;, &quot;name&quot;: &quot;Checkout still reaches payment&quot;,
+  &quot;task&quot;: &quot;…&quot;, &quot;intervalMinutes&quot;: 60, &quot;enabled&quot;: true, &quot;learned&quot;: false,
+  &quot;lastStatus&quot;: null, &quot;lastRunAt&quot;: null, &quot;nextRunAt&quot;: &quot;2026-08-23T12:00:00Z&quot;,
+  &quot;consecutiveFailures&quot;: 0, &quot;createdAt&quot;: &quot;2026-08-23T12:00:00Z&quot;
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"checkId"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"Checkout still reaches payment"</span><span class="token punctuation">,</span>
+  <span class="token property">"task"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"intervalMinutes"</span><span class="token operator">:</span> <span class="token number">60</span><span class="token punctuation">,</span> <span class="token property">"enabled"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"learned"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token property">"lastStatus"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span> <span class="token property">"lastRunAt"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span> <span class="token property">"nextRunAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-23T12:00:00Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"consecutiveFailures"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token property">"createdAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-23T12:00:00Z"</span>
+<span class="token punctuation">}</span></code></pre></div><p><code>learned</code> is false until the first run has worked the steps out. A check that
+has not learned has never been able to fail. <code>intervalMinutes</code> is 5 at the
+lowest — below that a run has not finished before the next is due.</p>
+<p><code>GET /v1/checks</code> lists them. <code>GET /v1/checks/{checkId}</code> reads one.
+<code>PATCH /v1/checks/{checkId}</code> takes <code>name</code>, <code>intervalMinutes</code> and <code>enabled</code>;
+re-enabling clears the failure count. <code>DELETE /v1/checks/{checkId}</code> removes it.</p>
+<h3 id="post-v1checkscheckidrun"><code>POST /v1/checks/{checkId}/run</code><a class="anchor" href="#post-v1checkscheckidrun" aria-label="Link to this section">#</a></h3>
+<p>Runs it now rather than waiting for the schedule, and returns the result.
+Synchronous, unlike an autopilot run: a replay is seconds, and &quot;is it working
+right now&quot; is worthless as a promise to answer later.</p>
+<h3 id="get-v1checkscheckidruns"><code>GET /v1/checks/{checkId}/runs</code><a class="anchor" href="#get-v1checkscheckidruns" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="[
+  {
+    &quot;runId&quot;: &quot;…&quot;, &quot;checkId&quot;: &quot;…&quot;, &quot;status&quot;: &quot;failed&quot;,
+    &quot;detail&quot;: &quot;1 assertion(s) no longer hold: page no longer contains \&quot;€98.44\&quot;&quot;,
+    &quot;results&quot;: &quot;[{\&quot;key\&quot;:\&quot;total\&quot;,\&quot;held\&quot;:false,\&quot;expected\&quot;:\&quot;€98.44\&quot;,\&quot;detail\&quot;:\&quot;…\&quot;}]&quot;,
+    &quot;costMicros&quot;: 0, &quot;startedAt&quot;: &quot;2026-08-23T12:00:00Z&quot;, &quot;durationMs&quot;: 8400
+  }
+]">Copy</button></div><pre class="language-json"><code><span class="token punctuation">[</span>
+  <span class="token punctuation">{</span>
+    <span class="token property">"runId"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"checkId"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"status"</span><span class="token operator">:</span> <span class="token string">"failed"</span><span class="token punctuation">,</span>
+    <span class="token property">"detail"</span><span class="token operator">:</span> <span class="token string">"1 assertion(s) no longer hold: page no longer contains \"€98.44\""</span><span class="token punctuation">,</span>
+    <span class="token property">"results"</span><span class="token operator">:</span> <span class="token string">"[{\"key\":\"total\",\"held\":false,\"expected\":\"€98.44\",\"detail\":\"…\"}]"</span><span class="token punctuation">,</span>
+    <span class="token property">"costMicros"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token property">"startedAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-23T12:00:00Z"</span><span class="token punctuation">,</span> <span class="token property">"durationMs"</span><span class="token operator">:</span> <span class="token number">8400</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">]</span></code></pre></div><p><code>status</code> is one of:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>passed</code></td>
+<td>Every step ran and every assertion held</td>
+</tr>
+<tr>
+<td><code>failed</code></td>
+<td>Every step ran; an assertion no longer holds. <strong>This is a finding</strong></td>
+</tr>
+<tr>
+<td><code>drifted</code></td>
+<td>A step could not be carried out and the journey could not be re-derived</td>
+</tr>
+<tr>
+<td><code>healed</code></td>
+<td>A step could not be carried out; the journey was re-derived and stored</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>Something on our side, or the allowance is spent</td>
+</tr>
+</tbody></table>
+</div><p><code>costMicros</code> is zero for the overwhelming majority of runs, because a replay
+uses no model. It is non-zero only where a heal happened — which is exactly the
+number worth being able to see.</p>
 <h2 id="browser-contexts">Browser contexts<a class="anchor" href="#browser-contexts" aria-label="Link to this section">#</a></h2>
 <p>A saved cookie jar, so a run does not have to log in again every time. A
 container is destroyed on release and Chromium&#39;s profile goes with it, so
@@ -906,7 +994,7 @@ waiting out a cache TTL.</p>
       <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20API%20reference">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
-    <p class="updated">Last updated 2026-08-17</p>
+    <p class="updated">Last updated 2026-08-23</p>
   </main>
   <aside class="toc">
     <span class="toc-title">On this page</span>
@@ -932,6 +1020,10 @@ waiting out a cache TTL.</p>
     <a class="toc-2" href="#autopilot">Autopilot</a>
     <a class="toc-3" href="#post-v1agentsruns">POST /v1/agents/runs</a>
     <a class="toc-3" href="#get-v1agentsrunsrunid">GET /v1/agents/runs/{runId}</a>
+    <a class="toc-2" href="#checks">Checks</a>
+    <a class="toc-3" href="#post-v1checks">POST /v1/checks</a>
+    <a class="toc-3" href="#post-v1checkscheckidrun">POST /v1/checks/{checkId}/run</a>
+    <a class="toc-3" href="#get-v1checkscheckidruns">GET /v1/checks/{checkId}/runs</a>
     <a class="toc-2" href="#browser-contexts">Browser contexts</a>
     <a class="toc-3" href="#post-v1contexts">POST /v1/contexts</a>
     <a class="toc-3" href="#using-one">Using one</a>

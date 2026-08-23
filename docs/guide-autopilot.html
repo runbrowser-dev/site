@@ -42,6 +42,7 @@
     <span class="nav-title nav-title-spaced">Guides</span>
     <div class="nav-links">
         <a class="nav-link active" href="/docs/guide-autopilot">Autopilot</a>
+        <a class="nav-link " href="/docs/guide-checks">Checks</a>
         <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
         <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
         <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
@@ -90,6 +91,14 @@
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1agentsruns"><span class="m m-post">POST</span><span class="ep-path">/v1/agents/runs</span></a>
             <a class="ep" href="/docs/api-reference#get-v1agentsrunsrunid"><span class="m m-get">GET</span><span class="ep-path">/v1/agents/runs/{runId}</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#checks">Checks</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1checks"><span class="m m-post">POST</span><span class="ep-path">/v1/checks</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1checkscheckidrun"><span class="m m-post">POST</span><span class="ep-path">/v1/checks/{checkId}/run</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1checkscheckidruns"><span class="m m-get">GET</span><span class="ep-path">/v1/checks/{checkId}/runs</span></a>
           </div>
         </div>
         <div class="nav-cat">
@@ -207,15 +216,16 @@ as invention.</p>
 </div><p><code>unresolved</code> is deliberately not <code>failed</code>. Not finding a thing and finding the
 wrong thing have different causes and different fixes, and a check that
 collapses them sends you looking in the wrong place.</p>
-<h2 id="replaying-and-exporting">Replaying and exporting<a class="anchor" href="#replaying-and-exporting" aria-label="Link to this section">#</a></h2>
-<p>Every run keeps its transcript, and — on plans with
-<a href="/docs/concepts#session-recording">recording</a> — a frame-by-frame replay of the browser.</p>
-<p>Any run can also be exported as a <strong>Playwright script</strong>. It is a runnable
-<code>.mjs</code> file with the actual steps the run took, pointed at your own key:</p>
-<div class="code-block"><div class="code-bar"><span class="code-lang">Shell</span><button class="copy" type="button" data-code="RUNBROWSER_TOKEN=ab_… node run.mjs">Copy</button></div><pre class="language-bash"><code><span class="token assign-left variable">RUNBROWSER_TOKEN</span><span class="token operator">=</span>ab_… <span class="token function">node</span> run.mjs</code></pre></div><p>This is the path out of autopilot rather than deeper into it. Use a run to
-work out what the steps are, export it, and from then on you have ordinary
-code you own and can put in CI — no model in the loop, no per-run cost, and
-nothing of ours in the script but the connect URL.</p>
+<h2 id="turning-a-run-into-a-check">Turning a run into a check<a class="anchor" href="#turning-a-run-into-a-check" aria-label="Link to this section">#</a></h2>
+<p>A run answers a question once. A <strong>check</strong> asks it on a schedule.</p>
+<p>When a run does what you wanted, make it a <a href="/docs/guide-checks">check</a>: we keep
+the steps it worked out and the assertions it made, and repeat them every N
+minutes. No model is involved after that — the journey is already known — so a
+check costs browser time rather than tokens, which is why the run allowances
+are small and the check allowances are not.</p>
+<p>Every run also keeps its transcript, and on plans with
+<a href="/docs/concepts#session-recording">recording</a> a frame-by-frame replay of the
+browser.</p>
 <h2 id="what-it-costs">What it costs<a class="anchor" href="#what-it-costs" aria-label="Link to this section">#</a></h2>
 <p>Runs are counted monthly against your plan: 3 on Free, 20 on Hobby, 50 on
 Startup, 250 on Scale. Monthly rather than daily on purpose — a run is a
@@ -240,22 +250,22 @@ for the thing that is written down — the price, the date, the status — and
 let your own code decide what &quot;best&quot; means.</li>
 </ul>
 <h2 id="doing-it-from-code">Doing it from code<a class="anchor" href="#doing-it-from-code" aria-label="Link to this section">#</a></h2>
-<p>The dashboard is the place to work out whether a task is possible. Once it is,
-you have two ways to run it without a browser tab open, and the second is
+<p>The dashboard is where you work out whether a task is possible. Once it is,
+there are two ways to run it without a browser tab open, and the first is
 usually the right one:</p>
 <ol>
-<li><strong>Export the run as Playwright</strong> and run that on a schedule. No model, no
-per-run cost, and it fails loudly when the site changes — which is what you
-want from a check.</li>
-<li><strong>Call it as an API.</strong> Better when the page changes shape often enough that
-a fixed script keeps breaking, and you would rather describe the goal than
-maintain selectors.</li>
+<li><strong>Make it a <a href="/docs/guide-checks">check</a></strong> and we run it on a schedule. No model
+after the first run, so it is cheap enough to run hourly forever, and it
+tells you when the answer changes.</li>
+<li><strong>Call it as an API</strong> with <code>POST /v1/agents/runs</code>. Right when the question
+is different every time — a one-off investigation rather than something
+worth watching.</li>
 </ol>
 <p>See the <a href="/docs/api-reference#autopilot">API reference</a> for the endpoints.</p>
 
     <nav class="pager">
       <a class="prev" href="/docs/recipes"><span>Previous</span>Recipes</a>
-      <a class="next" href="/docs/guide-sessions"><span>Next</span>Sessions &amp; stable sessions</a>
+      <a class="next" href="/docs/guide-checks"><span>Next</span>Checks</a>
     </nav>
     <hr>
     <p class="foot">
@@ -270,7 +280,7 @@ maintain selectors.</li>
     <a class="toc-2" href="#running-one">Running one</a>
     <a class="toc-2" href="#what-comes-back">What comes back</a>
     <a class="toc-2" href="#turning-a-task-into-a-check">Turning a task into a check</a>
-    <a class="toc-2" href="#replaying-and-exporting">Replaying and exporting</a>
+    <a class="toc-2" href="#turning-a-run-into-a-check">Turning a run into a check</a>
     <a class="toc-2" href="#what-it-costs">What it costs</a>
     <a class="toc-2" href="#where-it-struggles">Where it struggles</a>
     <a class="toc-2" href="#doing-it-from-code">Doing it from code</a>

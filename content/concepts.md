@@ -23,12 +23,12 @@ can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.
 
-| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract | Autopilot runs |
-|---|---|---|---|---|---|---|---|---|
-| Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 | 3 |
-| Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 | 20 |
-| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 | 50 |
-| Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 | 250 |
+| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract | Autopilot runs | Check runs |
+|---|---|---|---|---|---|---|---|---|---|
+| Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 | 3 | 300 |
+| Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 | 20 | 5,000 |
+| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 | 50 | 20,000 |
+| Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 | 250 | 100,000 |
 
 Free, Hobby and Startup are self-serve — sign up and start. Scale is priced
 per deal, because at 50 concurrent browsers it is a conversation about
@@ -40,6 +40,19 @@ Browser time is metered **while the session runs**, not only when it ends, so
 your usage and your remaining allowance reflect what you are burning right
 now. A session that runs past your monthly allowance is stopped during the
 session rather than after you disconnect.
+
+**Check runs are the number that matters**, and they are generous because a
+check run has no language model in it. Working out how to do something needs
+one and costs real money; repeating it needs neither, so a replay costs
+browser-seconds — which we own — rather than tokens, which we buy. Startup's
+20,000 is about seven checks running every fifteen minutes, or thirty hourly
+ones. Free's 300 is one check every couple of hours: enough to watch one thing
+that matters.
+
+Active checks are capped separately: 1 on Free, 10 on Hobby, 50 on Startup,
+250 on Scale. The two limits stop different mistakes — the run count stops one
+check set to a five-minute interval from eating the month, the check count
+stops a thousand checks all coming due in the same second.
 
 [Autopilot](guide-autopilot.md) runs are counted monthly rather than daily.
 A run is a considered thing you do a few of, not a chat you hold, and a daily

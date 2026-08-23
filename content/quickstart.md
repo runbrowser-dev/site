@@ -239,5 +239,6 @@ the point of the feature, but know that you're making it.
 
 - [Concepts](concepts.md) — sessions, quotas, stable sessions, the viewer
 - [Autopilot](guide-autopilot.md) — describe a task instead of scripting it
+- [Checks](guide-checks.md) — and have us repeat it on a schedule
 - [API reference](api-reference.md) — every endpoint
 - [Errors](errors.md) — every status code, what causes it, what to do

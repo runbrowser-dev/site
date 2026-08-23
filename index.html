@@ -542,10 +542,10 @@
           <div class="ic" aria-hidden="true">
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 2.5 15.4 9l6.6 1.6-4.8 4.6 1.2 6.7L13 18.6 7.6 21.9l1.2-6.7L4 10.6 10.6 9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
           </div>
-          <h3>Autopilot</h3>
-          <p>Describe the task in plain language and a real browser works through it. It comes back with the answer, the facts behind it, and where on the page it read each one — so you can check the work instead of trusting it. Say what a fact must equal and the run reports passed, failed, or never found it. Export any run as a Playwright script you own.</p>
+          <h3>Checks that heal themselves</h3>
+          <p>Describe a journey once — &ldquo;sign in, add to basket, confirm the total&rdquo; — and a real browser works out how. After that we repeat it on a schedule with no model involved, so it costs browser-seconds instead of tokens. When the site is rebuilt, the steps are re-derived on their own. When the page still works and the <em>answer</em> changes, that is a finding and we leave the check alone and tell you. Adapting to that would be the one thing a check must never do.</p>
           <div class="mini" aria-hidden="true">
-            <div class="mbar"><span class="mp">● 6 steps</span><span class="mu">total_price = &euro;98.44 · passed</span></div>
+            <div class="mbar"><span class="mp">● hourly</span><span class="mu">checkout &middot; total &euro;98.44 &middot; passed</span></div>
             <div class="mbody"></div>
           </div>
         </div>
@@ -607,11 +607,12 @@
           <tbody>
             <tr><td class="q">Billing</td><td class="us">Per second, floored at 10s</td><td class="them">30-second blocks, rounded up</td></tr>
             <tr><td class="q">Say what you want</td><td class="us"><span class="yes">Plain language, with the evidence</span></td><td class="them">Write the selectors yourself</td></tr>
+            <tr><td class="q">When a site is rebuilt</td><td class="us"><span class="yes">Re-derived automatically</span></td><td class="them">Your script breaks, you fix it</td></tr>
             <tr><td class="q">Watch a run</td><td class="us"><span class="yes">Live viewer + shareable link</span></td><td class="them">Logs, or nothing</td></tr>
             <tr><td class="q">Bot walls</td><td class="us">Flagged, not disguised</td><td class="them">Returned as page content</td></tr>
             <tr><td class="q">Proxies</td><td class="us">Wholesale, or geo-matched pools</td><td class="them">Marked-up per-GB</td></tr>
             <tr><td class="q">Data residency</td><td class="us"><span class="yes">EU, always</span></td><td class="them">US-default</td></tr>
-            <tr><td class="q">Portability</td><td class="us">Standard CDP, no SDK to rewrite</td><td class="them">Proprietary client</td></tr>
+            <tr><td class="q">Portability</td><td class="us">Sessions are standard CDP, no SDK to rewrite</td><td class="them">Proprietary client</td></tr>
           </tbody>
         </table>
         </div>
@@ -628,6 +629,7 @@
           <span class="pn">Free</span><span class="pp">&euro;0</span>
           <ul>
             <li><span class="d">›</span><b>3</b> concurrent</li>
+            <li><span class="d">›</span><b>300</b> check runs / mo</li>
             <li><span class="d">›</span><b>1&nbsp;hr</b> browser / mo</li>
             <li><span class="d">›</span><b>3</b> autopilot runs</li>
             <li><span class="d">›</span><b>1,000</b> fetches</li>
@@ -639,6 +641,7 @@
           <span class="pn">Hobby</span><span class="pp">&euro;19 <small>/mo</small></span>
           <ul>
             <li><span class="d">›</span><b>10</b> concurrent</li>
+            <li><span class="d">›</span><b>5,000</b> check runs / mo</li>
             <li><span class="d">›</span><b>200&nbsp;hrs</b> browser / mo</li>
             <li><span class="d">›</span><b>20</b> autopilot runs</li>
             <li><span class="d">›</span><b>5,000</b> fetches</li>
@@ -651,6 +654,7 @@
           <span class="pn">Startup</span><span class="pp">&euro;99 <small>/mo</small></span>
           <ul>
             <li><span class="d">›</span><b>25</b> concurrent</li>
+            <li><span class="d">›</span><b>20,000</b> check runs / mo</li>
             <li><span class="d">›</span><b>1,200&nbsp;hrs</b> browser / mo</li>
             <li><span class="d">›</span><b>50</b> autopilot runs</li>
             <li><span class="d">›</span><b>25,000</b> fetches</li>
@@ -662,6 +666,7 @@
           <span class="pn">Scale</span><span class="pp pp-word">talk to us</span>
           <ul>
             <li><span class="d">›</span><b>50+</b> concurrent</li>
+            <li><span class="d">›</span><b>100,000</b> check runs / mo</li>
             <li><span class="d">›</span><b>6,500&nbsp;hrs</b> browser / mo</li>
             <li><span class="d">›</span><b>250</b> autopilot runs</li>
             <li><span class="d">›</span>allowances sized to you</li>
@@ -671,6 +676,8 @@
         </div>
       </div>
       <p class="price-note">
+        Check runs are the number to look at, and they are large because a run has no language model in it —
+        working out how to do something costs tokens, repeating it costs browser-seconds.
         Stealth, stable sessions, autopilot and the live viewer are on every plan, free one included. Session
         recording is the one exception, and we would rather say so than bury it: it is Startup and up, because
         storing the frames costs us money on every recorded run.

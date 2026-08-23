@@ -17,6 +17,7 @@ const PUBLIC_DOCS = [
   'quickstart.md',
   'concepts.md',
   'guide-autopilot.md',
+  'guide-checks.md',
   'recipes.md',
   'guide-sessions.md',
   'guide-viewer.md',

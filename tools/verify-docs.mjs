@@ -21,6 +21,7 @@ const PAGES = [
   '/docs/quickstart',
   '/docs/concepts',
   '/docs/guide-autopilot',
+  '/docs/guide-checks',
   '/docs/api-reference',
   '/docs/errors',
   '/docs/mcp',

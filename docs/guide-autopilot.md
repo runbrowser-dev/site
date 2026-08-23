@@ -63,22 +63,19 @@ Say what a fact has to be, and the run reports a verdict instead of a value:
 wrong thing have different causes and different fixes, and a check that
 collapses them sends you looking in the wrong place.
 
-## Replaying and exporting
+## Turning a run into a check
 
-Every run keeps its transcript, and — on plans with
-[recording](concepts.md#session-recording) — a frame-by-frame replay of the browser.
+A run answers a question once. A **check** asks it on a schedule.
 
-Any run can also be exported as a **Playwright script**. It is a runnable
-`.mjs` file with the actual steps the run took, pointed at your own key:
+When a run does what you wanted, make it a [check](guide-checks.md): we keep
+the steps it worked out and the assertions it made, and repeat them every N
+minutes. No model is involved after that — the journey is already known — so a
+check costs browser time rather than tokens, which is why the run allowances
+are small and the check allowances are not.
 
-```bash
-RUNBROWSER_TOKEN=ab_… node run.mjs
-```
-
-This is the path out of autopilot rather than deeper into it. Use a run to
-work out what the steps are, export it, and from then on you have ordinary
-code you own and can put in CI — no model in the loop, no per-run cost, and
-nothing of ours in the script but the connect URL.
+Every run also keeps its transcript, and on plans with
+[recording](concepts.md#session-recording) a frame-by-frame replay of the
+browser.
 
 ## What it costs
 
@@ -110,15 +107,15 @@ Worth knowing before you point it at something important.
 
 ## Doing it from code
 
-The dashboard is the place to work out whether a task is possible. Once it is,
-you have two ways to run it without a browser tab open, and the second is
+The dashboard is where you work out whether a task is possible. Once it is,
+there are two ways to run it without a browser tab open, and the first is
 usually the right one:
 
-1. **Export the run as Playwright** and run that on a schedule. No model, no
-   per-run cost, and it fails loudly when the site changes — which is what you
-   want from a check.
-2. **Call it as an API.** Better when the page changes shape often enough that
-   a fixed script keeps breaking, and you would rather describe the goal than
-   maintain selectors.
+1. **Make it a [check](guide-checks.md)** and we run it on a schedule. No model
+   after the first run, so it is cheap enough to run hourly forever, and it
+   tells you when the answer changes.
+2. **Call it as an API** with `POST /v1/agents/runs`. Right when the question
+   is different every time — a one-off investigation rather than something
+   worth watching.
 
 See the [API reference](api-reference.md#autopilot) for the endpoints.

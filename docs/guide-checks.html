@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checks — runbrowser docs</title>
+<meta name="description" content="Describe something a browser should be able to do, and how you would know it worked. We work out the steps once, then repeat them on a schedule and tell yo">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/docs.css">
+</head>
+<body>
+<header class="docs-header">
+  <a class="logo" href="/">
+    <span class="mark"><img src="/assets/logo.svg" alt="" width="24" height="24"></span>
+    <span>runbrowser <span class="logo-docs">docs</span></span>
+  </a>
+  <button id="search-open" class="search-trigger" type="button">
+    <span>Search the docs…</span><span><kbd class="kbd-mod">Ctrl</kbd> <kbd>K</kbd></span>
+  </button>
+  <a class="back" href="/">runbrowser.dev &rarr;</a>
+</header>
+
+<div id="search-modal" class="search-modal" hidden>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search documentation">
+    <input id="search-input" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false">
+    <div id="search-results" class="search-results"></div>
+    <div class="search-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate · <kbd>&crarr;</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <span class="nav-title">Get started</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/quickstart">Quickstart</a>
+        <a class="nav-link " href="/docs/concepts">Concepts</a>
+        <a class="nav-link " href="/docs/recipes">Recipes</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Guides</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-autopilot">Autopilot</a>
+        <a class="nav-link active" href="/docs/guide-checks">Checks</a>
+        <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
+        <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
+        <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
+        <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
+        <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
+        <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
+        <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
+        <a class="nav-link " href="/docs/guide-unblocking">Getting through walls</a>
+    </div>
+
+    <details class="nav-group" >
+      <summary class="nav-title nav-title-spaced">API reference</summary>
+      <div class="nav-api">
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#connecting-a-browser">Connecting a browser</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#sessions">Sessions</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1sessions"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessions"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1sessionsidrecording"><span class="m m-get">GET</span><span class="ep-path">/v1/sessions/{id}/recording</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidclose"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/close</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1sessionsidviewer-token"><span class="m m-post">POST</span><span class="ep-path">/v1/sessions/{id}/viewer-token</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#rest-shortcuts">REST shortcuts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-screenshot-imagepngjpegwebp"><span class="m m-post">POST</span><span class="ep-path">/screenshot</span></a>
+            <a class="ep" href="/docs/api-reference#post-pdf-applicationpdf"><span class="m m-post">POST</span><span class="ep-path">/pdf</span></a>
+            <a class="ep" href="/docs/api-reference#post-content-texthtml"><span class="m m-post">POST</span><span class="ep-path">/content</span></a>
+            <a class="ep" href="/docs/api-reference#post-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-function-json"><span class="m m-post">POST</span><span class="ep-path">/function</span></a>
+            <a class="ep" href="/docs/api-reference#post-export-the-resource-as-is"><span class="m m-post">POST</span><span class="ep-path">/export</span></a>
+            <a class="ep" href="/docs/api-reference#post-smart-scrape-json"><span class="m m-post">POST</span><span class="ep-path">/smart-scrape</span></a>
+            <a class="ep" href="/docs/api-reference#post-map-json"><span class="m m-post">POST</span><span class="ep-path">/map</span></a>
+            <a class="ep" href="/docs/api-reference#post-crawl-json"><span class="m m-post">POST</span><span class="ep-path">/crawl</span></a>
+            <a class="ep" href="/docs/api-reference#post-download-the-file-as-is"><span class="m m-post">POST</span><span class="ep-path">/download</span></a>
+            <a class="ep" href="/docs/api-reference#post-unblock-json"><span class="m m-post">POST</span><span class="ep-path">/unblock</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#autopilot">Autopilot</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1agentsruns"><span class="m m-post">POST</span><span class="ep-path">/v1/agents/runs</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1agentsrunsrunid"><span class="m m-get">GET</span><span class="ep-path">/v1/agents/runs/{runId}</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#checks">Checks</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1checks"><span class="m m-post">POST</span><span class="ep-path">/v1/checks</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1checkscheckidrun"><span class="m m-post">POST</span><span class="ep-path">/v1/checks/{checkId}/run</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1checkscheckidruns"><span class="m m-get">GET</span><span class="ep-path">/v1/checks/{checkId}/runs</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#browser-contexts">Browser contexts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1contexts"><span class="m m-post">POST</span><span class="ep-path">/v1/contexts</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1search"><span class="m m-post">POST</span><span class="ep-path">/v1/search</span></a>
+            <a class="ep" href="/docs/api-reference#post-v1extract"><span class="m m-post">POST</span><span class="ep-path">/v1/extract</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#mcp">MCP</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#metrics">Metrics</a>
+          
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#errors">Errors</a>
+          
+        </div>
+      </div>
+    </details>
+
+    <span class="nav-title nav-title-spaced">Integrations</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-sdk">SDKs</a>
+        <a class="nav-link " href="/docs/guide-integrations">LangChain &amp; n8n</a>
+        <a class="nav-link " href="/docs/mcp">MCP server</a>
+    </div>
+
+    <span class="nav-title nav-title-spaced">Migrating</span>
+    <div class="nav-links">
+    </div>
+
+    <span class="nav-title nav-title-spaced">More</span>
+    <div class="nav-links">
+        <a class="nav-link " href="/docs/errors">Errors</a>
+        <a class="nav-link" href="/#pricing">Pricing</a>
+        <a class="nav-link" href="https://github.com/runbrowser-dev/runbrowser" target="_blank" rel="noopener">Chromium image</a>
+    </div>
+  </nav>
+  <main class="prose">
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Checks</span></div>
+<h1 id="checks">Checks</h1>
+<p>Describe something a browser should be able to do, and how you would know it
+worked. We work out the steps once, then repeat them on a schedule and tell
+you when the answer changes.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">Shell</span><button class="copy" type="button" data-code="curl -X POST https://api.runbrowser.dev/v1/checks \
+  -H &quot;Authorization: Bearer ab_…&quot; -H 'Content-Type: application/json' \
+  -d '{
+        &quot;name&quot;: &quot;Checkout still reaches payment&quot;,
+        &quot;task&quot;: &quot;Go to shop.example.com, add the first product to the basket, go to checkout, and confirm the page offers a card payment option and shows a total.&quot;,
+        &quot;intervalMinutes&quot;: 60
+      }'">Copy</button></div><pre class="language-bash"><code><span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://api.runbrowser.dev/v1/checks <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer ab_…"</span> <span class="token parameter variable">-H</span> <span class="token string">'Content-Type: application/json'</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{
+        "name": "Checkout still reaches payment",
+        "task": "Go to shop.example.com, add the first product to the basket, go to checkout, and confirm the page offers a card payment option and shows a total.",
+        "intervalMinutes": 60
+      }'</span></code></pre></div><p>That is the whole setup. No selectors, no script, no runner to host.</p>
+<h2 id="why-it-is-cheap-enough-to-run-hourly">Why it is cheap enough to run hourly<a class="anchor" href="#why-it-is-cheap-enough-to-run-hourly" aria-label="Link to this section">#</a></h2>
+<p>The expensive part of automating a website is <em>discovering</em> the steps. A
+language model is very good at that and far too expensive to keep in the loop
+afterwards.</p>
+<p>So it only runs once. The first execution of a check works the journey out and
+stores it: the actual selectors that worked, and the assertions it established
+along the way. Every run after that replays them with no model involved. That
+is why check runs are measured in tens of thousands per month while autopilot
+runs are measured in tens — a replay costs browser-seconds, not tokens.</p>
+<h2 id="the-three-outcomes">The three outcomes<a class="anchor" href="#the-three-outcomes" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>What happened</th>
+<th>What we do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>passed</code></td>
+<td>Every step ran, every assertion held</td>
+<td>Nothing</td>
+</tr>
+<tr>
+<td><code>failed</code></td>
+<td>Every step ran, and an assertion no longer holds</td>
+<td><strong>Tell you.</strong> The check is left exactly as it is</td>
+</tr>
+<tr>
+<td><code>drifted</code> → <code>healed</code></td>
+<td>A step could not be carried out</td>
+<td>Re-derive the journey and carry on</td>
+</tr>
+</tbody></table>
+</div><p><strong>The distinction between the last two is the whole design.</strong> A check that
+re-derived itself on every failure would be worse than useless: it would adapt
+around the regression it exists to catch, go green, and report that your site
+is fine — and you would believe it, because it is a check.</p>
+<p>So the two failures are treated as the different things they are. A step that
+cannot be carried out means the markup moved under us; your site probably works
+and our stored journey is stale, so re-deriving it is exactly right. An
+assertion that no longer holds means every step ran, the page rendered, and it
+now says something else. That <em>is</em> the finding. Healing there would teach the
+check to accept the new value, which is the one thing it must never do.</p>
+<p>A check that fails to heal three times running pauses itself, so a check
+pointed at a site that has genuinely gone away stops spending your allowance on
+it. Re-enable it and the counter resets.</p>
+<h2 id="writing-a-good-task">Writing a good task<a class="anchor" href="#writing-a-good-task" aria-label="Link to this section">#</a></h2>
+<p>The task is doing two jobs: it says what to do, and it says what &quot;worked&quot;
+means. It is also what a heal re-derives <em>from</em> — so write the intent, not the
+steps.</p>
+<p><strong>Good:</strong></p>
+<blockquote>
+<p>Go to status.example.com and confirm every service shows &quot;Operational&quot;.</p>
+</blockquote>
+<blockquote>
+<p>Sign in at app.example.com with the credentials in the staging context, open
+Billing, and confirm the plan shows &quot;Startup&quot; and a next invoice date.</p>
+</blockquote>
+<p><strong>Bad:</strong></p>
+<blockquote>
+<p>Click the third button in the header.</p>
+</blockquote>
+<p>The second one describes <em>our</em> implementation rather than your intent, so when
+the header changes there is nothing left to re-derive from.</p>
+<p>Name the thing that must be true. &quot;Confirm the total is €98.44&quot; gives the check
+something to assert; &quot;check the basket page&quot; does not, and a check with no
+assertions can only ever detect a page that fails to load.</p>
+<h2 id="a-check-with-nothing-to-assert-is-not-a-check">A check with nothing to assert is not a check<a class="anchor" href="#a-check-with-nothing-to-assert-is-not-a-check" aria-label="Link to this section">#</a></h2>
+<p>If the first run works out the steps but finds nothing to assert, the check is
+reported as an <strong>error</strong>, not a pass. It would otherwise report green for ever
+while proving only that a page loads.</p>
+<p>That is almost always a task that says what to <em>do</em> without saying what must be
+<em>true</em>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>✗</td>
+<td>&quot;Open the basket page&quot;</td>
+</tr>
+<tr>
+<td>✓</td>
+<td>&quot;Open the basket and confirm the total is €98.44&quot;</td>
+</tr>
+<tr>
+<td>✗</td>
+<td>&quot;Go to the status page&quot;</td>
+</tr>
+<tr>
+<td>✓</td>
+<td>&quot;Go to the status page and confirm every service reads Operational&quot;</td>
+</tr>
+</tbody></table>
+</div><p>Name a value, a word, or a state that has to be there. That is the thing the
+check watches, and it is what a failure will point at.</p>
+<h2 id="logging-in">Logging in<a class="anchor" href="#logging-in" aria-label="Link to this section">#</a></h2>
+<p>A check starts signed out, like any session. Point it at a
+<a href="/docs/api-reference#browser-contexts">browser context</a> that already holds the
+sign-in:</p>
+<ol>
+<li>Run one session with <code>persistContext</code> that does the login by hand.</li>
+<li>Reference that context from the check.</li>
+</ol>
+<p>Refresh it when runs start failing at the login wall — you are restoring the
+client half of a session and the server can still expire it.</p>
+<h2 id="scheduling">Scheduling<a class="anchor" href="#scheduling" aria-label="Link to this section">#</a></h2>
+<p><code>intervalMinutes</code> is floored at 5. Below that a run has not finished before the
+next is due, and the check spends its whole allowance overlapping with itself.</p>
+<p>Runs are claimed before they start, so a slow run never gets a second copy
+started underneath it, and a redeploy mid-run costs you that run rather than the
+schedule — the next tick picks it up from the database.</p>
+<h2 id="limits">Limits<a class="anchor" href="#limits" aria-label="Link to this section">#</a></h2>
+<p>Active checks are capped per plan: 1 on Free, 10 on Hobby, 50 on Startup, 250
+on Scale. Run allowances are in <a href="/docs/concepts#browser-time-billing">concepts</a>.</p>
+<p>Two limits rather than one because they stop different mistakes: the run count
+stops a single five-minute check from eating the month, and the check count
+stops a thousand checks all coming due in the same second.</p>
+<p>An org that runs out of check runs has its checks paused rather than failed —
+the check is fine, the month is not.</p>
+<h2 id="what-it-does-not-do-yet">What it does not do yet<a class="anchor" href="#what-it-does-not-do-yet" aria-label="Link to this section">#</a></h2>
+<ul>
+<li><strong>No alerting.</strong> Runs and their outcomes are readable through
+<code>GET /v1/checks/{id}/runs</code>; nothing emails or pages you. Poll it, or watch
+the dashboard.</li>
+<li><strong>No branching.</strong> A check is one linear journey. Something with a decision in
+it wants two checks.</li>
+<li><strong>No CAPTCHAs.</strong> Same as everywhere else — we flag the wall rather than
+pretending it isn&#39;t there.</li>
+</ul>
+
+    <nav class="pager">
+      <a class="prev" href="/docs/guide-autopilot"><span>Previous</span>Autopilot</a>
+      <a class="next" href="/docs/guide-sessions"><span>Next</span>Sessions &amp; stable sessions</a>
+    </nav>
+    <hr>
+    <p class="foot">
+      Something wrong, missing, or just annoying here?
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Checks">Tell us</a> —
+      we'd rather fix it than have you work around it.
+    </p>
+    <p class="updated">Last updated 2026-08-23</p>
+  </main>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#why-it-is-cheap-enough-to-run-hourly">Why it is cheap enough to run hourly</a>
+    <a class="toc-2" href="#the-three-outcomes">The three outcomes</a>
+    <a class="toc-2" href="#writing-a-good-task">Writing a good task</a>
+    <a class="toc-2" href="#a-check-with-nothing-to-assert-is-not-a-check">A check with nothing to assert is not a check</a>
+    <a class="toc-2" href="#logging-in">Logging in</a>
+    <a class="toc-2" href="#scheduling">Scheduling</a>
+    <a class="toc-2" href="#limits">Limits</a>
+    <a class="toc-2" href="#what-it-does-not-do-yet">What it does not do yet</a>
+  </aside>
+</div>
+<script src="/assets/docs.js" defer></script>
+</body>
+</html>
