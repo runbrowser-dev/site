@@ -224,7 +224,7 @@ you get a stable session.</p>
   <span class="token property">"proxy"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"external"</span><span class="token punctuation">,</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"http://user:pass@host:port"</span> <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre></div><p><code>contextId</code> starts the browser from a saved cookie jar, so the session begins
 signed in — see <a href="#browser-contexts">browser contexts</a>.</p>
-<p><code>record: true</code> captures the whole session for replay (Startup and up — a
+<p><code>record: true</code> captures the whole session for replay (Pro and up — a
 Free or Hobby key gets <code>403</code>). Also works as <code>?record=true</code> on a direct
 connect URL. Retrieve it after the session ends with
 <a href="#get-v1sessionsidrecording"><code>GET /v1/sessions/{id}/recording</code></a>.</p>
@@ -870,7 +870,7 @@ its body reads like ordinary content.</p>
   &quot;phrase&quot;: false, &quot;include_hosts&quot;: [&quot;example.com&quot;], &quot;exclude_hosts&quot;: [&quot;spam.example&quot;] }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"q"</span><span class="token operator">:</span> <span class="token string">"browser automation"</span><span class="token punctuation">,</span> <span class="token property">"count"</span><span class="token operator">:</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"en"</span><span class="token punctuation">,</span>
   <span class="token property">"phrase"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token property">"include_hosts"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"example.com"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token property">"exclude_hosts"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"spam.example"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span></code></pre></div><p>Note the field names: <code>q</code> and <code>count</code>, not <code>query</code> and <code>limit</code>.</p>
 <p><code>count</code> maxes at 20, and your plan caps it further: 3 on Free, 10 on Hobby,
-20 on Startup and Scale. Ask for more than your plan allows and you get your
+20 on Pro and Scale. Ask for more than your plan allows and you get your
 plan&#39;s maximum rather than an error, so a downgrade never breaks a working
 integration. The <code>X-RunBrowser-Max-Results</code> response header carries the cap
 that was applied. Omit <code>count</code> entirely and you get your plan&#39;s maximum.</p>

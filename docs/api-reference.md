@@ -53,7 +53,7 @@ you get a stable session.
 `contextId` starts the browser from a saved cookie jar, so the session begins
 signed in — see [browser contexts](#browser-contexts).
 
-`record: true` captures the whole session for replay (Startup and up — a
+`record: true` captures the whole session for replay (Pro and up — a
 Free or Hobby key gets `403`). Also works as `?record=true` on a direct
 connect URL. Retrieve it after the session ends with
 [`GET /v1/sessions/{id}/recording`](#get-v1sessionsidrecording).
@@ -732,7 +732,7 @@ its body reads like ordinary content.
 Note the field names: `q` and `count`, not `query` and `limit`.
 
 `count` maxes at 20, and your plan caps it further: 3 on Free, 10 on Hobby,
-20 on Startup and Scale. Ask for more than your plan allows and you get your
+20 on Pro and Scale. Ask for more than your plan allows and you get your
 plan's maximum rather than an error, so a downgrade never breaks a working
 integration. The `X-RunBrowser-Max-Results` response header carries the cap
 that was applied. Omit `count` entirely and you get your plan's maximum.

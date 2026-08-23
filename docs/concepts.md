@@ -27,10 +27,10 @@ are cheap, and the incentive points the same way our capacity does.
 |---|---|---|---|---|---|---|---|---|---|
 | Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 | 3 | 300 |
 | Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 | 20 | 5,000 |
-| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 | 50 | 20,000 |
+| Pro | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 | 50 | 20,000 |
 | Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 | 250 | 100,000 |
 
-Free, Hobby and Startup are self-serve — sign up and start. Scale is priced
+Free, Hobby and Pro are self-serve — sign up and start. Scale is priced
 per deal, because at 50 concurrent browsers it is a conversation about
 capacity rather than a checkout: we size hardware to it before we sell it.
 Email [sales@runbrowser.dev](mailto:sales@runbrowser.dev) and we will quote
@@ -44,12 +44,12 @@ session rather than after you disconnect.
 **Check runs are the number that matters**, and they are generous because a
 check run has no language model in it. Working out how to do something needs
 one and costs real money; repeating it needs neither, so a replay costs
-browser-seconds — which we own — rather than tokens, which we buy. Startup's
+browser-seconds — which we own — rather than tokens, which we buy. Pro's
 20,000 is about seven checks running every fifteen minutes, or thirty hourly
 ones. Free's 300 is one check every couple of hours: enough to watch one thing
 that matters.
 
-Active checks are capped separately: 1 on Free, 10 on Hobby, 50 on Startup,
+Active checks are capped separately: 1 on Free, 10 on Hobby, 50 on Pro,
 250 on Scale. The two limits stop different mistakes — the run count stops one
 check set to a five-minute interval from eating the month, the check count
 stops a thousand checks all coming due in the same second.
@@ -59,13 +59,13 @@ A run is a considered thing you do a few of, not a chat you hold, and a daily
 cap on a small number just means "not today" on the day you actually need it.
 
 Session recording is the one capability tied to a tier rather than sized by an
-allowance: it is Startup and up, because every recorded session writes frames
+allowance: it is Pro and up, because every recorded session writes frames
 to storage for the retention window and the €0 and €19 plans do not fund that.
 Everything else — stealth, stable sessions, the live viewer, autopilot — is on
 every plan including the free one.
 
 `/search` returns up to 3 results per query on Free, 10 on Hobby, and 20 on
-Startup and Scale. Search is the one primitive we buy rather than run — every
+Pro and Scale. Search is the one primitive we buy rather than run — every
 query is a purchase from an upstream provider — which is why its allowances
 are smaller than `/fetch`, which runs on our own hardware and is priced
 accordingly. Ask for more results than your tier allows and you get your
@@ -85,7 +85,7 @@ for what that means when the box is busy.
 
 Two separate limits apply, and they mean different things.
 
-**Your tier's concurrency** — Free 3, Hobby 10, Startup 25, Scale 50 — is
+**Your tier's concurrency** — Free 3, Hobby 10, Pro 25, Scale 50 — is
 your own ceiling. At it, new requests **wait** for a slot rather than
 failing immediately: up to about 20 seconds, then a `429`. A burst of
 parallel jobs against a small tier usually resolves itself in a second or
@@ -201,7 +201,7 @@ also thins itself out as it approaches the cap, so what you get back is the
 whole session at a lower frame rate rather than the first third at full rate
 and then nothing.
 
-Startup and up. It is the one capability tied to a tier rather than sized by
+Pro and up. It is the one capability tied to a tier rather than sized by
 an allowance, because every recorded session writes frames to storage for the
 whole retention window — a real per-session cost the €0 and €19 plans do not
 fund. A Free or Hobby key asking for `record: true` gets a `403` at session

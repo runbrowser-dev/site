@@ -80,7 +80,7 @@ browser.
 ## What it costs
 
 Runs are counted monthly against your plan: 3 on Free, 20 on Hobby, 50 on
-Startup, 250 on Scale. Monthly rather than daily on purpose — a run is a
+Pro, 250 on Scale. Monthly rather than daily on purpose — a run is a
 considered thing you do a few of, not a chat you hold, and a daily cap on a
 small number just means "not today" on the day you actually need it.
 

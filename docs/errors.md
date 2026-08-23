@@ -125,7 +125,7 @@ list of things that actually cause one.
 
 | Reason | When | Applies to |
 |---|---|---|
-| **Max session duration** | After **1 hour**, or your plan's ceiling if it's lower — Free 15 min, Hobby 60 min, Startup 3 hours, Scale 6 hours | **Every session**, whether or not it's stable |
+| **Max session duration** | After **1 hour**, or your plan's ceiling if it's lower — Free 15 min, Hobby 60 min, Pro 3 hours, Scale 6 hours | **Every session**, whether or not it's stable |
 | **Idle timeout** | **10 minutes** with nothing connected | Stable (`keepAlive`) sessions only |
 | **You closed it** | `POST /v1/sessions/{id}/close`, or the dashboard | Any |
 | **You disconnected** | Ordinary sessions end when your CDP connection does | Non-`keepAlive` sessions |
@@ -154,7 +154,7 @@ Plain-text bodies.
 | 400 | `unsupported proxy.type … (only "external" in v1)` | Only external proxies for now |
 | 404 | `session not found` | Already gone |
 | 403 | `session belongs to a different org` | Wrong key |
-| 403 | `session recording is a paid feature; upgrade to Startup or contact sales` | `record: true` on a Free or Hobby key. Refused at create rather than silently not recording |
+| 403 | `session recording is a paid feature; upgrade to Pro or contact sales` | `record: true` on a Free or Hobby key. Refused at create rather than silently not recording |
 | 400 | `invalid contextId` | Not a context id. It goes into a URL, so we check its shape rather than passing it on |
 | 400 | `persistContext requires contextId` | Nothing to save it into |
 | 502 | `could not create session: …` | We failed to record it. Retry |

@@ -63,7 +63,7 @@ steps.
 > Go to status.example.com and confirm every service shows "Operational".
 
 > Sign in at app.example.com with the credentials in the staging context, open
-> Billing, and confirm the plan shows "Startup" and a next invoice date.
+> Billing, and confirm the plan shows "Pro" and a next invoice date.
 
 **Bad:**
 
@@ -118,7 +118,7 @@ schedule — the next tick picks it up from the database.
 
 ## Limits
 
-Active checks are capped per plan: 1 on Free, 10 on Hobby, 50 on Startup, 250
+Active checks are capped per plan: 1 on Free, 10 on Hobby, 50 on Pro, 250
 on Scale. Run allowances are in [concepts](concepts.md#browser-time-billing).
 
 Two limits rather than one because they stop different mistakes: the run count
