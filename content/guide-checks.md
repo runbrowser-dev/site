@@ -76,24 +76,40 @@ Name the thing that must be true. "Confirm the total is €98.44" gives the chec
 something to assert; "check the basket page" does not, and a check with no
 assertions can only ever detect a page that fails to load.
 
-## A check with nothing to assert is not a check
+## What it ends up watching
 
-If the first run works out the steps but finds nothing to assert, the check is
-reported as an **error**, not a pass. It would otherwise report green for ever
-while proving only that a page loads.
+You do not have to state an expected value. The first run reads the page, and
+whatever it finds and can **verify against the page** becomes what the check
+watches from then on.
 
-That is almost always a task that says what to *do* without saying what must be
-*true*:
+So a task like *"open the status page and confirm every service reads
+Operational"* pins the words that were actually there — `All Systems
+Operational` — and every run after that re-checks them. Ask for a price and it
+pins the price. This is a regression check: the question is not "is this value
+correct" but "does the page still say what it said when this passed".
+
+Two consequences worth knowing.
+
+**Pin something stable.** If the run pins a value that changes on its own — an
+uptime percentage, a timestamp, a "3 minutes ago" — the next run fails, and it
+was your check that changed rather than the site. Reword the task to name the
+thing you actually care about. The failure says exactly which value moved, so
+this takes one look to spot.
+
+**A run that verifies nothing is an error, not a pass.** If the steps work but
+nothing it reported could be found on any page it read, the check is reported
+as an **error** rather than sitting green for ever while proving only that a
+page loads. That usually means a task that says what to *do* without naming
+anything to look for:
 
 | | |
 |---|---|
 | ✗ | "Open the basket page" |
 | ✓ | "Open the basket and confirm the total is €98.44" |
-| ✗ | "Go to the status page" |
-| ✓ | "Go to the status page and confirm every service reads Operational" |
 
-Name a value, a word, or a state that has to be there. That is the thing the
-check watches, and it is what a failure will point at.
+For exact control, the API takes an explicit checklist — see `expect` on
+[`POST /v1/agents/runs`](api-reference.md#post-v1agentsruns). A stated
+expectation always wins over a pinned one.
 
 ## Logging in
 

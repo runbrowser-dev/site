@@ -235,12 +235,25 @@ the header changes there is nothing left to re-derive from.</p>
 <p>Name the thing that must be true. &quot;Confirm the total is €98.44&quot; gives the check
 something to assert; &quot;check the basket page&quot; does not, and a check with no
 assertions can only ever detect a page that fails to load.</p>
-<h2 id="a-check-with-nothing-to-assert-is-not-a-check">A check with nothing to assert is not a check<a class="anchor" href="#a-check-with-nothing-to-assert-is-not-a-check" aria-label="Link to this section">#</a></h2>
-<p>If the first run works out the steps but finds nothing to assert, the check is
-reported as an <strong>error</strong>, not a pass. It would otherwise report green for ever
-while proving only that a page loads.</p>
-<p>That is almost always a task that says what to <em>do</em> without saying what must be
-<em>true</em>:</p>
+<h2 id="what-it-ends-up-watching">What it ends up watching<a class="anchor" href="#what-it-ends-up-watching" aria-label="Link to this section">#</a></h2>
+<p>You do not have to state an expected value. The first run reads the page, and
+whatever it finds and can <strong>verify against the page</strong> becomes what the check
+watches from then on.</p>
+<p>So a task like <em>&quot;open the status page and confirm every service reads
+Operational&quot;</em> pins the words that were actually there — <code>All Systems Operational</code> — and every run after that re-checks them. Ask for a price and it
+pins the price. This is a regression check: the question is not &quot;is this value
+correct&quot; but &quot;does the page still say what it said when this passed&quot;.</p>
+<p>Two consequences worth knowing.</p>
+<p><strong>Pin something stable.</strong> If the run pins a value that changes on its own — an
+uptime percentage, a timestamp, a &quot;3 minutes ago&quot; — the next run fails, and it
+was your check that changed rather than the site. Reword the task to name the
+thing you actually care about. The failure says exactly which value moved, so
+this takes one look to spot.</p>
+<p><strong>A run that verifies nothing is an error, not a pass.</strong> If the steps work but
+nothing it reported could be found on any page it read, the check is reported
+as an <strong>error</strong> rather than sitting green for ever while proving only that a
+page loads. That usually means a task that says what to <em>do</em> without naming
+anything to look for:</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -256,17 +269,10 @@ while proving only that a page loads.</p>
 <td>✓</td>
 <td>&quot;Open the basket and confirm the total is €98.44&quot;</td>
 </tr>
-<tr>
-<td>✗</td>
-<td>&quot;Go to the status page&quot;</td>
-</tr>
-<tr>
-<td>✓</td>
-<td>&quot;Go to the status page and confirm every service reads Operational&quot;</td>
-</tr>
 </tbody></table>
-</div><p>Name a value, a word, or a state that has to be there. That is the thing the
-check watches, and it is what a failure will point at.</p>
+</div><p>For exact control, the API takes an explicit checklist — see <code>expect</code> on
+<a href="/docs/api-reference#post-v1agentsruns"><code>POST /v1/agents/runs</code></a>. A stated
+expectation always wins over a pinned one.</p>
 <h2 id="logging-in">Logging in<a class="anchor" href="#logging-in" aria-label="Link to this section">#</a></h2>
 <p>A check starts signed out, like any session. Point it at a
 <a href="/docs/api-reference#browser-contexts">browser context</a> that already holds the
@@ -428,7 +434,7 @@ pretending it isn&#39;t there.</li>
     <a class="toc-2" href="#why-it-is-cheap-enough-to-run-hourly">Why it is cheap enough to run hourly</a>
     <a class="toc-2" href="#the-three-outcomes">The three outcomes</a>
     <a class="toc-2" href="#writing-a-good-task">Writing a good task</a>
-    <a class="toc-2" href="#a-check-with-nothing-to-assert-is-not-a-check">A check with nothing to assert is not a check</a>
+    <a class="toc-2" href="#what-it-ends-up-watching">What it ends up watching</a>
     <a class="toc-2" href="#logging-in">Logging in</a>
     <a class="toc-2" href="#scheduling">Scheduling</a>
     <a class="toc-2" href="#limits">Limits</a>
