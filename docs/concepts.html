@@ -193,7 +193,7 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>100</td>
 <td>25</td>
 <td>3</td>
-<td>300</td>
+<td>750</td>
 </tr>
 <tr>
 <td>Hobby</td>
@@ -205,7 +205,7 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>1,000</td>
 <td>100</td>
 <td>20</td>
-<td>5,000</td>
+<td>4,000</td>
 </tr>
 <tr>
 <td>Pro</td>
@@ -217,7 +217,7 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>4,000</td>
 <td>600</td>
 <td>50</td>
-<td>20,000</td>
+<td>15,000</td>
 </tr>
 <tr>
 <td>Scale</td>
@@ -229,7 +229,7 @@ are cheap, and the incentive points the same way our capacity does.</p>
 <td>20,000</td>
 <td>3,000</td>
 <td>250</td>
-<td>100,000</td>
+<td>55,000</td>
 </tr>
 </tbody></table>
 </div><p>Free, Hobby and Pro are self-serve — sign up and start. Scale is priced
@@ -241,17 +241,51 @@ against what you actually intend to run.</p>
 your usage and your remaining allowance reflect what you are burning right
 now. A session that runs past your monthly allowance is stopped during the
 session rather than after you disconnect.</p>
-<p><strong>Check runs are the number that matters</strong>, and they are generous because a
-check run has no language model in it. Working out how to do something needs
-one and costs real money; repeating it needs neither, so a replay costs
-browser-seconds — which we own — rather than tokens, which we buy. Pro&#39;s
-20,000 is about seven checks running every fifteen minutes, or thirty hourly
-ones. Free&#39;s 300 is one check every couple of hours: enough to watch one thing
-that matters.</p>
-<p>Active checks are capped separately: 1 on Free, 10 on Hobby, 50 on Pro,
-250 on Scale. The two limits stop different mistakes — the run count stops one
-check set to a five-minute interval from eating the month, the check count
-stops a thousand checks all coming due in the same second.</p>
+<p><strong>Check runs are the number that matters.</strong> The allowance is sized by one
+rule: <em>every check your tier allows can run hourly</em> — 730 runs a month each.
+It is a pool, so spend it differently if you like: five checks every fifteen
+minutes costs the same as twenty hourly ones.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Free</th>
+<th>Hobby</th>
+<th>Pro</th>
+<th>Scale</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Checks</td>
+<td>1</td>
+<td>5</td>
+<td>20</td>
+<td>75</td>
+</tr>
+<tr>
+<td>Runs/mo</td>
+<td>750</td>
+<td>4,000</td>
+<td>15,000</td>
+<td>55,000</td>
+</tr>
+<tr>
+<td>Re-derivations/mo</td>
+<td>10</td>
+<td>60</td>
+<td>400</td>
+<td>2,000</td>
+</tr>
+</tbody></table>
+</div><p>Runs are cheap to give because a run has no language model in it: it replays
+steps that are already known, costing browser-seconds rather than tokens.</p>
+<p><strong>Re-derivations are the exception, and they are capped.</strong> When a site is
+rebuilt under a check, working the journey out again runs a model — around a
+hundred times the cost of the run it replaces. A normal suite never comes near
+these numbers. A check that re-derives twenty times in a month is not drifting;
+it is pointed at something being rebuilt continuously, and we would rather say
+so than quietly keep paying for it. Past the cap a drifting check reports the
+drift instead of repairing itself.</p>
 <p><a href="/docs/guide-autopilot">Autopilot</a> runs are counted monthly rather than daily.
 A run is a considered thing you do a few of, not a chat you hold, and a daily
 cap on a small number just means &quot;not today&quot; on the day you actually need it.</p>

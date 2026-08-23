@@ -284,13 +284,50 @@ next is due, and the check spends its whole allowance overlapping with itself.</
 started underneath it, and a redeploy mid-run costs you that run rather than the
 schedule — the next tick picks it up from the database.</p>
 <h2 id="limits">Limits<a class="anchor" href="#limits" aria-label="Link to this section">#</a></h2>
-<p>Active checks are capped per plan: 1 on Free, 10 on Hobby, 50 on Pro, 250
-on Scale. Run allowances are in <a href="/docs/concepts#browser-time-billing">concepts</a>.</p>
-<p>Two limits rather than one because they stop different mistakes: the run count
-stops a single five-minute check from eating the month, and the check count
-stops a thousand checks all coming due in the same second.</p>
-<p>An org that runs out of check runs has its checks paused rather than failed —
-the check is fine, the month is not.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Free</th>
+<th>Hobby</th>
+<th>Pro</th>
+<th>Scale</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Checks</td>
+<td>1</td>
+<td>5</td>
+<td>20</td>
+<td>75</td>
+</tr>
+<tr>
+<td>Runs/mo</td>
+<td>750</td>
+<td>4,000</td>
+<td>15,000</td>
+<td>55,000</td>
+</tr>
+<tr>
+<td>Re-derivations/mo</td>
+<td>10</td>
+<td>60</td>
+<td>400</td>
+<td>2,000</td>
+</tr>
+</tbody></table>
+</div><p>Runs are sized so every check your tier allows can run <strong>hourly</strong> — 730 a month
+each — and the allowance is a pool, so five checks every fifteen minutes costs
+the same as twenty hourly ones.</p>
+<p><strong>Re-derivations are capped separately</strong> because they are the only expensive
+part. A run replays steps that are already known; re-deriving runs a language
+model, which is around a hundred times the price. A real suite never meets
+these numbers. Past the cap, a drifting check reports the drift and keeps its
+existing steps rather than paying to work them out again — which is also the
+honest answer, because something re-deriving that often is being rebuilt faster
+than any check can track it.</p>
+<p>An org out of runs has its checks paused rather than failed: the check is fine,
+the month is not.</p>
 <h2 id="what-it-does-not-do-yet">What it does not do yet<a class="anchor" href="#what-it-does-not-do-yet" aria-label="Link to this section">#</a></h2>
 <ul>
 <li><strong>No alerting.</strong> Runs and their outcomes are readable through

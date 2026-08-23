@@ -118,15 +118,26 @@ schedule — the next tick picks it up from the database.
 
 ## Limits
 
-Active checks are capped per plan: 1 on Free, 10 on Hobby, 50 on Pro, 250
-on Scale. Run allowances are in [concepts](concepts.md#browser-time-billing).
+| | Free | Hobby | Pro | Scale |
+|---|---|---|---|---|
+| Checks | 1 | 5 | 20 | 75 |
+| Runs/mo | 750 | 4,000 | 15,000 | 55,000 |
+| Re-derivations/mo | 10 | 60 | 400 | 2,000 |
 
-Two limits rather than one because they stop different mistakes: the run count
-stops a single five-minute check from eating the month, and the check count
-stops a thousand checks all coming due in the same second.
+Runs are sized so every check your tier allows can run **hourly** — 730 a month
+each — and the allowance is a pool, so five checks every fifteen minutes costs
+the same as twenty hourly ones.
 
-An org that runs out of check runs has its checks paused rather than failed —
-the check is fine, the month is not.
+**Re-derivations are capped separately** because they are the only expensive
+part. A run replays steps that are already known; re-deriving runs a language
+model, which is around a hundred times the price. A real suite never meets
+these numbers. Past the cap, a drifting check reports the drift and keeps its
+existing steps rather than paying to work them out again — which is also the
+honest answer, because something re-deriving that often is being rebuilt faster
+than any check can track it.
+
+An org out of runs has its checks paused rather than failed: the check is fine,
+the month is not.
 
 ## What it does not do yet
 
