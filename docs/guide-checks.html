@@ -326,8 +326,43 @@ these numbers. Past the cap, a drifting check reports the drift and keeps its
 existing steps rather than paying to work them out again — which is also the
 honest answer, because something re-deriving that often is being rebuilt faster
 than any check can track it.</p>
-<p>An org out of runs has its checks paused rather than failed: the check is fine,
-the month is not.</p>
+<h2 id="going-over">Going over<a class="anchor" href="#going-over" aria-label="Link to this section">#</a></h2>
+<p><strong>Your checks do not stop when the allowance runs out.</strong> Monitoring that goes
+quiet when you grow goes quiet exactly when you need it, so on a paid plan the
+allowance is where billing starts, not where the product stops:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Extra check run</td>
+<td>€0.01</td>
+</tr>
+<tr>
+<td>Extra re-derivation</td>
+<td>€0.05</td>
+</tr>
+</tbody></table>
+</div><p>Both are deliberately more than the plan works out at per run — moving up a
+tier is always cheaper than paying overage on the one below it. Re-derivations
+cost more because they cost <em>us</em> more in kind: a run replays steps that are
+already known, a re-derivation runs a language model.</p>
+<p><strong>There is a ceiling, and it defaults to your own plan price.</strong> Overage cannot
+more than double your bill unless you deliberately raise it. Set it to zero and
+overage is refused entirely — your checks pause at the allowance and the bill
+is fixed to the cent, which is the right answer if you need to predict it.</p>
+<p><code>GET /v1/checks/usage</code> shows where you are:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;plan&quot;: &quot;Pro&quot;, &quot;runsUsed&quot;: 15500, &quot;runsIncluded&quot;: 15000,
+  &quot;healsUsed&quot;: 410, &quot;healsIncluded&quot;: 400,
+  &quot;overageMicros&quot;: 5500000, &quot;overageCapMicros&quot;: 99000000, &quot;overageBilled&quot;: true }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"plan"</span><span class="token operator">:</span> <span class="token string">"Pro"</span><span class="token punctuation">,</span> <span class="token property">"runsUsed"</span><span class="token operator">:</span> <span class="token number">15500</span><span class="token punctuation">,</span> <span class="token property">"runsIncluded"</span><span class="token operator">:</span> <span class="token number">15000</span><span class="token punctuation">,</span>
+  <span class="token property">"healsUsed"</span><span class="token operator">:</span> <span class="token number">410</span><span class="token punctuation">,</span> <span class="token property">"healsIncluded"</span><span class="token operator">:</span> <span class="token number">400</span><span class="token punctuation">,</span>
+  <span class="token property">"overageMicros"</span><span class="token operator">:</span> <span class="token number">5500000</span><span class="token punctuation">,</span> <span class="token property">"overageCapMicros"</span><span class="token operator">:</span> <span class="token number">99000000</span><span class="token punctuation">,</span> <span class="token property">"overageBilled"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span></code></pre></div><p>Amounts are micro-EUR — €5.50 of overage against a €99.00 ceiling. Cents cannot
+represent a €0.01 charge without rounding a real one to nothing.</p>
+<p>The free plan has nothing to bill against, so there the allowance is still a
+wall: checks pause, and the check is fine — the month is not.</p>
 <h2 id="what-it-does-not-do-yet">What it does not do yet<a class="anchor" href="#what-it-does-not-do-yet" aria-label="Link to this section">#</a></h2>
 <ul>
 <li><strong>No alerting.</strong> Runs and their outcomes are readable through
@@ -360,6 +395,7 @@ pretending it isn&#39;t there.</li>
     <a class="toc-2" href="#logging-in">Logging in</a>
     <a class="toc-2" href="#scheduling">Scheduling</a>
     <a class="toc-2" href="#limits">Limits</a>
+    <a class="toc-2" href="#going-over">Going over</a>
     <a class="toc-2" href="#what-it-does-not-do-yet">What it does not do yet</a>
   </aside>
 </div>

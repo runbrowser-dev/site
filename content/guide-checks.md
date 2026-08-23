@@ -136,8 +136,40 @@ existing steps rather than paying to work them out again — which is also the
 honest answer, because something re-deriving that often is being rebuilt faster
 than any check can track it.
 
-An org out of runs has its checks paused rather than failed: the check is fine,
-the month is not.
+## Going over
+
+**Your checks do not stop when the allowance runs out.** Monitoring that goes
+quiet when you grow goes quiet exactly when you need it, so on a paid plan the
+allowance is where billing starts, not where the product stops:
+
+| | |
+|---|---|
+| Extra check run | €0.01 |
+| Extra re-derivation | €0.05 |
+
+Both are deliberately more than the plan works out at per run — moving up a
+tier is always cheaper than paying overage on the one below it. Re-derivations
+cost more because they cost *us* more in kind: a run replays steps that are
+already known, a re-derivation runs a language model.
+
+**There is a ceiling, and it defaults to your own plan price.** Overage cannot
+more than double your bill unless you deliberately raise it. Set it to zero and
+overage is refused entirely — your checks pause at the allowance and the bill
+is fixed to the cent, which is the right answer if you need to predict it.
+
+`GET /v1/checks/usage` shows where you are:
+
+```json
+{ "plan": "Pro", "runsUsed": 15500, "runsIncluded": 15000,
+  "healsUsed": 410, "healsIncluded": 400,
+  "overageMicros": 5500000, "overageCapMicros": 99000000, "overageBilled": true }
+```
+
+Amounts are micro-EUR — €5.50 of overage against a €99.00 ceiling. Cents cannot
+represent a €0.01 charge without rounding a real one to nothing.
+
+The free plan has nothing to bill against, so there the allowance is still a
+wall: checks pause, and the check is fine — the month is not.
 
 ## What it does not do yet
 
