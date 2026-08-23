@@ -171,11 +171,28 @@ represent a €0.01 charge without rounding a real one to nothing.
 The free plan has nothing to bill against, so there the allowance is still a
 wall: checks pause, and the check is fine — the month is not.
 
+## Getting told
+
+Add a destination under **Alerts** in the dashboard — an email address, a Slack
+incoming webhook, or a Teams one. As many as you like, each switchable, each
+with a **Send test** button so a mistyped URL is found now rather than at 3am.
+
+**You are told when a check changes**, not on every failing run. Green to
+broken says so once; broken back to green says so once. A check running every
+fifteen minutes against a site that is down would otherwise send ninety-six
+identical messages a day, and the second one has already taught you to filter
+the rest.
+
+**A check that repairs itself stays quiet.** That is the point of it — a
+redesign is not your problem, and telling you about it would hand back exactly
+the interruption the feature removes. Every heal is in the run history.
+
+A destination that fails delivery keeps its last error where you can see it: a
+webhook that stopped working when someone rotated it is otherwise
+indistinguishable from having no alerts at all.
+
 ## What it does not do yet
 
-- **No alerting.** Runs and their outcomes are readable through
-  `GET /v1/checks/{id}/runs`; nothing emails or pages you. Poll it, or watch
-  the dashboard.
 - **No branching.** A check is one linear journey. Something with a decision in
   it wants two checks.
 - **No CAPTCHAs.** Same as everywhere else — we flag the wall rather than

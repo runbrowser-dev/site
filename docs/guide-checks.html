@@ -363,11 +363,23 @@ is fixed to the cent, which is the right answer if you need to predict it.</p>
 represent a €0.01 charge without rounding a real one to nothing.</p>
 <p>The free plan has nothing to bill against, so there the allowance is still a
 wall: checks pause, and the check is fine — the month is not.</p>
+<h2 id="getting-told">Getting told<a class="anchor" href="#getting-told" aria-label="Link to this section">#</a></h2>
+<p>Add a destination under <strong>Alerts</strong> in the dashboard — an email address, a Slack
+incoming webhook, or a Teams one. As many as you like, each switchable, each
+with a <strong>Send test</strong> button so a mistyped URL is found now rather than at 3am.</p>
+<p><strong>You are told when a check changes</strong>, not on every failing run. Green to
+broken says so once; broken back to green says so once. A check running every
+fifteen minutes against a site that is down would otherwise send ninety-six
+identical messages a day, and the second one has already taught you to filter
+the rest.</p>
+<p><strong>A check that repairs itself stays quiet.</strong> That is the point of it — a
+redesign is not your problem, and telling you about it would hand back exactly
+the interruption the feature removes. Every heal is in the run history.</p>
+<p>A destination that fails delivery keeps its last error where you can see it: a
+webhook that stopped working when someone rotated it is otherwise
+indistinguishable from having no alerts at all.</p>
 <h2 id="what-it-does-not-do-yet">What it does not do yet<a class="anchor" href="#what-it-does-not-do-yet" aria-label="Link to this section">#</a></h2>
 <ul>
-<li><strong>No alerting.</strong> Runs and their outcomes are readable through
-<code>GET /v1/checks/{id}/runs</code>; nothing emails or pages you. Poll it, or watch
-the dashboard.</li>
 <li><strong>No branching.</strong> A check is one linear journey. Something with a decision in
 it wants two checks.</li>
 <li><strong>No CAPTCHAs.</strong> Same as everywhere else — we flag the wall rather than
@@ -396,6 +408,7 @@ pretending it isn&#39;t there.</li>
     <a class="toc-2" href="#scheduling">Scheduling</a>
     <a class="toc-2" href="#limits">Limits</a>
     <a class="toc-2" href="#going-over">Going over</a>
+    <a class="toc-2" href="#getting-told">Getting told</a>
     <a class="toc-2" href="#what-it-does-not-do-yet">What it does not do yet</a>
   </aside>
 </div>
