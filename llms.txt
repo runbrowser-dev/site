@@ -6,8 +6,9 @@
 ## Getting started
 
 - [Quickstart](https://runbrowser.dev/docs/quickstart.md): Connect an existing Playwright or Puppeteer script in one line, in TypeScript or Python.
-- [Concepts](https://runbrowser.dev/docs/concepts.md): Sessions, the session lifecycle, billing granularity, stable sessions, stealth, proxies and the live viewer.
+- [Concepts](https://runbrowser.dev/docs/concepts.md): Sessions, the session lifecycle, billing granularity, stable sessions, recording, stealth, proxies and the live viewer.
 - [Recipes](https://runbrowser.dev/docs/recipes.md): Recipes
+- [Autopilot](https://runbrowser.dev/docs/guide-autopilot.md): Describe a task in plain language: what comes back, how to turn it into a pass/fail check, and where it struggles.
 - [Sessions & stable sessions](https://runbrowser.dev/docs/guide-sessions.md): Sessions & stable sessions
 - [The live viewer](https://runbrowser.dev/docs/guide-viewer.md): The live viewer
 - [Structured extraction](https://runbrowser.dev/docs/guide-extract.md): Structured extraction
@@ -19,7 +20,7 @@
 
 ## Reference
 
-- [API reference](https://runbrowser.dev/docs/api-reference.md): Every endpoint: the CDP WebSocket, sessions, fetch, search and extract, with request and response shapes.
+- [API reference](https://runbrowser.dev/docs/api-reference.md): Every endpoint: the CDP WebSocket, sessions, autopilot runs, browser contexts, fetch, search and extract, with request and response shapes.
 - [Errors](https://runbrowser.dev/docs/errors.md): Every status code and error code the API returns, with cause, fix, and whether it is worth retrying.
 - [SDKs](https://runbrowser.dev/docs/guide-sdk.md): SDKs
 - [Integrations](https://runbrowser.dev/docs/guide-integrations.md): Integrations
@@ -27,8 +28,6 @@
 ## Integrations
 
 - [MCP server](https://runbrowser.dev/docs/mcp.md): The hosted MCP server: browser tools for Claude, Cursor and other MCP clients.
-- [From Browserless](https://runbrowser.dev/docs/migrating-from-browserless.md): Endpoint-by-endpoint mapping from Browserless, including what we do not have.
-- [From Browserbase](https://runbrowser.dev/docs/migrating-from-browserbase.md): Mapping from Browserbase, including contexts vs stable sessions and the gaps.
 
 ## Optional
 

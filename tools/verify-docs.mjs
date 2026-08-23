@@ -20,11 +20,10 @@ const PAGES = [
   '/docs/',
   '/docs/quickstart',
   '/docs/concepts',
+  '/docs/guide-autopilot',
   '/docs/api-reference',
   '/docs/errors',
   '/docs/mcp',
-  '/docs/migrating-from-browserless',
-  '/docs/migrating-from-browserbase',
 ]
 
 const TYPES = {

@@ -46,6 +46,8 @@ same header.
 | `browser_navigate` | yes | Open a URL in this session's persistent browser. |
 | `browser_click` | yes | Click the first element matching a CSS selector. |
 | `browser_type` | yes | Type into an element, optionally pressing Enter. Reports whether the page actually navigated. |
+| `browser_press_key` | yes | Send a single key — Enter, Escape, Tab, an arrow — to the page or a focused element. |
+| `browser_select_option` | yes | Choose an option in a `<select>`, by value or by visible label. |
 | `browser_wait_for` | yes | Wait for a selector — or, with no selector, for the page to stop changing. |
 | `browser_snapshot` | yes | List the visible interactive elements, each with a selector you can reuse. |
 | `browser_get_content` | yes | Read the page, or one region of it, as text or HTML. |

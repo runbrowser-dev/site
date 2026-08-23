@@ -538,10 +538,28 @@
           <p>A URL plus a JSON Schema in, validated JSON out. It renders the page first, retries on a schema miss, and 422s rather than handing you malformed data.</p>
         </div>
 
+        <div class="cell feature">
+          <div class="ic" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 2.5 15.4 9l6.6 1.6-4.8 4.6 1.2 6.7L13 18.6 7.6 21.9l1.2-6.7L4 10.6 10.6 9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Autopilot</h3>
+          <p>Describe the task in plain language and a real browser works through it. It comes back with the answer, the facts behind it, and where on the page it read each one — so you can check the work instead of trusting it. Say what a fact must equal and the run reports passed, failed, or never found it. Export any run as a Playwright script you own.</p>
+          <div class="mini" aria-hidden="true">
+            <div class="mbar"><span class="mp">● 6 steps</span><span class="mu">total_price = &euro;98.44 · passed</span></div>
+            <div class="mbody"></div>
+          </div>
+        </div>
+
+        <div class="cell half">
+          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="5" width="19" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M10 9.5l5 2.5-5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+          <h3>Recorded and replayable</h3>
+          <p>Capture a whole session and play it back frame by frame afterwards — for the run that failed at 3am with nobody watching. Startup and up, because the frames cost real storage.</p>
+        </div>
+
         <div class="cell third">
           <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2.4" stroke="currentColor" stroke-width="1.4"/><circle cx="18" cy="6" r="2.4" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="18" r="2.4" stroke="currentColor" stroke-width="1.4"/><path d="M6 8.4v3a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-3M12 13.4v2.2" stroke="currentColor" stroke-width="1.4"/></svg></div>
           <h3>MCP server, built in</h3>
-          <p>Nine browser tools for Claude, Cursor and anything that speaks MCP — with descriptions that steer the model to the cheap path first. No integration code.</p>
+          <p>Twelve browser tools for Claude, Cursor and anything that speaks MCP — with descriptions that steer the model to the cheap path first. No integration code.</p>
         </div>
 
         <div class="cell third">
@@ -588,6 +606,7 @@
           <thead><tr><th>&nbsp;</th><th class="us">RunBrowser</th><th>Typical</th></tr></thead>
           <tbody>
             <tr><td class="q">Billing</td><td class="us">Per second, floored at 10s</td><td class="them">30-second blocks, rounded up</td></tr>
+            <tr><td class="q">Say what you want</td><td class="us"><span class="yes">Plain language, with the evidence</span></td><td class="them">Write the selectors yourself</td></tr>
             <tr><td class="q">Watch a run</td><td class="us"><span class="yes">Live viewer + shareable link</span></td><td class="them">Logs, or nothing</td></tr>
             <tr><td class="q">Bot walls</td><td class="us">Flagged, not disguised</td><td class="them">Returned as page content</td></tr>
             <tr><td class="q">Proxies</td><td class="us">Wholesale, or geo-matched pools</td><td class="them">Marked-up per-GB</td></tr>
@@ -610,6 +629,7 @@
           <ul>
             <li><span class="d">›</span><b>3</b> concurrent</li>
             <li><span class="d">›</span><b>1&nbsp;hr</b> browser / mo</li>
+            <li><span class="d">›</span><b>3</b> autopilot runs</li>
             <li><span class="d">›</span><b>1,000</b> fetches</li>
             <li><span class="d">›</span><b>100</b> searches</li>
             <li><span class="d">›</span><b>25</b> extracts</li>
@@ -620,6 +640,7 @@
           <ul>
             <li><span class="d">›</span><b>10</b> concurrent</li>
             <li><span class="d">›</span><b>200&nbsp;hrs</b> browser / mo</li>
+            <li><span class="d">›</span><b>20</b> autopilot runs</li>
             <li><span class="d">›</span><b>5,000</b> fetches</li>
             <li><span class="d">›</span><b>1,000</b> searches</li>
             <li><span class="d">›</span><b>100</b> extracts</li>
@@ -631,6 +652,7 @@
           <ul>
             <li><span class="d">›</span><b>25</b> concurrent</li>
             <li><span class="d">›</span><b>1,200&nbsp;hrs</b> browser / mo</li>
+            <li><span class="d">›</span><b>50</b> autopilot runs</li>
             <li><span class="d">›</span><b>25,000</b> fetches</li>
             <li><span class="d">›</span><b>4,000</b> searches</li>
             <li><span class="d">›</span><b>600</b> extracts</li>
@@ -641,6 +663,7 @@
           <ul>
             <li><span class="d">›</span><b>50+</b> concurrent</li>
             <li><span class="d">›</span><b>6,500&nbsp;hrs</b> browser / mo</li>
+            <li><span class="d">›</span><b>250</b> autopilot runs</li>
             <li><span class="d">›</span>allowances sized to you</li>
             <li><span class="d">›</span>capacity reserved</li>
           </ul>
@@ -648,7 +671,9 @@
         </div>
       </div>
       <p class="price-note">
-        Every plan includes stealth, stable sessions and the live viewer — nothing is gated to a higher tier.
+        Stealth, stable sessions, autopilot and the live viewer are on every plan, free one included. Session
+        recording is the one exception, and we would rather say so than bury it: it is Startup and up, because
+        storing the frames costs us money on every recorded run.
         Browser time is billed <b>per second</b>, floored at 10s, which works out at roughly
         <span class="amber">$0.08–0.10 an effective browser-hour</span>. Most services bill in 30-second blocks and round up,
         so a 3-second job costs 10 seconds here and half a minute there. Proxies stay yours to buy at wholesale — we don't mark them up.

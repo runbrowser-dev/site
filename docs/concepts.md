@@ -23,12 +23,12 @@ can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.
 
-| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract |
-|---|---|---|---|---|---|---|---|
-| Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 |
-| Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 |
-| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 |
-| Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 |
+| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract | Autopilot runs |
+|---|---|---|---|---|---|---|---|---|
+| Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 | 3 |
+| Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 | 20 |
+| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 | 50 |
+| Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 | 250 |
 
 Free, Hobby and Startup are self-serve — sign up and start. Scale is priced
 per deal, because at 50 concurrent browsers it is a conversation about
@@ -40,6 +40,16 @@ Browser time is metered **while the session runs**, not only when it ends, so
 your usage and your remaining allowance reflect what you are burning right
 now. A session that runs past your monthly allowance is stopped during the
 session rather than after you disconnect.
+
+[Autopilot](guide-autopilot.md) runs are counted monthly rather than daily.
+A run is a considered thing you do a few of, not a chat you hold, and a daily
+cap on a small number just means "not today" on the day you actually need it.
+
+Session recording is the one capability tied to a tier rather than sized by an
+allowance: it is Startup and up, because every recorded session writes frames
+to storage for the retention window and the €0 and €19 plans do not fund that.
+Everything else — stealth, stable sessions, the live viewer, autopilot — is on
+every plan including the free one.
 
 `/search` returns up to 3 results per query on Free, 10 on Hobby, and 20 on
 Startup and Scale. Search is the one primitive we buy rather than run — every
@@ -154,6 +164,35 @@ diagnostic pill, and `postMessage` events to the parent frame.
 
 Read-only in v1. Mouse and keyboard back through CDP is a v1.5 feature
 waiting on someone asking for it.
+
+## Session recording
+
+The live viewer answers "what is it doing"; a recording answers "what did it
+do" — for the run that failed at 3am with nobody watching.
+
+Ask for it at session create:
+
+```json
+{ "keepAlive": true, "record": true }
+```
+
+or `?record=true` on a direct connect URL. The whole session is captured as
+frames and kept for the retention window, and
+[`GET /v1/sessions/{id}/recording`](api-reference.md#get-v1sessionsidrecording)
+hands back a replay once the session has ended.
+
+A very long session hits a capture size cap before it hits the end. When that
+happens the recording is marked `truncated` and capture stops, rather than the
+session being cut short — the run matters more than the record of it. Capture
+also thins itself out as it approaches the cap, so what you get back is the
+whole session at a lower frame rate rather than the first third at full rate
+and then nothing.
+
+Startup and up. It is the one capability tied to a tier rather than sized by
+an allowance, because every recorded session writes frames to storage for the
+whole retention window — a real per-session cost the €0 and €19 plans do not
+fund. A Free or Hobby key asking for `record: true` gets a `403` at session
+create rather than a session that quietly is not recorded.
 
 ## Device profile
 

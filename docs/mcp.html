@@ -41,6 +41,7 @@
 
     <span class="nav-title nav-title-spaced">Guides</span>
     <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-autopilot">Autopilot</a>
         <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
         <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
         <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
@@ -85,6 +86,19 @@
           </div>
         </div>
         <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#autopilot">Autopilot</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1agentsruns"><span class="m m-post">POST</span><span class="ep-path">/v1/agents/runs</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1agentsrunsrunid"><span class="m m-get">GET</span><span class="ep-path">/v1/agents/runs/{runId}</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#browser-contexts">Browser contexts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1contexts"><span class="m m-post">POST</span><span class="ep-path">/v1/contexts</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
@@ -116,8 +130,6 @@
 
     <span class="nav-title nav-title-spaced">Migrating</span>
     <div class="nav-links">
-        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
-        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
 
     <span class="nav-title nav-title-spaced">More</span>
@@ -202,6 +214,16 @@ same header.</p>
 <td><code>browser_type</code></td>
 <td>yes</td>
 <td>Type into an element, optionally pressing Enter. Reports whether the page actually navigated.</td>
+</tr>
+<tr>
+<td><code>browser_press_key</code></td>
+<td>yes</td>
+<td>Send a single key — Enter, Escape, Tab, an arrow — to the page or a focused element.</td>
+</tr>
+<tr>
+<td><code>browser_select_option</code></td>
+<td>yes</td>
+<td>Choose an option in a <code>&lt;select&gt;</code>, by value or by visible label.</td>
 </tr>
 <tr>
 <td><code>browser_wait_for</code></td>
@@ -355,7 +377,7 @@ teardown.</p>
 
     <nav class="pager">
       <a class="prev" href="/docs/guide-integrations"><span>Previous</span>Integrations</a>
-      <a class="next" href="/docs/migrating-from-browserless"><span>Next</span>From Browserless</a>
+      <span></span>
     </nav>
     <hr>
     <p class="foot">

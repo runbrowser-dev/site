@@ -238,7 +238,6 @@ the point of the feature, but know that you're making it.
 ## Next
 
 - [Concepts](concepts.md) — sessions, quotas, stable sessions, the viewer
+- [Autopilot](guide-autopilot.md) — describe a task instead of scripting it
 - [API reference](api-reference.md) — every endpoint
 - [Errors](errors.md) — every status code, what causes it, what to do
-- [Migrating from Browserless](migrating-from-browserless.md)
-- [Migrating from Browserbase](migrating-from-browserbase.md)

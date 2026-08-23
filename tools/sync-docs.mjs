@@ -16,6 +16,7 @@ import { execSync } from 'node:child_process'
 const PUBLIC_DOCS = [
   'quickstart.md',
   'concepts.md',
+  'guide-autopilot.md',
   'recipes.md',
   'guide-sessions.md',
   'guide-viewer.md',
@@ -30,8 +31,6 @@ const PUBLIC_DOCS = [
   'api-reference.md',
   'errors.md',
   'mcp.md',
-  'migrating-from-browserless.md',
-  'migrating-from-browserbase.md',
 ]
 
 const repo = process.argv[2] || process.env.PLATFORM_REPO || '../platform'

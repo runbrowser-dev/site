@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Documentation — runbrowser docs</title>
-<meta name="description" content="Hosted Chromium you drive over CDP. Quickstart, API reference and migration guides.">
+<title>Autopilot — runbrowser docs</title>
+<meta name="description" content="Describe a task in plain language. A real browser works through it, and comes back with the answer, the facts behind it, and where on the page it read each">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -41,7 +41,7 @@
 
     <span class="nav-title nav-title-spaced">Guides</span>
     <div class="nav-links">
-        <a class="nav-link " href="/docs/guide-autopilot">Autopilot</a>
+        <a class="nav-link active" href="/docs/guide-autopilot">Autopilot</a>
         <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
         <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
         <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
@@ -140,72 +140,141 @@
     </div>
   </nav>
   <main class="prose">
-    
-    <h1>Documentation</h1>
-    <p class="lede-doc">Hosted Chromium you drive over CDP with Playwright, Puppeteer or
-    anything else that speaks it. For most people the migration is one line.</p>
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Autopilot</span></div>
+<h1 id="autopilot">Autopilot</h1>
+<p>Describe a task in plain language. A real browser works through it, and comes
+back with the answer, the facts behind it, and where on the page it read each
+one.</p>
+<p>The point is not that a model can click things. It is that you can check the
+work afterwards. Every fact carries the page it came from, the text it was
+read out of, and the moment it was seen — so &quot;the total was €98.44&quot; is a claim
+you can verify rather than one you have to trust.</p>
+<h2 id="running-one">Running one<a class="anchor" href="#running-one" aria-label="Link to this section">#</a></h2>
+<p>Open <strong>Autopilot</strong> in the <a href="https://runbrowser.dev/dashboard">dashboard</a>,
+describe the task, and watch the browser work through it in the viewer beside
+the transcript. That is the whole thing; there is nothing to install and no
+key to make first.</p>
+<p>Good tasks name the site and the thing you want:</p>
+<blockquote>
+<p>Go to news.ycombinator.com and give me the title and points of the top story.</p>
+</blockquote>
+<blockquote>
+<p>Compare the price of the same flight on these two sites and tell me which is
+cheaper, and by how much.</p>
+</blockquote>
+<blockquote>
+<p>Work through the signup form on staging.example.com and tell me which step it
+fails at.</p>
+</blockquote>
+<p>Tasks that leave the destination open — &quot;find me a cheap laptop&quot; — take longer
+and cost more, because the run spends its first moves deciding where to go.</p>
+<h2 id="what-comes-back">What comes back<a class="anchor" href="#what-comes-back" aria-label="Link to this section">#</a></h2>
+<p><strong>The answer</strong>, in prose.</p>
+<p><strong>The facts</strong>, as a table. Before it starts, the run works out what the goal
+actually requires — a flight comparison needs a price from each site, not a
+paragraph about flights — and then fills those in as it reads pages. Anything
+it could not find comes back empty rather than invented.</p>
+<p><strong>The evidence.</strong> Expand any fact and you get the URL, the text on the page it
+was read from, and the timestamp. A fact with no evidence attached was not
+read off a page, and the table says so: it is marked <code>unverified</code>, and you
+should treat it as the model talking rather than the web answering.</p>
+<p>Values are checked against the page rather than compared character by
+character, so <code>€98,44</code> and <code>EUR 98.44</code> are the same number and neither counts
+as invention.</p>
+<p><strong>The cost and the step count</strong>, per run. A typical run is a few cents.</p>
+<h2 id="turning-a-task-into-a-check">Turning a task into a check<a class="anchor" href="#turning-a-task-into-a-check" aria-label="Link to this section">#</a></h2>
+<p>Say what a fact has to be, and the run reports a verdict instead of a value:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Verdict</th>
+<th>Means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>passed</code></td>
+<td>Found it on a page, and it agrees</td>
+</tr>
+<tr>
+<td><code>failed</code></td>
+<td>Found it, and it does not agree</td>
+</tr>
+<tr>
+<td><code>unresolved</code></td>
+<td>Never found it at all</td>
+</tr>
+</tbody></table>
+</div><p><code>unresolved</code> is deliberately not <code>failed</code>. Not finding a thing and finding the
+wrong thing have different causes and different fixes, and a check that
+collapses them sends you looking in the wrong place.</p>
+<h2 id="replaying-and-exporting">Replaying and exporting<a class="anchor" href="#replaying-and-exporting" aria-label="Link to this section">#</a></h2>
+<p>Every run keeps its transcript, and — on plans with
+<a href="/docs/concepts#session-recording">recording</a> — a frame-by-frame replay of the browser.</p>
+<p>Any run can also be exported as a <strong>Playwright script</strong>. It is a runnable
+<code>.mjs</code> file with the actual steps the run took, pointed at your own key:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">Shell</span><button class="copy" type="button" data-code="RUNBROWSER_TOKEN=ab_… node run.mjs">Copy</button></div><pre class="language-bash"><code><span class="token assign-left variable">RUNBROWSER_TOKEN</span><span class="token operator">=</span>ab_… <span class="token function">node</span> run.mjs</code></pre></div><p>This is the path out of autopilot rather than deeper into it. Use a run to
+work out what the steps are, export it, and from then on you have ordinary
+code you own and can put in CI — no model in the loop, no per-run cost, and
+nothing of ours in the script but the connect URL.</p>
+<h2 id="what-it-costs">What it costs<a class="anchor" href="#what-it-costs" aria-label="Link to this section">#</a></h2>
+<p>Runs are counted monthly against your plan: 3 on Free, 20 on Hobby, 50 on
+Startup, 250 on Scale. Monthly rather than daily on purpose — a run is a
+considered thing you do a few of, not a chat you hold, and a daily cap on a
+small number just means &quot;not today&quot; on the day you actually need it.</p>
+<p>Token spend is bounded underneath by the same per-org ceiling <code>/extract</code> uses,
+so an unusually long run cannot outrun its count and land you with a surprise.</p>
+<p>The browser it drives is an ordinary session, billed as browser time like any
+other.</p>
+<h2 id="where-it-struggles">Where it struggles<a class="anchor" href="#where-it-struggles" aria-label="Link to this section">#</a></h2>
+<p>Worth knowing before you point it at something important.</p>
+<ul>
+<li><strong>Sites that need a login.</strong> The run starts signed out. Give it credentials
+in the task and it will try, but a flow behind MFA is not something to
+automate this way.</li>
+<li><strong>Anything with a CAPTCHA.</strong> The run flags the wall rather than pretending
+it isn&#39;t there. See <a href="/docs/guide-unblocking">getting through walls</a>.</li>
+<li><strong>Very long flows.</strong> Runs are capped at a fixed number of moves. A
+twelve-step checkout is near the edge; break it into two tasks.</li>
+<li><strong>Ambiguity.</strong> &quot;The best option&quot; is not a fact that exists on a page. Ask
+for the thing that is written down — the price, the date, the status — and
+let your own code decide what &quot;best&quot; means.</li>
+</ul>
+<h2 id="doing-it-from-code">Doing it from code<a class="anchor" href="#doing-it-from-code" aria-label="Link to this section">#</a></h2>
+<p>The dashboard is the place to work out whether a task is possible. Once it is,
+you have two ways to run it without a browser tab open, and the second is
+usually the right one:</p>
+<ol>
+<li><strong>Export the run as Playwright</strong> and run that on a schedule. No model, no
+per-run cost, and it fails loudly when the site changes — which is what you
+want from a check.</li>
+<li><strong>Call it as an API.</strong> Better when the page changes shape often enough that
+a fixed script keeps breaking, and you would rather describe the goal than
+maintain selectors.</li>
+</ol>
+<p>See the <a href="/docs/api-reference#autopilot">API reference</a> for the endpoints.</p>
 
-    <div class="code-block">
-      <div class="code-bar"><span class="code-lang">typescript</span><button class="copy" type="button" data-code="import { chromium } from 'playwright'
-
-const browser = await chromium.connectOverCDP(
-  'wss://connect.runbrowser.dev?token=' + process.env.RUNBROWSER_TOKEN,
-)
-const page = await browser.newPage()
-await page.goto('https://example.com')">Copy</button></div>
-      <pre class="language-typescript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> chromium <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'playwright'</span>
-
-<span class="token keyword">const</span> browser <span class="token operator">=</span> <span class="token keyword">await</span> chromium<span class="token punctuation">.</span><span class="token function">connectOverCDP</span><span class="token punctuation">(</span>
-  <span class="token string">'wss://connect.runbrowser.dev?token='</span> <span class="token operator">+</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">RUNBROWSER_TOKEN</span><span class="token punctuation">,</span>
-<span class="token punctuation">)</span>
-<span class="token keyword">const</span> page <span class="token operator">=</span> <span class="token keyword">await</span> browser<span class="token punctuation">.</span><span class="token function">newPage</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">'https://example.com'</span><span class="token punctuation">)</span></code></pre>
-    </div>
-
-    <div class="cards">
-      <a class="card" href="/docs/quickstart">
-        <span class="card-title">Quickstart</span>
-        <span class="card-blurb">Change one line and run your existing script on our browsers.</span>
-      </a>
-      <a class="card" href="/docs/guide-sessions">
-        <span class="card-title">Sessions &amp; stable sessions</span>
-        <span class="card-blurb">One browser, yours while connected — and how to keep it alive between connects.</span>
-      </a>
-      <a class="card" href="/docs/guide-viewer">
-        <span class="card-title">The live viewer</span>
-        <span class="card-blurb">Watch a run in real time, or hand someone a signed link that carries no key.</span>
-      </a>
-      <a class="card" href="/docs/guide-extract">
-        <span class="card-title">Structured extraction</span>
-        <span class="card-blurb">A URL and a JSON Schema in, validated JSON out — on JavaScript sites too.</span>
-      </a>
-      <a class="card" href="/docs/guide-crawling">
-        <span class="card-title">Crawling a site</span>
-        <span class="card-blurb">Smart-scrape, map and crawl — cheapest-first, and honest about what they did.</span>
-      </a>
-      <a class="card" href="/docs/api-reference">
-        <span class="card-title">API reference</span>
-        <span class="card-blurb">Every endpoint, categorised, with request and response shapes.</span>
-      </a>
-      <a class="card" href="/docs/mcp">
-        <span class="card-title">MCP server</span>
-        <span class="card-blurb">Browser tools for Claude, Cursor, or anything that speaks MCP.</span>
-      </a>
-      <a class="card" href="/docs/errors">
-        <span class="card-title">Errors</span>
-        <span class="card-blurb">Every status code we return, what causes it, and what to do about it.</span>
-      </a>
-    </div>
-    
+    <nav class="pager">
+      <a class="prev" href="/docs/recipes"><span>Previous</span>Recipes</a>
+      <a class="next" href="/docs/guide-sessions"><span>Next</span>Sessions &amp; stable sessions</a>
+    </nav>
     <hr>
     <p class="foot">
       Something wrong, missing, or just annoying here?
-      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Documentation">Tell us</a> —
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Autopilot">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
-    
+    <p class="updated">Last updated 2026-08-23</p>
   </main>
-  <aside class="toc"></aside>
+  <aside class="toc">
+    <span class="toc-title">On this page</span>
+    <a class="toc-2" href="#running-one">Running one</a>
+    <a class="toc-2" href="#what-comes-back">What comes back</a>
+    <a class="toc-2" href="#turning-a-task-into-a-check">Turning a task into a check</a>
+    <a class="toc-2" href="#replaying-and-exporting">Replaying and exporting</a>
+    <a class="toc-2" href="#what-it-costs">What it costs</a>
+    <a class="toc-2" href="#where-it-struggles">Where it struggles</a>
+    <a class="toc-2" href="#doing-it-from-code">Doing it from code</a>
+  </aside>
 </div>
 <script src="/assets/docs.js" defer></script>
 </body>

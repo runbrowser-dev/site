@@ -2,8 +2,8 @@
 
 Watch a session as it runs. Not a recording played back later, not a log —
 the actual browser, streamed live, that you can open in a tab or hand to a
-teammate. It's the fastest way to answer "what is my agent actually doing?"
-and the thing neither Browserless nor Browserbase puts on the front page.
+teammate. It's the fastest way to answer "what is my agent actually doing?",
+and it's on every plan.
 
 ## Get a viewer link
 

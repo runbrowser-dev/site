@@ -35,6 +35,7 @@ const NAV = [
   ['quickstart', 'Quickstart'],
   ['concepts', 'Concepts'],
   ['recipes', 'Recipes'],
+  ['guide-autopilot', 'Autopilot'],
   ['guide-sessions', 'Sessions & stable sessions'],
   ['guide-viewer', 'The live viewer'],
   ['guide-extract', 'Structured extraction'],
@@ -48,12 +49,11 @@ const NAV = [
   ['guide-sdk', 'SDKs'],
   ['guide-integrations', 'Integrations'],
   ['mcp', 'MCP server'],
-  ['migrating-from-browserless', 'From Browserless'],
-  ['migrating-from-browserbase', 'From Browserbase'],
 ]
 
 // The guide pages, in the order they appear in the sidebar's Guides group.
 const GUIDES = [
+  ['guide-autopilot', 'Autopilot'],
   ['guide-sessions', 'Sessions & stable sessions'],
   ['guide-viewer', 'The live viewer'],
   ['guide-extract', 'Structured extraction'],
@@ -65,10 +65,10 @@ const GUIDES = [
 ]
 
 /**
- * Search tie-breaker. A migration guide has a "Concurrency" heading and
- * Concepts has "Concurrency and queueing", so an exact-match rule alone sends
- * someone asking about a core concept to a migration page instead. Canonical
- * pages win ties; migration pages lose them.
+ * Search tie-breaker. Several guides repeat a heading that Concepts also
+ * carries — "Concurrency" against "Concurrency and queueing" — so an
+ * exact-match rule alone sends someone asking about a core concept to a
+ * narrower page. The canonical pages win ties.
  */
 const PAGE_WEIGHT = {
   quickstart: 1.4,
@@ -76,8 +76,6 @@ const PAGE_WEIGHT = {
   'api-reference': 1.3,
   errors: 1.3,
   mcp: 1.0,
-  'migrating-from-browserless': 0.7,
-  'migrating-from-browserbase': 0.7,
 }
 
 const escapeHtml = (s) =>
@@ -358,8 +356,6 @@ function sidebarHtml(currentSlug) {
 
     <span class="nav-title nav-title-spaced">Migrating</span>
     <div class="nav-links">
-        ${link('migrating-from-browserless', 'From Browserless')}
-        ${link('migrating-from-browserbase', 'From Browserbase')}
     </div>
 
     <span class="nav-title nav-title-spaced">More</span>
@@ -576,17 +572,15 @@ writeFileSync(join(OUT, 'search-index.json'), JSON.stringify(searchIndex))
 // API are now doing it through a coding agent, and an agent that can read the
 // whole corpus in one fetch will recommend what it actually understands.
 //
-// Sectioned with a sentence per page rather than a flat link dump: the flat
-// version is what the market leader ships, and it tells a model nothing about
-// which page to open.
+// Sectioned with a sentence per page rather than a flat link dump. A flat list
+// of URLs tells a model nothing about which page to open, so it opens several.
 const BLURB = {
   quickstart: 'Connect an existing Playwright or Puppeteer script in one line, in TypeScript or Python.',
-  concepts: 'Sessions, the session lifecycle, billing granularity, stable sessions, stealth, proxies and the live viewer.',
-  'api-reference': 'Every endpoint: the CDP WebSocket, sessions, fetch, search and extract, with request and response shapes.',
+  concepts: 'Sessions, the session lifecycle, billing granularity, stable sessions, recording, stealth, proxies and the live viewer.',
+  'api-reference': 'Every endpoint: the CDP WebSocket, sessions, autopilot runs, browser contexts, fetch, search and extract, with request and response shapes.',
   errors: 'Every status code and error code the API returns, with cause, fix, and whether it is worth retrying.',
   mcp: 'The hosted MCP server: browser tools for Claude, Cursor and other MCP clients.',
-  'migrating-from-browserless': 'Endpoint-by-endpoint mapping from Browserless, including what we do not have.',
-  'migrating-from-browserbase': 'Mapping from Browserbase, including contexts vs stable sessions and the gaps.',
+  'guide-autopilot': 'Describe a task in plain language: what comes back, how to turn it into a pass/fail check, and where it struggles.',
 }
 
 const SITE = 'https://runbrowser.dev'

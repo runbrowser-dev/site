@@ -154,6 +154,9 @@ Plain-text bodies.
 | 400 | `unsupported proxy.type … (only "external" in v1)` | Only external proxies for now |
 | 404 | `session not found` | Already gone |
 | 403 | `session belongs to a different org` | Wrong key |
+| 403 | `session recording is a paid feature; upgrade to Startup or contact sales` | `record: true` on a Free or Hobby key. Refused at create rather than silently not recording |
+| 400 | `invalid contextId` | Not a context id. It goes into a URL, so we check its shape rather than passing it on |
+| 400 | `persistContext requires contextId` | Nothing to save it into |
 | 502 | `could not create session: …` | We failed to record it. Retry |
 
 ## REST shortcuts
@@ -174,6 +177,24 @@ Plain-text bodies.
 | **504** | `page never reached document.readyState=complete: …` | **The page never finished loading.** Default 30s, max 60s | Raise `waitForTimeout` (in ms, ≤60000), or target a page that settles |
 | 502 | `navigate failed: …`, `attach failed: …`, `printToPDF failed: …` | The browser failed mid-operation | Retry with backoff |
 | 429 / 503 | as [Connecting a browser](#connecting-a-browser) | Quota, concurrency, or fleet capacity | Same handling |
+
+## Autopilot and contexts
+
+`/v1/agents/runs` and `/v1/contexts` on `api.runbrowser.dev`. JSON bodies in
+the [standard envelope](#json-error-shapes-on-apirunbrowserdev).
+
+| Status | `error` | Cause | What to do |
+|---|---|---|---|
+| 400 | `invalid_request` | Failed validation — `fields` names which. A blank `task`, more than 10 `expect` entries, an entry with no `key` | Fix the body |
+| 429 | `quota_exceeded` | This month's autopilot runs are used up. The message names your plan's limit | Upgrade, or wait for the reset |
+| 429 | `spend_ceiling_reached` | Your org's monthly token ceiling is spent. Separate from the run count: a small number of unusually long runs can hit this first | Wait for the reset, or talk to us about raising it |
+| 503 | `llm_not_configured` | No language model configured on this deployment. Not your fault and not fixable from your side | Contact support |
+| 404 | `not_found` | No such run **in your org**. A run id from another org is indistinguishable from one that never existed, which is deliberate | Check the id |
+
+A run that starts and then fails comes back as `status: "failed"` on
+`GET /v1/agents/runs/{runId}` with a `200`, not an error status. The request
+to read the run succeeded; the run is what failed. Poll for `status` and do
+not treat `200` as "it worked".
 
 ## /v1/fetch
 

@@ -44,9 +44,14 @@ you get a stable session.
   "keepAlive": true,
   "maxIdleSeconds": 600,
   "record": true,
+  "contextId": "…",
+  "persistContext": false,
   "proxy": { "type": "external", "url": "http://user:pass@host:port" }
 }
 ```
+
+`contextId` starts the browser from a saved cookie jar, so the session begins
+signed in — see [browser contexts](#browser-contexts).
 
 `record: true` captures the whole session for replay (Startup and up — a
 Free or Hobby key gets `403`). Also works as `?record=true` on a direct
@@ -144,8 +149,11 @@ Default TTL 1 hour, max 24. HMAC-signed; no API key in the URL.
 
 ## REST shortcuts
 
-Browserless-compatible body shapes, on `connect.runbrowser.dev`. Each one
-provisions a browser, does the work, and releases it.
+One-shot HTTP endpoints on `connect.runbrowser.dev`, for when you want a
+result rather than a browser. Each one provisions a browser, does the work,
+and releases it. The body shapes follow the conventions common to this class
+of service, so a script written against another one usually needs only a
+change of host.
 
 All four take **either** a `url` to load **or** `html` to render directly —
 one or the other, not both. `html` is what you want for documents you
@@ -473,6 +481,132 @@ the content is accessible you get `unblocked: true` and no solve is spent.
 
 ---
 
+## Autopilot
+
+Describe a task in plain language and a browser works through it. Concepts,
+limits and what it is bad at are in the [autopilot guide](guide-autopilot.md);
+this is the wire format.
+
+### `POST /v1/agents/runs`
+
+```json
+{
+  "task": "Go to news.ycombinator.com and give me the title of the top story.",
+  "expect": [
+    { "key": "top_story_title", "what": "headline of the number one story" },
+    { "key": "site_name", "what": "the site's own name", "equals": "Hacker News" }
+  ]
+}
+```
+
+Returns `202` with a run id, immediately:
+
+```json
+{ "runId": "…", "status": "running" }
+```
+
+`202` rather than `200` because the work has been accepted and has not been
+done. Poll the run to get the answer. Submit-and-poll rather than a held-open
+request: a run takes minutes, and a request held open for minutes dies to the
+first proxy timeout between you and us. Every check that could refuse the run
+— your plan's run allowance, the spend ceiling — has already happened by the
+time you get an id, so an id means the work is genuinely under way.
+
+`expect` is optional. Supply it and the run collects exactly those and nothing
+else; leave it out and it works out for itself what the task requires. An
+entry with `equals` is an assertion and gets a verdict; one without is a
+question and gets a value.
+
+### `GET /v1/agents/runs/{runId}`
+
+```json
+{
+  "runId": "…",
+  "status": "complete",
+  "task": "Go to news.ycombinator.com …",
+  "result": "The top story is …",
+  "facts": "{\"top_story_title\":\"…\",\"site_name\":\"Hacker News\"}",
+  "evidence": "{\"site_name\":{\"url\":\"https://news.ycombinator.com/\",\"quote\":\"Hacker News\",\"seenAt\":\"…\"}}",
+  "verdicts": "{\"site_name\":\"passed\"}",
+  "steps": 2,
+  "costMicros": 4500,
+  "startedAt": "2026-08-23T12:00:00Z",
+  "durationMs": 9800
+}
+```
+
+`status` is `running`, `complete` or `failed`. `facts`, `evidence` and
+`verdicts` are JSON documents carried as strings — their keys are yours,
+whatever you passed in `expect` or whatever the run derived, so they have no
+fixed schema.
+
+**A fact missing from `evidence` was not read off a page.** Treat it as the
+model talking rather than the web answering.
+
+Verdicts are `passed`, `failed` or `unresolved`. `unresolved` means no value
+was found at all, which is a different problem from finding the wrong one —
+do not collapse the two.
+
+`costMicros` is micro-USD. Divide by 1,000,000.
+
+## Browser contexts
+
+A saved cookie jar, so a run does not have to log in again every time. A
+container is destroyed on release and Chromium's profile goes with it, so
+without one every session starts signed out of everything.
+
+### `POST /v1/contexts`
+
+```json
+{ "name": "staging-admin" }
+```
+
+```json
+{ "contextId": "…", "name": "staging-admin", "hasState": false,
+  "updatedAt": null, "createdAt": "2026-08-23T12:00:00Z" }
+```
+
+`name` is optional and is for whoever later has to tell these apart; the id is
+the identity. `hasState` is how you know whether anything has been written
+into it yet. The cookies themselves are never returned — they are credentials
+for someone else's site, and only the browser has any use for them.
+
+`GET /v1/contexts` lists this org's contexts, newest first.
+`DELETE /v1/contexts/{contextId}` removes one, and is `204` whether or not it
+was there: deleting the same thing twice gets you what you wanted both times.
+
+### Using one
+
+Pass it at session create:
+
+```json
+{ "keepAlive": true, "contextId": "…", "persistContext": true }
+```
+
+`contextId` loads the jar into the browser **before anything navigates**, so
+your first request is already authenticated rather than landing on a login
+page. `persistContext` writes the jar back when the session ends.
+
+They are separate switches on purpose. The shape that matters — sign in once,
+then run a hundred cases from that state — wants to load every time and save
+never. If every run wrote back, the hundredth run's leftovers become the next
+suite's starting state, and you have a test suite whose result depends on the
+order it happened to run in. So: one job with `persistContext` that does the
+login, and everything else with `contextId` alone.
+
+**Cookies only.** Not `localStorage`, not `sessionStorage`, not IndexedDB.
+That is a real limit, not an omission: `localStorage` can only be written
+while the page is already on the origin that owns it, and a browser at session
+start is not on any origin — restoring it would mean visiting every origin
+first, which is a visit you did not ask for and one the site can see. If your
+target keeps its session token in `localStorage` rather than a cookie, this
+will not restore it.
+
+Contexts also go stale. You are restoring the client half of a session; the
+server can still have expired it. When runs start failing at the login wall,
+re-run the job that saves. One writer per context — two sessions both
+persisting to the same one will clobber each other.
+
 ## Primitives
 
 On `api.runbrowser.dev`. These are the ones that make agent loops cheap.
@@ -489,6 +623,25 @@ rendering, use `/v1/extract` or a browser.
 ```
 
 `format` is `html` (default), `text`, `markdown` or `markdown-full`.
+
+`followRedirects` defaults to `true`: the redirect chain is walked for you and
+you get the page at the end of it. An HTTPS response is never followed to a
+plain-HTTP one, so a fetch that started encrypted cannot be quietly walked off
+TLS.
+
+Set it to `false` and you get the redirect itself — `status` is the `301`/`302`
+and `headers.location` is where it points. That is the mode you want when the
+redirect *is* the answer: resolving a shortened or tracking link without
+visiting the destination, checking whether a URL is canonical, or finding out
+that a page is bouncing you to a login rather than serving you. It is also how
+you see a chain hop by hop, which following collapses into a single status.
+
+Two things to know. The response does not tell you where you landed, so with
+following on, a URL that redirected is indistinguishable from one served
+directly. And the [URL guard](errors.md) validates the URL you passed, not the
+targets it redirects to — if you are fetching URLs supplied by someone else and
+that distinction matters to you, turn following off and walk the chain
+yourself.
 
 `markdown` runs Readability first: you get the main article and none of the
 site chrome, which is what you want for prose. That also means navigation

@@ -44,9 +44,14 @@ you get a stable session.
   "keepAlive": true,
   "maxIdleSeconds": 600,
   "record": true,
+  "contextId": "…",
+  "persistContext": false,
   "proxy": { "type": "external", "url": "http://user:pass@host:port" }
 }
 ```
+
+`contextId` starts the browser from a saved cookie jar, so the session begins
+signed in — see [browser contexts](#browser-contexts).
 
 `record: true` captures the whole session for replay (Startup and up — a
 Free or Hobby key gets `403`). Also works as `?record=true` on a direct
@@ -144,8 +149,11 @@ Default TTL 1 hour, max 24. HMAC-signed; no API key in the URL.
 
 ## REST shortcuts
 
-Browserless-compatible body shapes, on `connect.runbrowser.dev`. Each one
-provisions a browser, does the work, and releases it.
+One-shot HTTP endpoints on `connect.runbrowser.dev`, for when you want a
+result rather than a browser. Each one provisions a browser, does the work,
+and releases it. The body shapes follow the conventions common to this class
+of service, so a script written against another one usually needs only a
+change of host.
 
 All four take **either** a `url` to load **or** `html` to render directly —
 one or the other, not both. `html` is what you want for documents you
@@ -473,6 +481,132 @@ the content is accessible you get `unblocked: true` and no solve is spent.
 
 ---
 
+## Autopilot
+
+Describe a task in plain language and a browser works through it. Concepts,
+limits and what it is bad at are in the [autopilot guide](guide-autopilot.md);
+this is the wire format.
+
+### `POST /v1/agents/runs`
+
+```json
+{
+  "task": "Go to news.ycombinator.com and give me the title of the top story.",
+  "expect": [
+    { "key": "top_story_title", "what": "headline of the number one story" },
+    { "key": "site_name", "what": "the site's own name", "equals": "Hacker News" }
+  ]
+}
+```
+
+Returns `202` with a run id, immediately:
+
+```json
+{ "runId": "…", "status": "running" }
+```
+
+`202` rather than `200` because the work has been accepted and has not been
+done. Poll the run to get the answer. Submit-and-poll rather than a held-open
+request: a run takes minutes, and a request held open for minutes dies to the
+first proxy timeout between you and us. Every check that could refuse the run
+— your plan's run allowance, the spend ceiling — has already happened by the
+time you get an id, so an id means the work is genuinely under way.
+
+`expect` is optional. Supply it and the run collects exactly those and nothing
+else; leave it out and it works out for itself what the task requires. An
+entry with `equals` is an assertion and gets a verdict; one without is a
+question and gets a value.
+
+### `GET /v1/agents/runs/{runId}`
+
+```json
+{
+  "runId": "…",
+  "status": "complete",
+  "task": "Go to news.ycombinator.com …",
+  "result": "The top story is …",
+  "facts": "{\"top_story_title\":\"…\",\"site_name\":\"Hacker News\"}",
+  "evidence": "{\"site_name\":{\"url\":\"https://news.ycombinator.com/\",\"quote\":\"Hacker News\",\"seenAt\":\"…\"}}",
+  "verdicts": "{\"site_name\":\"passed\"}",
+  "steps": 2,
+  "costMicros": 4500,
+  "startedAt": "2026-08-23T12:00:00Z",
+  "durationMs": 9800
+}
+```
+
+`status` is `running`, `complete` or `failed`. `facts`, `evidence` and
+`verdicts` are JSON documents carried as strings — their keys are yours,
+whatever you passed in `expect` or whatever the run derived, so they have no
+fixed schema.
+
+**A fact missing from `evidence` was not read off a page.** Treat it as the
+model talking rather than the web answering.
+
+Verdicts are `passed`, `failed` or `unresolved`. `unresolved` means no value
+was found at all, which is a different problem from finding the wrong one —
+do not collapse the two.
+
+`costMicros` is micro-USD. Divide by 1,000,000.
+
+## Browser contexts
+
+A saved cookie jar, so a run does not have to log in again every time. A
+container is destroyed on release and Chromium's profile goes with it, so
+without one every session starts signed out of everything.
+
+### `POST /v1/contexts`
+
+```json
+{ "name": "staging-admin" }
+```
+
+```json
+{ "contextId": "…", "name": "staging-admin", "hasState": false,
+  "updatedAt": null, "createdAt": "2026-08-23T12:00:00Z" }
+```
+
+`name` is optional and is for whoever later has to tell these apart; the id is
+the identity. `hasState` is how you know whether anything has been written
+into it yet. The cookies themselves are never returned — they are credentials
+for someone else's site, and only the browser has any use for them.
+
+`GET /v1/contexts` lists this org's contexts, newest first.
+`DELETE /v1/contexts/{contextId}` removes one, and is `204` whether or not it
+was there: deleting the same thing twice gets you what you wanted both times.
+
+### Using one
+
+Pass it at session create:
+
+```json
+{ "keepAlive": true, "contextId": "…", "persistContext": true }
+```
+
+`contextId` loads the jar into the browser **before anything navigates**, so
+your first request is already authenticated rather than landing on a login
+page. `persistContext` writes the jar back when the session ends.
+
+They are separate switches on purpose. The shape that matters — sign in once,
+then run a hundred cases from that state — wants to load every time and save
+never. If every run wrote back, the hundredth run's leftovers become the next
+suite's starting state, and you have a test suite whose result depends on the
+order it happened to run in. So: one job with `persistContext` that does the
+login, and everything else with `contextId` alone.
+
+**Cookies only.** Not `localStorage`, not `sessionStorage`, not IndexedDB.
+That is a real limit, not an omission: `localStorage` can only be written
+while the page is already on the origin that owns it, and a browser at session
+start is not on any origin — restoring it would mean visiting every origin
+first, which is a visit you did not ask for and one the site can see. If your
+target keeps its session token in `localStorage` rather than a cookie, this
+will not restore it.
+
+Contexts also go stale. You are restoring the client half of a session; the
+server can still have expired it. When runs start failing at the login wall,
+re-run the job that saves. One writer per context — two sessions both
+persisting to the same one will clobber each other.
+
 ## Primitives
 
 On `api.runbrowser.dev`. These are the ones that make agent loops cheap.
@@ -489,6 +623,25 @@ rendering, use `/v1/extract` or a browser.
 ```
 
 `format` is `html` (default), `text`, `markdown` or `markdown-full`.
+
+`followRedirects` defaults to `true`: the redirect chain is walked for you and
+you get the page at the end of it. An HTTPS response is never followed to a
+plain-HTTP one, so a fetch that started encrypted cannot be quietly walked off
+TLS.
+
+Set it to `false` and you get the redirect itself — `status` is the `301`/`302`
+and `headers.location` is where it points. That is the mode you want when the
+redirect *is* the answer: resolving a shortened or tracking link without
+visiting the destination, checking whether a URL is canonical, or finding out
+that a page is bouncing you to a login rather than serving you. It is also how
+you see a chain hop by hop, which following collapses into a single status.
+
+Two things to know. The response does not tell you where you landed, so with
+following on, a URL that redirected is indistinguishable from one served
+directly. And the [URL guard](errors.md) validates the URL you passed, not the
+targets it redirects to — if you are fetching URLs supplied by someone else and
+that distinction matters to you, turn following off and walk the chain
+yourself.
 
 `markdown` runs Readability first: you get the main article and none of the
 site chrome, which is what you want for prose. That also means navigation
@@ -651,12 +804,12 @@ can do is cram work into fewer, longer sessions — which is the opposite of
 what makes a fleet efficient. Under browser-time, short focused sessions
 are cheap, and the incentive points the same way our capacity does.
 
-| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract |
-|---|---|---|---|---|---|---|---|
-| Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 |
-| Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 |
-| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 |
-| Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 |
+| Tier | Price | Concurrent | Browser hours/mo | Max session | /fetch | /search | /extract | Autopilot runs |
+|---|---|---|---|---|---|---|---|---|
+| Free | €0 | 3 | 1 | 15 min | 1,000 | 100 | 25 | 3 |
+| Hobby | €19/mo | 10 | 200 | 60 min | 5,000 | 1,000 | 100 | 20 |
+| Startup | €99/mo | 25 | 1,200 | 180 min | 25,000 | 4,000 | 600 | 50 |
+| Scale | Contact us | 50 | 6,500 | 360 min | 100,000 | 20,000 | 3,000 | 250 |
 
 Free, Hobby and Startup are self-serve — sign up and start. Scale is priced
 per deal, because at 50 concurrent browsers it is a conversation about
@@ -668,6 +821,16 @@ Browser time is metered **while the session runs**, not only when it ends, so
 your usage and your remaining allowance reflect what you are burning right
 now. A session that runs past your monthly allowance is stopped during the
 session rather than after you disconnect.
+
+[Autopilot](guide-autopilot.md) runs are counted monthly rather than daily.
+A run is a considered thing you do a few of, not a chat you hold, and a daily
+cap on a small number just means "not today" on the day you actually need it.
+
+Session recording is the one capability tied to a tier rather than sized by an
+allowance: it is Startup and up, because every recorded session writes frames
+to storage for the retention window and the €0 and €19 plans do not fund that.
+Everything else — stealth, stable sessions, the live viewer, autopilot — is on
+every plan including the free one.
 
 `/search` returns up to 3 results per query on Free, 10 on Hobby, and 20 on
 Startup and Scale. Search is the one primitive we buy rather than run — every
@@ -782,6 +945,35 @@ diagnostic pill, and `postMessage` events to the parent frame.
 
 Read-only in v1. Mouse and keyboard back through CDP is a v1.5 feature
 waiting on someone asking for it.
+
+## Session recording
+
+The live viewer answers "what is it doing"; a recording answers "what did it
+do" — for the run that failed at 3am with nobody watching.
+
+Ask for it at session create:
+
+```json
+{ "keepAlive": true, "record": true }
+```
+
+or `?record=true` on a direct connect URL. The whole session is captured as
+frames and kept for the retention window, and
+[`GET /v1/sessions/{id}/recording`](api-reference.md#get-v1sessionsidrecording)
+hands back a replay once the session has ended.
+
+A very long session hits a capture size cap before it hits the end. When that
+happens the recording is marked `truncated` and capture stops, rather than the
+session being cut short — the run matters more than the record of it. Capture
+also thins itself out as it approaches the cap, so what you get back is the
+whole session at a lower frame rate rather than the first third at full rate
+and then nothing.
+
+Startup and up. It is the one capability tied to a tier rather than sized by
+an allowance, because every recorded session writes frames to storage for the
+whole retention window — a real per-session cost the €0 and €19 plans do not
+fund. A Free or Hobby key asking for `record: true` gets a `403` at session
+create rather than a session that quietly is not recorded.
 
 ## Device profile
 
@@ -1050,6 +1242,9 @@ Plain-text bodies.
 | 400 | `unsupported proxy.type … (only "external" in v1)` | Only external proxies for now |
 | 404 | `session not found` | Already gone |
 | 403 | `session belongs to a different org` | Wrong key |
+| 403 | `session recording is a paid feature; upgrade to Startup or contact sales` | `record: true` on a Free or Hobby key. Refused at create rather than silently not recording |
+| 400 | `invalid contextId` | Not a context id. It goes into a URL, so we check its shape rather than passing it on |
+| 400 | `persistContext requires contextId` | Nothing to save it into |
 | 502 | `could not create session: …` | We failed to record it. Retry |
 
 ## REST shortcuts
@@ -1070,6 +1265,24 @@ Plain-text bodies.
 | **504** | `page never reached document.readyState=complete: …` | **The page never finished loading.** Default 30s, max 60s | Raise `waitForTimeout` (in ms, ≤60000), or target a page that settles |
 | 502 | `navigate failed: …`, `attach failed: …`, `printToPDF failed: …` | The browser failed mid-operation | Retry with backoff |
 | 429 / 503 | as [Connecting a browser](#connecting-a-browser) | Quota, concurrency, or fleet capacity | Same handling |
+
+## Autopilot and contexts
+
+`/v1/agents/runs` and `/v1/contexts` on `api.runbrowser.dev`. JSON bodies in
+the [standard envelope](#json-error-shapes-on-apirunbrowserdev).
+
+| Status | `error` | Cause | What to do |
+|---|---|---|---|
+| 400 | `invalid_request` | Failed validation — `fields` names which. A blank `task`, more than 10 `expect` entries, an entry with no `key` | Fix the body |
+| 429 | `quota_exceeded` | This month's autopilot runs are used up. The message names your plan's limit | Upgrade, or wait for the reset |
+| 429 | `spend_ceiling_reached` | Your org's monthly token ceiling is spent. Separate from the run count: a small number of unusually long runs can hit this first | Wait for the reset, or talk to us about raising it |
+| 503 | `llm_not_configured` | No language model configured on this deployment. Not your fault and not fixable from your side | Contact support |
+| 404 | `not_found` | No such run **in your org**. A run id from another org is indistinguishable from one that never existed, which is deliberate | Check the id |
+
+A run that starts and then fails comes back as `status: "failed"` on
+`GET /v1/agents/runs/{runId}` with a `200`, not an error status. The request
+to read the run succeeded; the run is what failed. Poll for `status` and do
+not treat `200` as "it worked".
 
 ## /v1/fetch
 
@@ -1343,6 +1556,133 @@ code, and roughly when it happened, and we'll look at the actual logs.
 - [Concepts](concepts.md) — sessions, quotas, stable sessions, the viewer
 - [API reference](api-reference.md) — every endpoint
 - [Quickstart](quickstart.md) — connect in one line
+
+---
+
+# Autopilot
+
+Describe a task in plain language. A real browser works through it, and comes
+back with the answer, the facts behind it, and where on the page it read each
+one.
+
+The point is not that a model can click things. It is that you can check the
+work afterwards. Every fact carries the page it came from, the text it was
+read out of, and the moment it was seen — so "the total was €98.44" is a claim
+you can verify rather than one you have to trust.
+
+## Running one
+
+Open **Autopilot** in the [dashboard](https://runbrowser.dev/dashboard),
+describe the task, and watch the browser work through it in the viewer beside
+the transcript. That is the whole thing; there is nothing to install and no
+key to make first.
+
+Good tasks name the site and the thing you want:
+
+> Go to news.ycombinator.com and give me the title and points of the top story.
+
+> Compare the price of the same flight on these two sites and tell me which is
+> cheaper, and by how much.
+
+> Work through the signup form on staging.example.com and tell me which step it
+> fails at.
+
+Tasks that leave the destination open — "find me a cheap laptop" — take longer
+and cost more, because the run spends its first moves deciding where to go.
+
+## What comes back
+
+**The answer**, in prose.
+
+**The facts**, as a table. Before it starts, the run works out what the goal
+actually requires — a flight comparison needs a price from each site, not a
+paragraph about flights — and then fills those in as it reads pages. Anything
+it could not find comes back empty rather than invented.
+
+**The evidence.** Expand any fact and you get the URL, the text on the page it
+was read from, and the timestamp. A fact with no evidence attached was not
+read off a page, and the table says so: it is marked `unverified`, and you
+should treat it as the model talking rather than the web answering.
+
+Values are checked against the page rather than compared character by
+character, so `€98,44` and `EUR 98.44` are the same number and neither counts
+as invention.
+
+**The cost and the step count**, per run. A typical run is a few cents.
+
+## Turning a task into a check
+
+Say what a fact has to be, and the run reports a verdict instead of a value:
+
+| Verdict | Means |
+|---|---|
+| `passed` | Found it on a page, and it agrees |
+| `failed` | Found it, and it does not agree |
+| `unresolved` | Never found it at all |
+
+`unresolved` is deliberately not `failed`. Not finding a thing and finding the
+wrong thing have different causes and different fixes, and a check that
+collapses them sends you looking in the wrong place.
+
+## Replaying and exporting
+
+Every run keeps its transcript, and — on plans with
+[recording](concepts.md#session-recording) — a frame-by-frame replay of the browser.
+
+Any run can also be exported as a **Playwright script**. It is a runnable
+`.mjs` file with the actual steps the run took, pointed at your own key:
+
+```bash
+RUNBROWSER_TOKEN=ab_… node run.mjs
+```
+
+This is the path out of autopilot rather than deeper into it. Use a run to
+work out what the steps are, export it, and from then on you have ordinary
+code you own and can put in CI — no model in the loop, no per-run cost, and
+nothing of ours in the script but the connect URL.
+
+## What it costs
+
+Runs are counted monthly against your plan: 3 on Free, 20 on Hobby, 50 on
+Startup, 250 on Scale. Monthly rather than daily on purpose — a run is a
+considered thing you do a few of, not a chat you hold, and a daily cap on a
+small number just means "not today" on the day you actually need it.
+
+Token spend is bounded underneath by the same per-org ceiling `/extract` uses,
+so an unusually long run cannot outrun its count and land you with a surprise.
+
+The browser it drives is an ordinary session, billed as browser time like any
+other.
+
+## Where it struggles
+
+Worth knowing before you point it at something important.
+
+- **Sites that need a login.** The run starts signed out. Give it credentials
+  in the task and it will try, but a flow behind MFA is not something to
+  automate this way.
+- **Anything with a CAPTCHA.** The run flags the wall rather than pretending
+  it isn't there. See [getting through walls](guide-unblocking.md).
+- **Very long flows.** Runs are capped at a fixed number of moves. A
+  twelve-step checkout is near the edge; break it into two tasks.
+- **Ambiguity.** "The best option" is not a fact that exists on a page. Ask
+  for the thing that is written down — the price, the date, the status — and
+  let your own code decide what "best" means.
+
+## Doing it from code
+
+The dashboard is the place to work out whether a task is possible. Once it is,
+you have two ways to run it without a browser tab open, and the second is
+usually the right one:
+
+1. **Export the run as Playwright** and run that on a schedule. No model, no
+   per-run cost, and it fails loudly when the site changes — which is what you
+   want from a check.
+2. **Call it as an API.** Better when the page changes shape often enough that
+   a fixed script keeps breaking, and you would rather describe the goal than
+   maintain selectors.
+
+See the [API reference](api-reference.md#autopilot) for the endpoints.
 
 ---
 
@@ -2466,8 +2806,8 @@ browser hits fewer walls in the first place.
 
 Watch a session as it runs. Not a recording played back later, not a log —
 the actual browser, streamed live, that you can open in a tab or hand to a
-teammate. It's the fastest way to answer "what is my agent actually doing?"
-and the thing neither Browserless nor Browserbase puts on the front page.
+teammate. It's the fastest way to answer "what is my agent actually doing?",
+and it's on every plan.
 
 ## Get a viewer link
 
@@ -2608,6 +2948,8 @@ same header.
 | `browser_navigate` | yes | Open a URL in this session's persistent browser. |
 | `browser_click` | yes | Click the first element matching a CSS selector. |
 | `browser_type` | yes | Type into an element, optionally pressing Enter. Reports whether the page actually navigated. |
+| `browser_press_key` | yes | Send a single key — Enter, Escape, Tab, an arrow — to the page or a focused element. |
+| `browser_select_option` | yes | Choose an option in a `<select>`, by value or by visible label. |
 | `browser_wait_for` | yes | Wait for a selector — or, with no selector, for the page to stop changing. |
 | `browser_snapshot` | yes | List the visible interactive elements, each with a selector you can reuse. |
 | `browser_get_content` | yes | Read the page, or one region of it, as text or HTML. |
@@ -2764,292 +3106,6 @@ make mcp
 Drives the whole surface against a running stack: initialize, `tools/list`,
 every tool, click-through navigation, a deliberate bad selector, then
 teardown.
-
----
-
-# Migrating from Browserbase
-
-Browserbase gives you an SDK that creates a session and hands back a
-`connectUrl`. We give you a URL. The shapes are close enough that the
-migration is mostly deleting code.
-
-## The direct translation
-
-```diff
-- import Browserbase from "@browserbasehq/sdk";
-  import { chromium } from "playwright-core";
-
-- const bb = new Browserbase({ apiKey: process.env.BROWSERBASE_API_KEY });
-- const session = await bb.sessions.create();
-- const browser = await chromium.connectOverCDP(session.connectUrl);
-+ const browser = await chromium.connectOverCDP(
-+   `wss://connect.runbrowser.dev?token=${process.env.RUNBROWSER_TOKEN}`,
-+ );
-
-  const context = browser.contexts()[0];
-  const page = context.pages()[0];
-```
-
-No SDK, no project ID, no session-create round trip. One dependency
-fewer in your `package.json`.
-
-If you *want* the create-then-connect shape — to pass a proxy without
-putting credentials in a URL, or to get a stable session — it exists:
-
-```ts
-const res = await fetch(`https://connect.runbrowser.dev/v1/sessions`, {
-  method: 'POST',
-  headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-  body: JSON.stringify({ keepAlive: true, maxIdleSeconds: 600 }),
-});
-const { sessionId, connectUrl } = await res.json();
-```
-
-Same two-step, no SDK required.
-
-## Feature-by-feature
-
-| Browserbase | Us |
-|---|---|
-| `sessions.create()` → `connectUrl` | Direct connect URL, or `POST /v1/sessions` |
-| Session persistence via **Contexts** | **Stable sessions** — see below, they're different |
-| Live View | [Live viewer](concepts.md#live-viewer), signed expiring URLs |
-| Session recording / replay | **Yes** (Startup+). `record: true` at session create, then `GET /v1/sessions/{id}/recording`. |
-| Stagehand | Works — it connects over CDP like anything else |
-| Advanced Stealth | Always-on here, no tier gate |
-| Bundled CAPTCHA solving | **Not bundled.** We orchestrate it with your own solver key via [`/unblock`](/docs/guide-unblocking) — you pay wholesale |
-| Bundled proxies | BYO proxy, no markup |
-| Extensions, file uploads | Via CDP, no dedicated API |
-| File downloads | [`POST /download`](/docs/api-reference#post-download-the-file-as-is), or CDP |
-| Multiple regions | EU only |
-| Fetch, Search | `POST /v1/fetch`, `POST /v1/search` — comparable, separate allowance |
-| Agents, Functions, Model Gateway | **No equivalent.** We're infrastructure; the agent framework is yours. |
-
-## Contexts vs stable sessions — the one real difference
-
-A Browserbase **Context** persists cookies, localStorage and cached auth,
-and you attach it to a *new* browser on each run. Our **stable session**
-keeps the actual browser alive between connects.
-
-That difference cuts both ways, and which one you want depends on what
-you're doing:
-
-**Contexts are better when** you want to run the same logged-in identity
-across many independent, spread-out runs. A context costs nothing while
-idle, because there's no browser.
-
-**Stable sessions are better when** you're mid-workflow — a multi-step
-form, a flow behind MFA, an agent that needs to come back to a page it was
-already on. Everything survives, including in-memory SPA state, open tabs,
-in-flight requests and scroll position, because it's the same browser.
-
-**The cost model differs and it matters.** A parked stable session bills
-while parked; a context doesn't. If your pattern is "log in, do something
-once a day", contexts are cheaper and we don't have an equivalent yet — a
-Redis-persisted context is on the list, waiting on someone asking. If your
-pattern is "an agent working through a flow over minutes", stable sessions
-do something contexts can't.
-
-Be honest about which one you actually have.
-
-## Pricing
-
-> Read off browserbase.com's published pricing on **2026-08-13**. Their
-> terms are theirs to change and this page won't always keep up — verify
-> before deciding on it. What follows describes the shape of the
-> difference, which is what tends to persist.
-
-Browserbase's structure is a monthly plan plus browser-hours, with some
-capabilities associated with higher tiers. Ours is a plan plus
-browser-hours too — €0, €19 and €99 self-serve, with a larger Scale tier
-priced per deal — and two structural differences:
-
-- **A realistic device profile isn't a tier here.** Free-tier browsers get
-  exactly what Scale gets. There is nothing to upgrade into — see
-  [Device profiles](/docs/guide-device-profile).
-- **CAPTCHAs and proxies are both yours to buy.** We don't solve CAPTCHAs
-  on your behalf and we don't resell proxies; you bring a key for each and
-  pay wholesale. Cheaper, but more setup. If you'd rather the invoice be
-  one line, we're the wrong choice today.
-
-We deliberately don't publish a "cheaper by X%" claim: their pricing moves,
-and per-tier comparisons depend on your mix of browser-hours, solves and
-proxy traffic. Price both against your own workload.
-
-Concurrency runs 3 / 10 / 25 across the self-serve tiers, and 50 on Scale.
-Browserbase sells
-higher ceilings than that; if you genuinely need hundreds of simultaneous
-browsers, they have the fleet for it today and we don't. That is a real
-capacity difference, not a pricing one.
-
-## What we don't have, plainly
-
-- No Director, no semantic actions (`clickByDescription`). Stagehand works
-  against us, but the vision-based tooling is theirs.
-- No Agents, Functions or Model Gateway. They offer a broader platform;
-  we're deliberately staying infrastructure. If you want the agent runtime
-  bundled with the browser, that's them, not us.
-- One region.
-- No bundled proxy, and CAPTCHA solving uses your provider account rather
-  than ours.
-- Lower concurrency ceiling.
-
-If your product depends on any of those, stay. If you're paying premium
-tiers mostly for stealth and stable sessions, that's the trade we're built
-for.
-
-## What you get instead
-
-- **An MCP server** — thirteen tools, no integration code. [Details](mcp.md).
-- **`/v1/fetch` and `/v1/search`**, billed against separate monthly
-  allowances rather than browser-time, so agent loops stop burning
-  browser-seconds on cheap operations. Browserbase ships Fetch and Search
-  too — this isn't a capability we have and they don't. Compare the
-  billing rather than the feature list: what matters is whether those
-  calls draw from the same balance as your browser time.
-- **EU residency** by default.
-- **No proprietary SDK to unpick.** There are [typed clients](/docs/guide-sdk)
-  if you want them, but they are optional and thin: you connect over standard CDP, so the
-  automation you write here runs anywhere that speaks it. The lock-in
-  question for a browser service is whether *your code* is portable, and
-  ours is. (The Chromium image our fleet runs is
-  [published](https://github.com/runbrowser-dev/runbrowser) if you want to
-  match your local environment to production — the hosted service itself is
-  not open source.)
-
----
-
-# Migrating from Browserless
-
-Change the host. That's usually the whole migration.
-
-```diff
-- wss://production-sfo.browserless.io?token=YOUR_TOKEN
-+ wss://connect.runbrowser.dev?token=ab_yourkey
-```
-
-Both speak CDP, both take the token as a query parameter, both work with
-`chromium.connectOverCDP()` and `puppeteer.connect()`. Your selectors,
-waits and assertions don't change.
-
-## What maps directly
-
-| Browserless | Us | Notes |
-|---|---|---|
-| `wss://…?token=` (Puppeteer, Playwright over CDP) | `wss://connect.runbrowser.dev?token=` | Identical |
-| `POST /screenshot` | `POST /screenshot` | Same body shape |
-| `POST /pdf` | `POST /pdf` | Same body shape |
-| `POST /content` | `POST /content` | Same body shape |
-| `POST /scrape` | `POST /scrape` | Same `elements[]` shape |
-
-The REST bodies were written against Browserless's shapes on purpose, so
-existing calls generally work untouched.
-
-## What we don't have
-
-Be honest with yourself about this list before you switch:
-
-| Browserless | Status here |
-|---|---|
-| `/performance` (Lighthouse) | **No.** Not planned — pick a browser API for browsers, not SEO audits. |
-| BrowserQL (GraphQL automation language) | **No, and not planned.** We bet on plain Playwright. |
-| Firefox, WebKit | **No.** Chromium only — if you need cross-browser testing, this is the wrong product. |
-| Session replay / recording | **Yes** on Startup and up. Pass `record: true` when you create a session; fetch the replay afterwards from `GET /v1/sessions/{id}/recording`. |
-| Bundled proxies | BYO proxy. Wholesale pricing from your provider, no markup from us. |
-| `/search` | Different shape: ours is `POST /v1/search` on the API host with `{q, count}`. Results per query are capped by plan, as theirs are. |
-
-If you depend on BrowserQL or need a non-Chromium engine, this isn't a
-drop-in and you should stay where you are.
-
-### What we now match
-
-These were gaps and no longer are:
-
-| Browserless | Here |
-|---|---|
-| `/function` | [`POST /function`](/docs/api-reference#post-function-json) — your JavaScript, run in the page |
-| `/unblock` | [`POST /unblock`](/docs/guide-unblocking) — and it tells you *which* wall you hit |
-| `/download`, `/export` | [`POST /download`](/docs/api-reference#post-download-the-file-as-is), [`POST /export`](/docs/api-reference#post-export-the-resource-as-is) |
-| `/scrape` | Same `elements[]` shape |
-| — | `/map`, `/crawl`, `/smart-scrape` — see [Crawling](/docs/guide-crawling) |
-
-## What you get here
-
-- **Stable sessions** that survive disconnect with *full* state — in-memory
-  SPA state and open tabs, not just cookies. [Details](concepts.md#stable-sessions).
-- **`/v1/extract`** — URL plus JSON Schema in, validated structured JSON out.
-- **An MCP server**, so any MCP-aware agent gets browser tools with no
-  integration code. [Details](mcp.md).
-- **Live viewer with signed shareable URLs** that are safe to paste into a
-  ticket — no API key inside.
-- **EU residency.** Sessions and session data stay inside the EU. If EU-only
-  matters to you legally, we're single-region by design; check their current
-  region list against your own requirements.
-
-## Billing differences that will actually surprise you
-
-> Their pricing is theirs to change, and this page won't always keep up.
-> The figures below were read off browserless.io's published pricing on
-> **2026-08-13**; check the current terms before you make a decision on
-> them. We describe the *shape* of the difference because that's what
-> tends to persist — not to score a point on the numbers.
-
-Browserless bills in **units**, where a unit covers a block of browser
-time and partial blocks round **up**. We bill **browser-seconds**, floored
-at 10 seconds per session, plus separate monthly allowances for
-`/v1/fetch`, `/v1/search` and `/v1/extract`. Proxy traffic and CAPTCHA
-solving stay on your providers' bills rather than ours.
-
-The practical consequences:
-
-- **Short sessions get cheaper.** Rounding a block up means a 3-second
-  session bills as a whole block. Ours bills as 10 seconds. If your
-  workload is many short sessions, this is the single biggest difference
-  in the whole migration — and the one to model against your own numbers.
-- **CAPTCHA solving moves to your own account.** We orchestrate it, but the
-  provider account is yours: pass a CapSolver or 2Captcha key to
-  [`/unblock`](/docs/guide-unblocking) and pay them at list price. Usually
-  cheaper than a bundled rate, but it's a signup you didn't have before.
-  Most walls need no solver at all — passive interstitials are waited out
-  for you.
-- **Your proxy bill becomes visible.** Bundled proxy traffic stops being
-  part of one invoice and becomes a line item from your proxy provider.
-  Usually cheaper at wholesale, but always more work to set up.
-- **Parked stable sessions bill while parked.** Same as Browserbase, and
-  worth knowing before you leave one open overnight.
-
-## Concurrency
-
-Browserless sells concurrency by plan; so do we, but at the limit we
-**queue** for about 20 seconds before returning 429, where a hard cap
-would reject immediately. Retry logic written against a strict cap still
-works — it'll just fire less often.
-
-Concurrency by tier: Free 3, Hobby 10, Startup 25 — and 50 on Scale,
-which is quoted rather than listed ([sales@runbrowser.dev](mailto:sales@runbrowser.dev)).
-
-There are two limits, and they return different codes:
-
-| Limit | Meaning | Response |
-|---|---|---|
-| Your tier's concurrency | You're at your own ceiling | `429` after queueing |
-| Fleet capacity | The whole box is full | `503` + `Retry-After` |
-
-The `503` is rare and not your fault — it means every customer's traffic
-together exceeded the hardware. Treat it as retryable. We'd rather return
-it than keep spawning browsers until the box runs out of memory and takes
-down sessions that were well inside their limits.
-
-## A realistic migration
-
-1. Point one non-critical script at `connect.runbrowser.dev` and run it.
-2. Grep your codebase for `browserless.io` — that finds the REST calls
-   you'd forgotten.
-3. Check the "don't have" table above against those hits.
-4. Move the rest, keeping your Browserless account alive for a week.
-
-Most people are done in an afternoon. If you're not, the thing blocking
-you is almost certainly on that list.
 
 ---
 
@@ -3293,10 +3349,9 @@ the point of the feature, but know that you're making it.
 ## Next
 
 - [Concepts](concepts.md) — sessions, quotas, stable sessions, the viewer
+- [Autopilot](guide-autopilot.md) — describe a task instead of scripting it
 - [API reference](api-reference.md) — every endpoint
 - [Errors](errors.md) — every status code, what causes it, what to do
-- [Migrating from Browserless](migrating-from-browserless.md)
-- [Migrating from Browserbase](migrating-from-browserbase.md)
 
 ---
 

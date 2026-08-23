@@ -41,6 +41,7 @@
 
     <span class="nav-title nav-title-spaced">Guides</span>
     <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-autopilot">Autopilot</a>
         <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
         <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
         <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
@@ -85,6 +86,19 @@
           </div>
         </div>
         <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#autopilot">Autopilot</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1agentsruns"><span class="m m-post">POST</span><span class="ep-path">/v1/agents/runs</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1agentsrunsrunid"><span class="m m-get">GET</span><span class="ep-path">/v1/agents/runs/{runId}</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#browser-contexts">Browser contexts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1contexts"><span class="m m-post">POST</span><span class="ep-path">/v1/contexts</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
@@ -116,8 +130,6 @@
 
     <span class="nav-title nav-title-spaced">Migrating</span>
     <div class="nav-links">
-        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
-        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
 
     <span class="nav-title nav-title-spaced">More</span>
@@ -191,13 +203,19 @@ you get a stable session.</p>
   &quot;keepAlive&quot;: true,
   &quot;maxIdleSeconds&quot;: 600,
   &quot;record&quot;: true,
+  &quot;contextId&quot;: &quot;…&quot;,
+  &quot;persistContext&quot;: false,
   &quot;proxy&quot;: { &quot;type&quot;: &quot;external&quot;, &quot;url&quot;: &quot;http://user:pass@host:port&quot; }
 }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
   <span class="token property">"keepAlive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
   <span class="token property">"maxIdleSeconds"</span><span class="token operator">:</span> <span class="token number">600</span><span class="token punctuation">,</span>
   <span class="token property">"record"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"contextId"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span>
+  <span class="token property">"persistContext"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
   <span class="token property">"proxy"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"external"</span><span class="token punctuation">,</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"http://user:pass@host:port"</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre></div><p><code>record: true</code> captures the whole session for replay (Startup and up — a
+<span class="token punctuation">}</span></code></pre></div><p><code>contextId</code> starts the browser from a saved cookie jar, so the session begins
+signed in — see <a href="#browser-contexts">browser contexts</a>.</p>
+<p><code>record: true</code> captures the whole session for replay (Startup and up — a
 Free or Hobby key gets <code>403</code>). Also works as <code>?record=true</code> on a direct
 connect URL. Retrieve it after the session ends with
 <a href="#get-v1sessionsidrecording"><code>GET /v1/sessions/{id}/recording</code></a>.</p>
@@ -291,8 +309,11 @@ session.</p>
 <span class="token punctuation">}</span></code></pre></div><p>Default TTL 1 hour, max 24. HMAC-signed; no API key in the URL.</p>
 <hr>
 <h2 id="rest-shortcuts">REST shortcuts<a class="anchor" href="#rest-shortcuts" aria-label="Link to this section">#</a></h2>
-<p>Browserless-compatible body shapes, on <code>connect.runbrowser.dev</code>. Each one
-provisions a browser, does the work, and releases it.</p>
+<p>One-shot HTTP endpoints on <code>connect.runbrowser.dev</code>, for when you want a
+result rather than a browser. Each one provisions a browser, does the work,
+and releases it. The body shapes follow the conventions common to this class
+of service, so a script written against another one usually needs only a
+change of host.</p>
 <p>All four take <strong>either</strong> a <code>url</code> to load <strong>or</strong> <code>html</code> to render directly —
 one or the other, not both. <code>html</code> is what you want for documents you
 generated yourself: an invoice, a report, an OG image. Publishing a
@@ -621,6 +642,105 @@ modal on a page you can already read matches every CAPTCHA selector, so a naive
 check would tell you to spend a solve on a page that was never blocked. When
 the content is accessible you get <code>unblocked: true</code> and no solve is spent.</p>
 <hr>
+<h2 id="autopilot">Autopilot<a class="anchor" href="#autopilot" aria-label="Link to this section">#</a></h2>
+<p>Describe a task in plain language and a browser works through it. Concepts,
+limits and what it is bad at are in the <a href="/docs/guide-autopilot">autopilot guide</a>;
+this is the wire format.</p>
+<h3 id="post-v1agentsruns"><code>POST /v1/agents/runs</code><a class="anchor" href="#post-v1agentsruns" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;task&quot;: &quot;Go to news.ycombinator.com and give me the title of the top story.&quot;,
+  &quot;expect&quot;: [
+    { &quot;key&quot;: &quot;top_story_title&quot;, &quot;what&quot;: &quot;headline of the number one story&quot; },
+    { &quot;key&quot;: &quot;site_name&quot;, &quot;what&quot;: &quot;the site's own name&quot;, &quot;equals&quot;: &quot;Hacker News&quot; }
+  ]
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"task"</span><span class="token operator">:</span> <span class="token string">"Go to news.ycombinator.com and give me the title of the top story."</span><span class="token punctuation">,</span>
+  <span class="token property">"expect"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token property">"key"</span><span class="token operator">:</span> <span class="token string">"top_story_title"</span><span class="token punctuation">,</span> <span class="token property">"what"</span><span class="token operator">:</span> <span class="token string">"headline of the number one story"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token property">"key"</span><span class="token operator">:</span> <span class="token string">"site_name"</span><span class="token punctuation">,</span> <span class="token property">"what"</span><span class="token operator">:</span> <span class="token string">"the site's own name"</span><span class="token punctuation">,</span> <span class="token property">"equals"</span><span class="token operator">:</span> <span class="token string">"Hacker News"</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre></div><p>Returns <code>202</code> with a run id, immediately:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;runId&quot;: &quot;…&quot;, &quot;status&quot;: &quot;running&quot; }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"runId"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"status"</span><span class="token operator">:</span> <span class="token string">"running"</span> <span class="token punctuation">}</span></code></pre></div><p><code>202</code> rather than <code>200</code> because the work has been accepted and has not been
+done. Poll the run to get the answer. Submit-and-poll rather than a held-open
+request: a run takes minutes, and a request held open for minutes dies to the
+first proxy timeout between you and us. Every check that could refuse the run
+— your plan&#39;s run allowance, the spend ceiling — has already happened by the
+time you get an id, so an id means the work is genuinely under way.</p>
+<p><code>expect</code> is optional. Supply it and the run collects exactly those and nothing
+else; leave it out and it works out for itself what the task requires. An
+entry with <code>equals</code> is an assertion and gets a verdict; one without is a
+question and gets a value.</p>
+<h3 id="get-v1agentsrunsrunid"><code>GET /v1/agents/runs/{runId}</code><a class="anchor" href="#get-v1agentsrunsrunid" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{
+  &quot;runId&quot;: &quot;…&quot;,
+  &quot;status&quot;: &quot;complete&quot;,
+  &quot;task&quot;: &quot;Go to news.ycombinator.com …&quot;,
+  &quot;result&quot;: &quot;The top story is …&quot;,
+  &quot;facts&quot;: &quot;{\&quot;top_story_title\&quot;:\&quot;…\&quot;,\&quot;site_name\&quot;:\&quot;Hacker News\&quot;}&quot;,
+  &quot;evidence&quot;: &quot;{\&quot;site_name\&quot;:{\&quot;url\&quot;:\&quot;https://news.ycombinator.com/\&quot;,\&quot;quote\&quot;:\&quot;Hacker News\&quot;,\&quot;seenAt\&quot;:\&quot;…\&quot;}}&quot;,
+  &quot;verdicts&quot;: &quot;{\&quot;site_name\&quot;:\&quot;passed\&quot;}&quot;,
+  &quot;steps&quot;: 2,
+  &quot;costMicros&quot;: 4500,
+  &quot;startedAt&quot;: &quot;2026-08-23T12:00:00Z&quot;,
+  &quot;durationMs&quot;: 9800
+}">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span>
+  <span class="token property">"runId"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span>
+  <span class="token property">"status"</span><span class="token operator">:</span> <span class="token string">"complete"</span><span class="token punctuation">,</span>
+  <span class="token property">"task"</span><span class="token operator">:</span> <span class="token string">"Go to news.ycombinator.com …"</span><span class="token punctuation">,</span>
+  <span class="token property">"result"</span><span class="token operator">:</span> <span class="token string">"The top story is …"</span><span class="token punctuation">,</span>
+  <span class="token property">"facts"</span><span class="token operator">:</span> <span class="token string">"{\"top_story_title\":\"…\",\"site_name\":\"Hacker News\"}"</span><span class="token punctuation">,</span>
+  <span class="token property">"evidence"</span><span class="token operator">:</span> <span class="token string">"{\"site_name\":{\"url\":\"https://news.ycombinator.com/\",\"quote\":\"Hacker News\",\"seenAt\":\"…\"}}"</span><span class="token punctuation">,</span>
+  <span class="token property">"verdicts"</span><span class="token operator">:</span> <span class="token string">"{\"site_name\":\"passed\"}"</span><span class="token punctuation">,</span>
+  <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+  <span class="token property">"costMicros"</span><span class="token operator">:</span> <span class="token number">4500</span><span class="token punctuation">,</span>
+  <span class="token property">"startedAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-23T12:00:00Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"durationMs"</span><span class="token operator">:</span> <span class="token number">9800</span>
+<span class="token punctuation">}</span></code></pre></div><p><code>status</code> is <code>running</code>, <code>complete</code> or <code>failed</code>. <code>facts</code>, <code>evidence</code> and
+<code>verdicts</code> are JSON documents carried as strings — their keys are yours,
+whatever you passed in <code>expect</code> or whatever the run derived, so they have no
+fixed schema.</p>
+<p><strong>A fact missing from <code>evidence</code> was not read off a page.</strong> Treat it as the
+model talking rather than the web answering.</p>
+<p>Verdicts are <code>passed</code>, <code>failed</code> or <code>unresolved</code>. <code>unresolved</code> means no value
+was found at all, which is a different problem from finding the wrong one —
+do not collapse the two.</p>
+<p><code>costMicros</code> is micro-USD. Divide by 1,000,000.</p>
+<h2 id="browser-contexts">Browser contexts<a class="anchor" href="#browser-contexts" aria-label="Link to this section">#</a></h2>
+<p>A saved cookie jar, so a run does not have to log in again every time. A
+container is destroyed on release and Chromium&#39;s profile goes with it, so
+without one every session starts signed out of everything.</p>
+<h3 id="post-v1contexts"><code>POST /v1/contexts</code><a class="anchor" href="#post-v1contexts" aria-label="Link to this section">#</a></h3>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;name&quot;: &quot;staging-admin&quot; }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"staging-admin"</span> <span class="token punctuation">}</span></code></pre></div><div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;contextId&quot;: &quot;…&quot;, &quot;name&quot;: &quot;staging-admin&quot;, &quot;hasState&quot;: false,
+  &quot;updatedAt&quot;: null, &quot;createdAt&quot;: &quot;2026-08-23T12:00:00Z&quot; }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"contextId"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"staging-admin"</span><span class="token punctuation">,</span> <span class="token property">"hasState"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token property">"updatedAt"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span> <span class="token property">"createdAt"</span><span class="token operator">:</span> <span class="token string">"2026-08-23T12:00:00Z"</span> <span class="token punctuation">}</span></code></pre></div><p><code>name</code> is optional and is for whoever later has to tell these apart; the id is
+the identity. <code>hasState</code> is how you know whether anything has been written
+into it yet. The cookies themselves are never returned — they are credentials
+for someone else&#39;s site, and only the browser has any use for them.</p>
+<p><code>GET /v1/contexts</code> lists this org&#39;s contexts, newest first.
+<code>DELETE /v1/contexts/{contextId}</code> removes one, and is <code>204</code> whether or not it
+was there: deleting the same thing twice gets you what you wanted both times.</p>
+<h3 id="using-one">Using one<a class="anchor" href="#using-one" aria-label="Link to this section">#</a></h3>
+<p>Pass it at session create:</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;keepAlive&quot;: true, &quot;contextId&quot;: &quot;…&quot;, &quot;persistContext&quot;: true }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"keepAlive"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"contextId"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"persistContext"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span></code></pre></div><p><code>contextId</code> loads the jar into the browser <strong>before anything navigates</strong>, so
+your first request is already authenticated rather than landing on a login
+page. <code>persistContext</code> writes the jar back when the session ends.</p>
+<p>They are separate switches on purpose. The shape that matters — sign in once,
+then run a hundred cases from that state — wants to load every time and save
+never. If every run wrote back, the hundredth run&#39;s leftovers become the next
+suite&#39;s starting state, and you have a test suite whose result depends on the
+order it happened to run in. So: one job with <code>persistContext</code> that does the
+login, and everything else with <code>contextId</code> alone.</p>
+<p><strong>Cookies only.</strong> Not <code>localStorage</code>, not <code>sessionStorage</code>, not IndexedDB.
+That is a real limit, not an omission: <code>localStorage</code> can only be written
+while the page is already on the origin that owns it, and a browser at session
+start is not on any origin — restoring it would mean visiting every origin
+first, which is a visit you did not ask for and one the site can see. If your
+target keeps its session token in <code>localStorage</code> rather than a cookie, this
+will not restore it.</p>
+<p>Contexts also go stale. You are restoring the client half of a session; the
+server can still have expired it. When runs start failing at the login wall,
+re-run the job that saves. One writer per context — two sessions both
+persisting to the same one will clobber each other.</p>
 <h2 id="primitives">Primitives<a class="anchor" href="#primitives" aria-label="Link to this section">#</a></h2>
 <p>On <code>api.runbrowser.dev</code>. These are the ones that make agent loops cheap.</p>
 <h3 id="post-v1fetch"><code>POST /v1/fetch</code><a class="anchor" href="#post-v1fetch" aria-label="Link to this section">#</a></h3>
@@ -630,6 +750,22 @@ rendering, use <code>/v1/extract</code> or a browser.</p>
 <div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;url&quot;: &quot;…&quot;, &quot;format&quot;: &quot;markdown&quot;, &quot;method&quot;: &quot;GET&quot;,
   &quot;headers&quot;: {}, &quot;timeoutMs&quot;: 30000, &quot;followRedirects&quot;: true }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"…"</span><span class="token punctuation">,</span> <span class="token property">"format"</span><span class="token operator">:</span> <span class="token string">"markdown"</span><span class="token punctuation">,</span> <span class="token property">"method"</span><span class="token operator">:</span> <span class="token string">"GET"</span><span class="token punctuation">,</span>
   <span class="token property">"headers"</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token property">"timeoutMs"</span><span class="token operator">:</span> <span class="token number">30000</span><span class="token punctuation">,</span> <span class="token property">"followRedirects"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span></code></pre></div><p><code>format</code> is <code>html</code> (default), <code>text</code>, <code>markdown</code> or <code>markdown-full</code>.</p>
+<p><code>followRedirects</code> defaults to <code>true</code>: the redirect chain is walked for you and
+you get the page at the end of it. An HTTPS response is never followed to a
+plain-HTTP one, so a fetch that started encrypted cannot be quietly walked off
+TLS.</p>
+<p>Set it to <code>false</code> and you get the redirect itself — <code>status</code> is the <code>301</code>/<code>302</code>
+and <code>headers.location</code> is where it points. That is the mode you want when the
+redirect <em>is</em> the answer: resolving a shortened or tracking link without
+visiting the destination, checking whether a URL is canonical, or finding out
+that a page is bouncing you to a login rather than serving you. It is also how
+you see a chain hop by hop, which following collapses into a single status.</p>
+<p>Two things to know. The response does not tell you where you landed, so with
+following on, a URL that redirected is indistinguishable from one served
+directly. And the <a href="/docs/errors">URL guard</a> validates the URL you passed, not the
+targets it redirects to — if you are fetching URLs supplied by someone else and
+that distinction matters to you, turn following off and walk the chain
+yourself.</p>
 <p><code>markdown</code> runs Readability first: you get the main article and none of the
 site chrome, which is what you want for prose. That also means navigation
 is stripped — including pagination links — so a listing page comes back
@@ -770,7 +906,7 @@ waiting out a cache TTL.</p>
       <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20API%20reference">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
-    <p class="updated">Last updated 2026-08-16</p>
+    <p class="updated">Last updated 2026-08-17</p>
   </main>
   <aside class="toc">
     <span class="toc-title">On this page</span>
@@ -793,6 +929,12 @@ waiting out a cache TTL.</p>
     <a class="toc-3" href="#post-crawl-json">POST /crawl → JSON</a>
     <a class="toc-3" href="#post-download-the-file-as-is">POST /download → the file, as-is</a>
     <a class="toc-3" href="#post-unblock-json">POST /unblock → JSON</a>
+    <a class="toc-2" href="#autopilot">Autopilot</a>
+    <a class="toc-3" href="#post-v1agentsruns">POST /v1/agents/runs</a>
+    <a class="toc-3" href="#get-v1agentsrunsrunid">GET /v1/agents/runs/{runId}</a>
+    <a class="toc-2" href="#browser-contexts">Browser contexts</a>
+    <a class="toc-3" href="#post-v1contexts">POST /v1/contexts</a>
+    <a class="toc-3" href="#using-one">Using one</a>
     <a class="toc-2" href="#primitives">Primitives</a>
     <a class="toc-3" href="#post-v1fetch">POST /v1/fetch</a>
     <a class="toc-3" href="#post-v1search">POST /v1/search</a>

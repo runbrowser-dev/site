@@ -41,6 +41,7 @@
 
     <span class="nav-title nav-title-spaced">Guides</span>
     <div class="nav-links">
+        <a class="nav-link " href="/docs/guide-autopilot">Autopilot</a>
         <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
         <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
         <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
@@ -85,6 +86,19 @@
           </div>
         </div>
         <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#autopilot">Autopilot</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1agentsruns"><span class="m m-post">POST</span><span class="ep-path">/v1/agents/runs</span></a>
+            <a class="ep" href="/docs/api-reference#get-v1agentsrunsrunid"><span class="m m-get">GET</span><span class="ep-path">/v1/agents/runs/{runId}</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
+          <a class="nav-cat-label" href="/docs/api-reference#browser-contexts">Browser contexts</a>
+          <div class="nav-eps">
+            <a class="ep" href="/docs/api-reference#post-v1contexts"><span class="m m-post">POST</span><span class="ep-path">/v1/contexts</span></a>
+          </div>
+        </div>
+        <div class="nav-cat">
           <a class="nav-cat-label" href="/docs/api-reference#primitives">Primitives</a>
           <div class="nav-eps">
             <a class="ep" href="/docs/api-reference#post-v1fetch"><span class="m m-post">POST</span><span class="ep-path">/v1/fetch</span></a>
@@ -116,8 +130,6 @@
 
     <span class="nav-title nav-title-spaced">Migrating</span>
     <div class="nav-links">
-        <a class="nav-link " href="/docs/migrating-from-browserless">From Browserless</a>
-        <a class="nav-link " href="/docs/migrating-from-browserbase">From Browserbase</a>
     </div>
 
     <span class="nav-title nav-title-spaced">More</span>
@@ -469,6 +481,21 @@ Plain-text bodies.</p>
 <td>Wrong key</td>
 </tr>
 <tr>
+<td>403</td>
+<td><code>session recording is a paid feature; upgrade to Startup or contact sales</code></td>
+<td><code>record: true</code> on a Free or Hobby key. Refused at create rather than silently not recording</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>invalid contextId</code></td>
+<td>Not a context id. It goes into a URL, so we check its shape rather than passing it on</td>
+</tr>
+<tr>
+<td>400</td>
+<td><code>persistContext requires contextId</code></td>
+<td>Nothing to save it into</td>
+</tr>
+<tr>
 <td>502</td>
 <td><code>could not create session: …</code></td>
 <td>We failed to record it. Retry</td>
@@ -548,7 +575,54 @@ Plain-text bodies.</p>
 <td>Same handling</td>
 </tr>
 </tbody></table>
-</div><h2 id="v1fetch">/v1/fetch<a class="anchor" href="#v1fetch" aria-label="Link to this section">#</a></h2>
+</div><h2 id="autopilot-and-contexts">Autopilot and contexts<a class="anchor" href="#autopilot-and-contexts" aria-label="Link to this section">#</a></h2>
+<p><code>/v1/agents/runs</code> and <code>/v1/contexts</code> on <code>api.runbrowser.dev</code>. JSON bodies in
+the <a href="#json-error-shapes-on-apirunbrowserdev">standard envelope</a>.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th><code>error</code></th>
+<th>Cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400</td>
+<td><code>invalid_request</code></td>
+<td>Failed validation — <code>fields</code> names which. A blank <code>task</code>, more than 10 <code>expect</code> entries, an entry with no <code>key</code></td>
+<td>Fix the body</td>
+</tr>
+<tr>
+<td>429</td>
+<td><code>quota_exceeded</code></td>
+<td>This month&#39;s autopilot runs are used up. The message names your plan&#39;s limit</td>
+<td>Upgrade, or wait for the reset</td>
+</tr>
+<tr>
+<td>429</td>
+<td><code>spend_ceiling_reached</code></td>
+<td>Your org&#39;s monthly token ceiling is spent. Separate from the run count: a small number of unusually long runs can hit this first</td>
+<td>Wait for the reset, or talk to us about raising it</td>
+</tr>
+<tr>
+<td>503</td>
+<td><code>llm_not_configured</code></td>
+<td>No language model configured on this deployment. Not your fault and not fixable from your side</td>
+<td>Contact support</td>
+</tr>
+<tr>
+<td>404</td>
+<td><code>not_found</code></td>
+<td>No such run <strong>in your org</strong>. A run id from another org is indistinguishable from one that never existed, which is deliberate</td>
+<td>Check the id</td>
+</tr>
+</tbody></table>
+</div><p>A run that starts and then fails comes back as <code>status: &quot;failed&quot;</code> on
+<code>GET /v1/agents/runs/{runId}</code> with a <code>200</code>, not an error status. The request
+to read the run succeeded; the run is what failed. Poll for <code>status</code> and do
+not treat <code>200</code> as &quot;it worked&quot;.</p>
+<h2 id="v1fetch">/v1/fetch<a class="anchor" href="#v1fetch" aria-label="Link to this section">#</a></h2>
 <p>JSON bodies. Note that most of these have <strong>no <code>message</code> field</strong> — the
 code is the whole answer.</p>
 <div class="table-wrap"><table>
@@ -1160,6 +1234,7 @@ code, and roughly when it happened, and we&#39;ll look at the actual logs.</p>
     <a class="toc-2" href="#why-did-my-session-end">Why did my session end?</a>
     <a class="toc-2" href="#sessions-api">Sessions API</a>
     <a class="toc-2" href="#rest-shortcuts">REST shortcuts</a>
+    <a class="toc-2" href="#autopilot-and-contexts">Autopilot and contexts</a>
     <a class="toc-2" href="#v1fetch">/v1/fetch</a>
     <a class="toc-2" href="#v1search">/v1/search</a>
     <a class="toc-2" href="#v1extract">/v1/extract</a>
