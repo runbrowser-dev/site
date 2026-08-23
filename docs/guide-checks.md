@@ -171,6 +171,39 @@ represent a €0.01 charge without rounding a real one to nothing.
 The free plan has nothing to bill against, so there the allowance is still a
 wall: checks pause, and the check is fine — the month is not.
 
+## Suites, and running them after a deploy
+
+A flat list stops being readable somewhere around twenty checks. Group them
+into a **suite** — everything that has to work for checkout, or for signup —
+and you can run the whole group at once and get a single result:
+
+```
+Checkout · 6 passed · 1 failed of 7 · 86%
+  ✓ Basket accepts a product
+  ✓ Basket shows the right total
+  ✗ Checkout reaches the payment step
+        expected "Pay by card" · page says nothing
+```
+
+The schedule answers "is the site working" eventually. A suite run answers it
+in the ten minutes after a release, which is when you are actually asking. Both
+write to the same history, so "has this ever passed" has one place to look.
+
+```bash
+curl -X POST https://api.runbrowser.dev/v1/suites/{suiteId}/run \
+  -H "Authorization: Bearer ab_…"
+```
+
+That is the call a deploy pipeline makes. It is **synchronous** — a step that
+returns immediately and passes is a step that can never fail, which is worse
+than not having it — so expect it to take as long as the slowest few checks in
+the suite. Every check runs even after one fails: stopping at the first would
+report one problem when there were four, and how bad it is is what you are
+deciding a rollback on.
+
+Deleting a suite leaves its checks alone. Tidying up a grouping is not the same
+as asking to stop watching checkout.
+
 ## Getting told
 
 Add a destination under **Alerts** in the dashboard — an email address, a Slack

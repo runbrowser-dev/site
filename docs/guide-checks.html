@@ -363,6 +363,31 @@ is fixed to the cent, which is the right answer if you need to predict it.</p>
 represent a €0.01 charge without rounding a real one to nothing.</p>
 <p>The free plan has nothing to bill against, so there the allowance is still a
 wall: checks pause, and the check is fine — the month is not.</p>
+<h2 id="suites-and-running-them-after-a-deploy">Suites, and running them after a deploy<a class="anchor" href="#suites-and-running-them-after-a-deploy" aria-label="Link to this section">#</a></h2>
+<p>A flat list stops being readable somewhere around twenty checks. Group them
+into a <strong>suite</strong> — everything that has to work for checkout, or for signup —
+and you can run the whole group at once and get a single result:</p>
+<div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="Checkout · 6 passed · 1 failed of 7 · 86%
+  ✓ Basket accepts a product
+  ✓ Basket shows the right total
+  ✗ Checkout reaches the payment step
+        expected &quot;Pay by card&quot; · page says nothing">Copy</button></div><pre class="language-"><code>Checkout · 6 passed · 1 failed of 7 · 86%
+  ✓ Basket accepts a product
+  ✓ Basket shows the right total
+  ✗ Checkout reaches the payment step
+        expected &quot;Pay by card&quot; · page says nothing</code></pre></div><p>The schedule answers &quot;is the site working&quot; eventually. A suite run answers it
+in the ten minutes after a release, which is when you are actually asking. Both
+write to the same history, so &quot;has this ever passed&quot; has one place to look.</p>
+<div class="code-block"><div class="code-bar"><span class="code-lang">Shell</span><button class="copy" type="button" data-code="curl -X POST https://api.runbrowser.dev/v1/suites/{suiteId}/run \
+  -H &quot;Authorization: Bearer ab_…&quot;">Copy</button></div><pre class="language-bash"><code><span class="token function">curl</span> <span class="token parameter variable">-X</span> POST https://api.runbrowser.dev/v1/suites/<span class="token punctuation">{</span>suiteId<span class="token punctuation">}</span>/run <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Authorization: Bearer ab_…"</span></code></pre></div><p>That is the call a deploy pipeline makes. It is <strong>synchronous</strong> — a step that
+returns immediately and passes is a step that can never fail, which is worse
+than not having it — so expect it to take as long as the slowest few checks in
+the suite. Every check runs even after one fails: stopping at the first would
+report one problem when there were four, and how bad it is is what you are
+deciding a rollback on.</p>
+<p>Deleting a suite leaves its checks alone. Tidying up a grouping is not the same
+as asking to stop watching checkout.</p>
 <h2 id="getting-told">Getting told<a class="anchor" href="#getting-told" aria-label="Link to this section">#</a></h2>
 <p>Add a destination under <strong>Alerts</strong> in the dashboard — an email address, a Slack
 incoming webhook, or a Teams one. As many as you like, each switchable, each
@@ -396,7 +421,7 @@ pretending it isn&#39;t there.</li>
       <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Checks">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
-    <p class="updated">Last updated 2026-08-23</p>
+    <p class="updated">Last updated 2026-08-24</p>
   </main>
   <aside class="toc">
     <span class="toc-title">On this page</span>
@@ -408,6 +433,7 @@ pretending it isn&#39;t there.</li>
     <a class="toc-2" href="#scheduling">Scheduling</a>
     <a class="toc-2" href="#limits">Limits</a>
     <a class="toc-2" href="#going-over">Going over</a>
+    <a class="toc-2" href="#suites-and-running-them-after-a-deploy">Suites, and running them after a deploy</a>
     <a class="toc-2" href="#getting-told">Getting told</a>
     <a class="toc-2" href="#what-it-does-not-do-yet">What it does not do yet</a>
   </aside>
