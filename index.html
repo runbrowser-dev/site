@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RunBrowser — browser infrastructure you can watch</title>
-<meta name="description" content="Hosted Chromium for Playwright, Puppeteer and AI agents. Drop-in over CDP, per-second billing, a live session viewer, EU-hosted. Free tier, no card.">
-<meta property="og:title" content="RunBrowser — browser infrastructure you can watch">
-<meta property="og:description" content="Hosted Chromium for Playwright, Puppeteer and AI agents. Drop-in over CDP, per-second billing, a live session viewer, EU-hosted. Free tier, no card.">
+<title>RunBrowser — the tests you never wrote, running every hour</title>
+<meta name="description" content="Describe what your site should do in a sentence. We work out how once, run it on a schedule on real Chrome, repair it when your UI changes, and only tell you when something actually broke. EU-hosted. Free tier, no card.">
+<meta property="og:title" content="RunBrowser — the tests you never wrote, running every hour">
+<meta property="og:description" content="Describe what your site should do in a sentence. We work out how once, run it on a schedule on real Chrome, repair it when your UI changes, and only tell you when something actually broke. EU-hosted. Free tier, no card.">
 <meta property="og:url" content="https://runbrowser.dev">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#08090b">
@@ -233,6 +233,58 @@
   }
 
   /* ---- logos / trust strip ---- */
+  /* The hero panel: a board of checks and their last result. It replaced a
+     generic browser mock, which showed that we have a browser — true of every
+     competitor — instead of showing what we do with it. A reader who takes one
+     look should come away knowing the product runs repeatedly, reports per
+     assertion, and repairs itself. */
+  .board { border: 1px solid var(--border-lit); border-radius: var(--r); overflow: hidden; background: var(--panel); }
+  .board-bar { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); background: var(--surface); font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .board-bar .spacer { flex: 1; }
+  .board-bar .cadence { color: var(--faint); }
+  .chk { display: grid; grid-template-columns: 18px 1fr auto; gap: 12px; align-items: baseline; padding: 13px 14px; border-bottom: 1px solid var(--border); }
+  .chk:last-child { border-bottom: 0; }
+  .chk .mark { font-family: var(--mono); font-size: 12px; line-height: 1.2; }
+  .chk .nm { font-size: 13.5px; color: var(--text); }
+  .chk .when { font-family: var(--mono); font-size: 11px; color: var(--faint); white-space: nowrap; }
+  .chk.ok .mark { color: var(--live); }
+  .chk.bad { background: rgba(255,120,120,0.05); }
+  .chk.bad .mark { color: #ff8a8a; }
+  .chk.heal .mark { color: var(--stream); }
+  /* The evidence line is the argument: a failure that names the assertion, what
+     was wanted and what the page actually says is the difference between a
+     check and a red light. */
+  .chk .why { grid-column: 2 / -1; margin-top: 6px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .chk .why b { color: #ff8a8a; font-weight: 500; }
+  .chk .why i { color: var(--live); font-style: normal; }
+  .chk .why .sep { color: var(--faint); padding: 0 6px; }
+  .board-foot { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--border); background: var(--surface); font-family: var(--mono); font-size: 11px; color: var(--faint); }
+  .board-foot .spacer { flex: 1; }
+  .board-foot .zero { color: var(--amber); }
+
+  /* Two small in-cell mocks. Both replace a generic browser mock that showed
+     we have a browser rather than what we do with it — and in a cell whose
+     whole claim is "we tell you exactly what changed", a vague picture was
+     arguing against the copy beside it. */
+  .diff, .evi { margin-top: 16px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--panel); font-family: var(--mono); font-size: 11.5px; }
+  .diff .row2 { display: grid; grid-template-columns: 38px 1fr; gap: 10px; padding: 9px 12px; }
+  .diff .row2 + .row2 { border-top: 1px solid var(--border); }
+  .lab2 { color: var(--faint); }
+  .diff .was { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--faint); overflow-wrap: anywhere; }
+  .diff .now { color: var(--live); overflow-wrap: anywhere; }
+  .diff .note { padding: 8px 12px; border-top: 1px solid var(--border); background: var(--surface); color: var(--faint); font-size: 11px; }
+
+  .evi .hd { display: flex; gap: 8px; align-items: baseline; padding: 9px 12px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .evi .hd .x { color: #ff8a8a; }
+  .evi .hd .key { color: var(--text); }
+  .evi .row2 { display: grid; grid-template-columns: 78px 1fr; gap: 10px; padding: 7px 12px; }
+  .evi .want { color: var(--live); }
+  .evi .got  { color: #ff8a8a; }
+  .evi .where { color: var(--muted); }
+
+  /* Cells with more than one paragraph ran them together. */
+  .cell p + p { margin-top: 11px; }
+
   .compat { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-top: 46px; }
   .compat .row { display: flex; align-items: center; gap: 18px 26px; flex-wrap: wrap; padding: 20px 0; }
   .compat .lab { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
@@ -417,7 +469,7 @@
         <a class="nav-link" href="#pricing">Pricing</a>
         <a class="nav-link" href="/docs/">Docs</a>
       </span>
-      <a class="nav-cta" href="#start">Get a key &rarr;</a>
+      <a class="nav-cta" href="#start">Start checking &rarr;</a>
     </nav>
   </div>
 </header>
@@ -427,61 +479,76 @@
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
-        <span class="eyebrow"><span class="tick">●</span> hosted chromium · cdp-native · eu</span>
-        <h1>A real browser,<br>on demand —<br><span class="lit">watch it work.</span></h1>
+        <span class="eyebrow"><span class="tick">●</span> browser checks · self-healing · eu-hosted</span>
+        <h1>The tests you<br>never wrote,<br><span class="lit">running every hour.</span></h1>
         <p class="lede">
-          Running your own Chrome fleet means memory leaks, zombie processes,
-          cold starts and a scaling problem you didn't want. Point your existing
-          Playwright or Puppeteer at us instead — one line changes, everything
-          else stays. Then open the viewer and watch the session live.
+          You know what your site is supposed to do. Writing a browser test that
+          proves it — and rewriting it every time a class name changes — is the
+          part nobody has time for. So write the sentence instead. We work out
+          how once, run it on real Chrome on a schedule, repair it when your UI
+          moves, and only get in touch when something actually broke.
         </p>
         <div class="cta-row">
-          <a class="btn primary" href="#start">Get a key <span class="arr">&rarr;</span></a>
-          <a class="btn" href="/docs/">Read the docs <span class="arr">&rarr;</span></a>
+          <a class="btn primary" href="#start">Start checking <span class="arr">&rarr;</span></a>
+          <a class="btn" href="/docs/guide-checks">How it works <span class="arr">&rarr;</span></a>
         </div>
-        <p class="hero-note">Free tier, no card. <b>Per-second billing</b>, floored at 10s. Your scripts stay portable — it's standard CDP.</p>
+        <p class="hero-note">Free tier, no card. <b>No selectors to write</b>, no runners to host, nothing to keep green in CI.</p>
       </div>
 
-      <!-- the thesis: a live session you can watch -->
-      <div class="session" aria-label="A live browser session">
-        <div class="sess-bar">
-          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span class="url"><span class="lock">&#9679;</span> https://example.com/checkout</span>
-          <span class="live-pill"><span class="beat"></span> live</span>
-        </div>
-        <div class="viewport" aria-hidden="true">
-          <div class="vp-top"><span class="b g"></span><span class="b"></span><span class="b" style="width:40px"></span></div>
-          <div class="vp-hero">
-            <div class="l w1"></div><div class="l w2"></div>
-            <div class="l s"></div><div class="l s2"></div>
-          </div>
-          <div class="vp-cards">
-            <div class="card"><div class="pr"></div></div>
-            <div class="card"><div class="pr"></div></div>
-            <div class="card"><div class="pr"></div></div>
-          </div>
-          <div class="scan"></div>
-          <div class="cursor"><svg width="16" height="16" viewBox="0 0 16 16" fill="#111"><path d="M1 1 L1 12 L4 9 L6.5 14 L8.5 13 L6 8 L10 8 Z" stroke="#fff" stroke-width="0.7"/></svg></div>
-        </div>
-        <div class="sess-foot">
-          <span><span class="k">ssn</span> a1f9c3</span>
-          <span class="stream-tag">streaming · 12 fps</span>
+      <!-- The thesis, in one panel: it repeats, it says WHY, and it repairs. -->
+      <div class="board" aria-label="Checks and their most recent result">
+        <div class="board-bar">
+          <span>example.com</span>
           <span class="spacer"></span>
-          <span><span class="k">billed</span> <span id="secs">00:07</span></span>
+          <span class="cadence">every 15 min</span>
+        </div>
+
+        <div class="chk ok">
+          <span class="mark" aria-hidden="true">✓</span>
+          <span class="nm">Checkout reaches the payment step</span>
+          <span class="when">2 min ago</span>
+        </div>
+
+        <div class="chk bad">
+          <span class="mark" aria-hidden="true">✗</span>
+          <span class="nm">Pricing page shows the Startup plan at &euro;99</span>
+          <span class="when">2 min ago</span>
+          <span class="why">
+            total<span class="sep">·</span>expected <i>&euro;99</i><span class="sep">·</span>page says <b>&euro;109</b>
+          </span>
+        </div>
+
+        <div class="chk heal">
+          <span class="mark" aria-hidden="true">↻</span>
+          <span class="nm">Search returns results</span>
+          <span class="when">2 min ago</span>
+          <span class="why">the markup moved<span class="sep">·</span>journey re-derived<span class="sep">·</span>still green</span>
+        </div>
+
+        <div class="chk ok">
+          <span class="mark" aria-hidden="true">✓</span>
+          <span class="nm">Signup accepts a new email address</span>
+          <span class="when">2 min ago</span>
+        </div>
+
+        <div class="board-foot">
+          <span>96 runs today</span>
+          <span class="spacer"></span>
+          <span class="zero">&euro;0.00 in model spend</span>
         </div>
       </div>
     </div>
 
-    <!-- compat strip -->
+    <!-- What people actually point these at. Concrete beats abstract: a reader
+         recognising their own worry is worth more than another adjective. -->
     <div class="compat">
       <div class="wrap row">
-        <span class="lab">Drop-in for</span>
-        <span class="name">Playwright</span>
-        <span class="name">Puppeteer</span>
-        <span class="name">Selenium</span>
-        <span class="name">Playwright&nbsp;MCP</span>
-        <span class="name">CDP</span>
-        <span class="lab mcp">Model Context Protocol&nbsp;✓</span>
+        <span class="lab">People check</span>
+        <span class="name">Can they still check out?</span>
+        <span class="name">Does login work?</span>
+        <span class="name">Is the price right?</span>
+        <span class="name">Did signup break?</span>
+        <span class="name">Is the status page honest?</span>
       </div>
     </div>
   </section>
@@ -489,27 +556,26 @@
   <!-- HOW IT WORKS -->
   <section class="block" id="how">
     <div class="wrap">
-      <div class="sec-head"><span class="idx">01</span><h2>one line changes</h2></div>
+      <div class="sec-head"><span class="idx">01</span><h2>one sentence, not one script</h2></div>
       <div class="codewrap">
-        <div class="code-top"><span class="file">connect.ts</span><span class="ep">wss://connect.runbrowser.dev</span></div>
-<pre><span class="c">// Same code. Different endpoint.</span>
-<span class="c">// No fleet to run, no Chrome to babysit.</span>
+        <div class="code-top"><span class="file">create-a-check</span><span class="ep">api.runbrowser.dev/v1/checks</span></div>
+<pre><span class="c">// No selectors. No runner. No CI minutes.</span>
+<span class="c">// Say what should be true, and how often to look.</span>
 
-<span class="k">import</span> { chromium } <span class="k">from</span> <span class="s">'playwright'</span>
-
-<span class="k">const</span> browser = <span class="k">await</span> chromium.connectOverCDP(
-  <span class="swap">'wss://connect.runbrowser.dev?token=YOUR_TOKEN'</span>
-)
-<span class="k">const</span> page = <span class="k">await</span> browser.newPage()
-<span class="k">await</span> page.goto(<span class="s">'https://example.com'</span>)
-<span class="k">await</span> page.screenshot({ path: <span class="s">'out.png'</span> })
-<span class="k">await</span> browser.close()</pre>
+{
+  <span class="s">"name"</span>: <span class="s">"Checkout reaches the payment step"</span>,
+  <span class="s">"task"</span>: <span class="swap">"Go to example.com, add the first product to the
+           basket, open checkout, and confirm the page
+           shows a total and a card payment option."</span>,
+  <span class="s">"intervalMinutes"</span>: <span class="k">15</span>
+}</pre>
       </div>
       <p class="code-note">
-        That's the whole integration — standard CDP, nothing to rewrite. Prefer a
-        typed client for the REST endpoints? <code>npm install runbrowser</code> or
-        <code>pip install runbrowser</code>; neither wraps Playwright, and neither
-        has runtime dependencies. <a href="/docs/guide-sdk">SDKs &rarr;</a>
+        The first run works out how — which links, which buttons, which words prove it
+        worked. Every run after that repeats those steps with no language model involved,
+        which is why one check every fifteen minutes is roughly three thousand runs a
+        month and still costs less than the coffee you drank writing this sentence.
+        <a href="/docs/guide-checks">How checks work &rarr;</a>
       </p>
     </div>
   </section>
@@ -517,79 +583,84 @@
   <!-- FEATURES (bento) -->
   <section class="block" id="features">
     <div class="wrap">
-      <div class="sec-head"><span class="idx">02</span><h2>what's in the box</h2></div>
+      <div class="sec-head"><span class="idx">02</span><h2>what makes it hold up</h2></div>
       <div class="bento">
 
         <div class="cell feature">
           <div class="ic" aria-hidden="true">
-            <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="1.5" y="3.5" width="23" height="17" rx="2.5" stroke="currentColor" stroke-width="1.4"/><line x1="1.5" y1="8" x2="24.5" y2="8" stroke="currentColor" stroke-width="1.4"/><circle cx="4.5" cy="5.7" r="0.8" fill="currentColor"/><circle cx="13" cy="14" r="3.2" stroke="currentColor" stroke-width="1.4"/><circle cx="13" cy="14" r="0.9" fill="currentColor"/></svg>
+            <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M22 8.5A9.5 9.5 0 1 0 23 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M22.5 3.5V9H17" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 13.2l2.6 2.6 5-5.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <h3>Live session viewer</h3>
-          <p>Watch any run in real time. Hand a teammate a signed, expiring link that carries no API key — safe to paste in a ticket. Nobody else advertises this.</p>
-          <div class="mini" aria-hidden="true">
-            <div class="mbar"><span class="mp">● live</span><span class="mu">ssn_a1f9c3 · streaming</span></div>
-            <div class="mbody"></div>
-          </div>
-        </div>
-
-        <div class="cell half">
-          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v5H4z" stroke="currentColor" stroke-width="1.4"/><path d="M4 12h10v8H4z" stroke="currentColor" stroke-width="1.4"/><path d="M17 12h3v3h-3zM17 17h3v3h-3z" stroke="currentColor" stroke-width="1.4"/></svg></div>
-          <h3>Structured /extract</h3>
-          <p>A URL plus a JSON Schema in, validated JSON out. It renders the page first, retries on a schema miss, and 422s rather than handing you malformed data.</p>
-        </div>
-
-        <div class="cell feature">
-          <div class="ic" aria-hidden="true">
-            <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 2.5 15.4 9l6.6 1.6-4.8 4.6 1.2 6.7L13 18.6 7.6 21.9l1.2-6.7L4 10.6 10.6 9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>Checks that heal themselves</h3>
-          <p>Describe a journey once — &ldquo;sign in, add to basket, confirm the total&rdquo; — and a real browser works out how. After that we repeat it on a schedule with no model involved, so it costs browser-seconds instead of tokens. When the site is rebuilt, the steps are re-derived on their own. When the page still works and the <em>answer</em> changes, that is a finding and we leave the check alone and tell you. Adapting to that would be the one thing a check must never do.</p>
-          <div class="mini" aria-hidden="true">
-            <div class="mbar"><span class="mp">● hourly</span><span class="mu">checkout &middot; total &euro;98.44 &middot; passed</span></div>
-            <div class="mbody"></div>
+          <h3>It repairs itself. It never covers for you.</h3>
+          <p>
+            Nine times out of ten a broken test means somebody renamed a div. We notice
+            that a step can no longer be carried out, work the journey out again, and
+            carry on — you never hear about it.
+          </p>
+          <p>
+            But when every step still works and the page simply <em>says something
+            else</em>, we change nothing and tell you. That is the whole discipline. A
+            check that quietly adapted to the new number would go green over your
+            regression, and you would believe it, because it is a check.
+          </p>
+          <div class="diff" aria-hidden="true">
+            <div class="row2"><span class="lab2">was</span><span class="was">button.btn-primary.checkout</span></div>
+            <div class="row2"><span class="lab2">now</span><span class="now">button[data-test="to-payment"]</span></div>
+            <div class="note">re-derived after a redesign &middot; assertions unchanged &middot; nobody woken</div>
           </div>
         </div>
 
         <div class="cell half">
-          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="5" width="19" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M10 9.5l5 2.5-5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
-          <h3>Recorded and replayable</h3>
-          <p>Capture a whole session and play it back frame by frame afterwards — for the run that failed at 3am with nobody watching. Startup and up, because the frames cost real storage.</p>
+          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 3h9l5 5v13H5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8.5 13h7M8.5 16.5h4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+          <h3>A failure that tells you what happened</h3>
+          <p>
+            Not "red". Which assertion, what it expected, and the words that are on the
+            page instead — with the URL it read them from and a replay of the browser
+            getting there. Enough to know whether to page someone before you open a
+            laptop.
+          </p>
+          <div class="evi" aria-hidden="true">
+            <div class="hd"><span class="x">✗</span><span class="key">plan_price</span></div>
+            <div class="row2"><span class="lab2">expected</span><span class="want">&euro;99</span></div>
+            <div class="row2"><span class="lab2">page says</span><span class="got">&euro;109</span></div>
+            <div class="row2"><span class="lab2">read from</span><span class="where">/pricing &middot; 14:02:11</span></div>
+            <div class="row2"><span class="lab2">replay</span><span class="where">4.2s &middot; 38 frames</span></div>
+          </div>
         </div>
 
         <div class="cell third">
-          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2.4" stroke="currentColor" stroke-width="1.4"/><circle cx="18" cy="6" r="2.4" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="18" r="2.4" stroke="currentColor" stroke-width="1.4"/><path d="M6 8.4v3a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-3M12 13.4v2.2" stroke="currentColor" stroke-width="1.4"/></svg></div>
-          <h3>MCP server, built in</h3>
-          <p>Twelve browser tools for Claude, Cursor and anything that speaks MCP — with descriptions that steer the model to the cheap path first. No integration code.</p>
+          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="4.5" width="19" height="15" rx="2" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></div>
+          <h3>Watch the one that failed</h3>
+          <p>Every run happens in a real browser you can watch live, and a failed one can be replayed frame by frame afterwards — for the 3am break with nobody at a screen.</p>
         </div>
 
         <div class="cell third">
-          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 3.8 8.4 9 10 5.2-1.6 9-5 9-10V6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8.5 12l2.4 2.4L16 9.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <h3>Honest by default</h3>
-          <p>We flag a bot wall instead of returning the interstitial as content. CAPTCHA solving is bring-your-own-key at your provider's wholesale price — no markup, no "evasion-as-a-service".</p>
+          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="10.5" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="15.5" r="1.3" fill="currentColor"/></svg></div>
+          <h3>Behind the login</h3>
+          <p>Most of what matters is past a sign-in. Do it once, keep the session, and every check after that starts already authenticated — no credentials in a task, no login on every run.</p>
         </div>
 
         <div class="cell third">
           <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.3" stroke="currentColor" stroke-width="1.4"/><path d="M3 12h18M12 3c2.5 2.4 3.8 5.6 3.8 9s-1.3 6.6-3.8 9c-2.5-2.4-3.8-5.6-3.8-9S9.5 5.4 12 3z" stroke="currentColor" stroke-width="1.4"/></svg></div>
-          <h3>EU-hosted, no lock-in</h3>
-          <p>Browsers and session data stay inside the European Union. You connect over standard CDP, so there's no proprietary SDK to rewrite if you ever leave.</p>
+          <h3>From where your customers are</h3>
+          <p>Run a check from Germany and the browser's clock, language and IP all agree. The bugs that only happen in one country are the ones nobody finds from the office.</p>
         </div>
 
         <div class="cell third">
           <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
-          <h3>Stable sessions</h3>
-          <p>The browser stays alive between connects — in-memory SPA state and open tabs, not just cookies. Survives our redeploys too.</p>
+          <h3>No model in the loop</h3>
+          <p>A language model works the journey out once. After that it is gone, so a run is deterministic and costs browser-seconds. That is why hourly checks are priced like a rounding error.</p>
+        </div>
+
+        <div class="cell third">
+          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 3.8 8.4 9 10 5.2-1.6 9-5 9-10V6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8.5 12l2.4 2.4L16 9.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>EU, always</h3>
+          <p>Browsers, screenshots and results stay inside the European Union. If your checks run against a product handling personal data, that is one conversation you do not have to have.</p>
         </div>
 
         <div class="cell third">
           <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M3 9h18" stroke="currentColor" stroke-width="1.4"/><path d="M8 14h8M8 17h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-          <h3>A REST surface too</h3>
-          <p>screenshot, pdf, scrape, fetch, search, function, map, crawl, download — for when you don't want to drive a browser at all.</p>
-        </div>
-
-        <div class="cell third">
-          <div class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="12" r="9.3" stroke="currentColor" stroke-width="1.4"/><path d="M7 4.5c3 2 7 2 10 0M7 19.5c3-2 7-2 10 0" stroke="currentColor" stroke-width="1.4"/></svg></div>
-          <h3>Managed proxy pools</h3>
-          <p>Pick a country and the browser's timezone and language follow the exit IP — no New-York clock on a Frankfurt address. Or bring your own, at wholesale.</p>
+          <h3>A browser platform underneath</h3>
+          <p>Checks sit on top of hosted Chromium you can also drive yourself over plain CDP — Playwright, Puppeteer, whatever you already have. It is there when you need it, and there is nothing to learn when you don't.</p>
         </div>
 
       </div>
@@ -599,23 +670,28 @@
   <!-- COMPARISON -->
   <section class="block">
     <div class="wrap">
-      <div class="sec-head"><span class="idx">03</span><h2>where we're different</h2></div>
+      <div class="sec-head"><span class="idx">03</span><h2>versus writing the tests</h2></div>
       <div class="cmp">
         <div class="cmp-wrap">
         <table>
-          <thead><tr><th>&nbsp;</th><th class="us">RunBrowser</th><th>Typical</th></tr></thead>
+          <thead><tr><th>&nbsp;</th><th class="us">RunBrowser</th><th>An end-to-end suite</th></tr></thead>
           <tbody>
-            <tr><td class="q">Billing</td><td class="us">Per second, floored at 10s</td><td class="them">30-second blocks, rounded up</td></tr>
-            <tr><td class="q">Say what you want</td><td class="us"><span class="yes">Plain language, with the evidence</span></td><td class="them">Write the selectors yourself</td></tr>
-            <tr><td class="q">When a site is rebuilt</td><td class="us"><span class="yes">Re-derived automatically</span></td><td class="them">Your script breaks, you fix it</td></tr>
-            <tr><td class="q">Watch a run</td><td class="us"><span class="yes">Live viewer + shareable link</span></td><td class="them">Logs, or nothing</td></tr>
-            <tr><td class="q">Bot walls</td><td class="us">Flagged, not disguised</td><td class="them">Returned as page content</td></tr>
-            <tr><td class="q">Proxies</td><td class="us">Wholesale, or geo-matched pools</td><td class="them">Marked-up per-GB</td></tr>
-            <tr><td class="q">Data residency</td><td class="us"><span class="yes">EU, always</span></td><td class="them">US-default</td></tr>
-            <tr><td class="q">Portability</td><td class="us">Sessions are standard CDP, no SDK to rewrite</td><td class="them">Proprietary client</td></tr>
+            <tr><td class="q">To add one</td><td class="us"><span class="yes">A sentence</span></td><td class="them">An afternoon, and a selector strategy</td></tr>
+            <tr><td class="q">When the UI changes</td><td class="us"><span class="yes">Re-derived, silently</span></td><td class="them">Red until someone fixes it</td></tr>
+            <tr><td class="q">When it really breaks</td><td class="us">The assertion, the page's own words, a replay</td><td class="them">A stack trace and a screenshot</td></tr>
+            <tr><td class="q">Where it runs</td><td class="us">Here, on a schedule</td><td class="them">Your CI, on a push</td></tr>
+            <tr><td class="q">So it catches</td><td class="us"><span class="yes">Your site being broken now</span></td><td class="them">Your branch being broken then</td></tr>
+            <tr><td class="q">Infrastructure</td><td class="us">None</td><td class="them">Runners, browsers, minutes, a queue</td></tr>
+            <tr><td class="q">Data residency</td><td class="us"><span class="yes">EU, always</span></td><td class="them">Wherever the runner is</td></tr>
           </tbody>
         </table>
         </div>
+        <p class="code-note" style="margin-top:22px">
+          Not a replacement for unit tests, and not really a replacement for a CI suite
+          either — those tell you a change is bad before it ships. This tells you the
+          live site is broken now, which is the failure your customers meet and the one
+          a suite on a push cannot see.
+        </p>
       </div>
     </div>
   </section>
@@ -628,47 +704,40 @@
         <div class="plan">
           <span class="pn">Free</span><span class="pp">&euro;0</span>
           <ul>
-            <li><span class="d">›</span><b>3</b> concurrent</li>
-            <li><span class="d">›</span><b>300</b> check runs / mo</li>
+            <li><span class="d">›</span><b>1</b> check</li>
+            <li><span class="d">›</span><b>300</b> runs / mo</li>
+            <li><span class="d">›</span>every <b>2&nbsp;hrs</b>, comfortably</li>
+            <li><span class="d">›</span>viewer + evidence</li>
             <li><span class="d">›</span><b>1&nbsp;hr</b> browser / mo</li>
-            <li><span class="d">›</span><b>3</b> autopilot runs</li>
-            <li><span class="d">›</span><b>1,000</b> fetches</li>
-            <li><span class="d">›</span><b>100</b> searches</li>
-            <li><span class="d">›</span><b>25</b> extracts</li>
           </ul>
         </div>
         <div class="plan">
           <span class="pn">Hobby</span><span class="pp">&euro;19 <small>/mo</small></span>
           <ul>
-            <li><span class="d">›</span><b>10</b> concurrent</li>
-            <li><span class="d">›</span><b>5,000</b> check runs / mo</li>
+            <li><span class="d">›</span><b>10</b> checks</li>
+            <li><span class="d">›</span><b>5,000</b> runs / mo</li>
+            <li><span class="d">›</span>every <b>hour</b>, all ten</li>
+            <li><span class="d">›</span>login sessions + geo</li>
             <li><span class="d">›</span><b>200&nbsp;hrs</b> browser / mo</li>
-            <li><span class="d">›</span><b>20</b> autopilot runs</li>
-            <li><span class="d">›</span><b>5,000</b> fetches</li>
-            <li><span class="d">›</span><b>1,000</b> searches</li>
-            <li><span class="d">›</span><b>100</b> extracts</li>
           </ul>
         </div>
         <div class="plan hot">
           <span class="tag">popular</span>
           <span class="pn">Startup</span><span class="pp">&euro;99 <small>/mo</small></span>
           <ul>
-            <li><span class="d">›</span><b>25</b> concurrent</li>
-            <li><span class="d">›</span><b>20,000</b> check runs / mo</li>
+            <li><span class="d">›</span><b>50</b> checks</li>
+            <li><span class="d">›</span><b>20,000</b> runs / mo</li>
+            <li><span class="d">›</span>every <b>15&nbsp;min</b>, seven of them</li>
+            <li><span class="d">›</span>recorded replays</li>
             <li><span class="d">›</span><b>1,200&nbsp;hrs</b> browser / mo</li>
-            <li><span class="d">›</span><b>50</b> autopilot runs</li>
-            <li><span class="d">›</span><b>25,000</b> fetches</li>
-            <li><span class="d">›</span><b>4,000</b> searches</li>
-            <li><span class="d">›</span><b>600</b> extracts</li>
           </ul>
         </div>
         <div class="plan">
           <span class="pn">Scale</span><span class="pp pp-word">talk to us</span>
           <ul>
-            <li><span class="d">›</span><b>50+</b> concurrent</li>
-            <li><span class="d">›</span><b>100,000</b> check runs / mo</li>
-            <li><span class="d">›</span><b>6,500&nbsp;hrs</b> browser / mo</li>
-            <li><span class="d">›</span><b>250</b> autopilot runs</li>
+            <li><span class="d">›</span><b>250</b> checks</li>
+            <li><span class="d">›</span><b>100,000</b> runs / mo</li>
+            <li><span class="d">›</span>every <b>5&nbsp;min</b>, if you want</li>
             <li><span class="d">›</span>allowances sized to you</li>
             <li><span class="d">›</span>capacity reserved</li>
           </ul>
@@ -678,13 +747,15 @@
       <p class="price-note">
         Check runs are the number to look at, and they are large because a run has no language model in it —
         working out how to do something costs tokens, repeating it costs browser-seconds.
-        Stealth, stable sessions, autopilot and the live viewer are on every plan, free one included. Session
-        recording is the one exception, and we would rather say so than bury it: it is Startup and up, because
-        storing the frames costs us money on every recorded run.
-        Browser time is billed <b>per second</b>, floored at 10s, which works out at roughly
-        <span class="amber">$0.08–0.10 an effective browser-hour</span>. Most services bill in 30-second blocks and round up,
-        so a 3-second job costs 10 seconds here and half a minute there. Proxies stay yours to buy at wholesale — we don't mark them up.
-        Search returns up to 3 results per query on Free, 10 on Hobby and 20 above that.
+        Runs are the number to look at, and they are large because a run has no language model in it: working
+        out how to do something costs tokens, repeating it costs browser-seconds. Every plan — the free one
+        included — gets the live viewer, evidence on every failure, saved login sessions, geo-matched checks
+        and real Chrome with a coherent device profile.
+        <span class="amber">Recorded replays are Startup and up</span>: the one thing tied to a tier rather
+        than sized by an allowance, because storing the frames costs us money on every recorded run and we
+        would rather say so than let you discover it.
+        Underneath, every plan carries the browser platform itself — hosted Chromium over plain CDP, plus
+        <code>/fetch</code>, <code>/search</code> and <code>/extract</code> — billed per second, floored at 10s.
       </p>
     </div>
   </section>
@@ -693,12 +764,12 @@
   <section class="block" id="start">
     <div class="wrap">
       <div class="final">
-        <h2>get a key</h2>
-        <p>Free tier at launch, no card. Point a script at us and open the viewer — you'll see what it does before you trust it with anything.</p>
+        <h2>start checking</h2>
+        <p>Free tier at launch, no card. Write one sentence about your site, watch a real browser prove it, and leave it running.</p>
         <div class="cta-row" style="justify-content:center">
           <a class="btn primary" href="mailto:hi@runbrowser.dev?subject=Early%20access%20-%20runbrowser">Email us <span class="arr">&rarr;</span></a>
           <a class="btn" href="/docs/">Read the docs <span class="arr">&rarr;</span></a>
-          <a class="btn" href="https://github.com/runbrowser-dev/runbrowser">Our Chromium image <span class="arr">&rarr;</span></a>
+          <a class="btn" href="/docs/guide-checks">How checks work <span class="arr">&rarr;</span></a>
         </div>
       </div>
     </div>

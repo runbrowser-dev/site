@@ -551,10 +551,11 @@ writeFileSync(
     title: 'Documentation',
     slug: '',
     toc: [],
-    description: 'Hosted Chromium you drive over CDP. Quickstart, API reference and migration guides.',
+    description: 'Browser checks that heal themselves, on hosted Chromium you can also drive yourself. Quickstart, guides and API reference.',
     body: `    <h1>Documentation</h1>
-    <p class="lede-doc">Hosted Chromium you drive over CDP with Playwright, Puppeteer or
-    anything else that speaks it. For most people the migration is one line.</p>
+    <p class="lede-doc">Describe what your site should do and we check it on a schedule,
+    repairing the journey when your UI moves. Underneath it is hosted Chromium you can also
+    drive yourself over plain CDP.</p>
 
     <div class="code-block">
       <div class="code-bar"><span class="code-lang">typescript</span><button class="copy" type="button" data-code="${escapeHtml(SNIPPET)}">Copy</button></div>
@@ -591,8 +592,12 @@ const full = []
 const llms = [
   '# runbrowser',
   '',
-  '> Hosted Chromium you drive over CDP with Playwright, Puppeteer, or anything else that speaks it.',
-  '> Hosted entirely in the EU. Sessions are billed by the second.',
+  '> Scheduled browser checks: describe in one sentence what your site should do, and a real',
+  '> browser proves it on a schedule. The journey is worked out once by a language model and',
+  '> repeated without one, so runs are deterministic and cheap. A check re-derives itself when',
+  '> the markup moves, and reports — without adapting — when the page still works and the answer',
+  '> changed. Underneath is hosted Chromium drivable over plain CDP with Playwright or Puppeteer.',
+  '> Hosted entirely in the EU.',
   '',
   '## Getting started',
   '',

@@ -17,6 +17,10 @@ import { extname, join, normalize } from 'node:path'
 const PORT = 8899
 const BASE = `http://localhost:${PORT}`
 const PAGES = [
+  // The marketing page was missing from this list for its whole life, which is
+  // the page most likely to be read and the one where a layout break costs the
+  // most. It is checked first now.
+  '/',
   '/docs/',
   '/docs/quickstart',
   '/docs/concepts',

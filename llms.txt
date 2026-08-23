@@ -1,7 +1,11 @@
 # runbrowser
 
-> Hosted Chromium you drive over CDP with Playwright, Puppeteer, or anything else that speaks it.
-> Hosted entirely in the EU. Sessions are billed by the second.
+> Scheduled browser checks: describe in one sentence what your site should do, and a real
+> browser proves it on a schedule. The journey is worked out once by a language model and
+> repeated without one, so runs are deterministic and cheap. A check re-derives itself when
+> the markup moves, and reports — without adapting — when the page still works and the answer
+> changed. Underneath is hosted Chromium drivable over plain CDP with Playwright or Puppeteer.
+> Hosted entirely in the EU.
 
 ## Getting started
 
