@@ -284,8 +284,12 @@ sign-in:</p>
 <p>Refresh it when runs start failing at the login wall — you are restoring the
 client half of a session and the server can still expire it.</p>
 <h2 id="scheduling">Scheduling<a class="anchor" href="#scheduling" aria-label="Link to this section">#</a></h2>
-<p><code>intervalMinutes</code> is floored at 5. Below that a run has not finished before the
-next is due, and the check spends its whole allowance overlapping with itself.</p>
+<p><code>intervalMinutes</code> is floored at 5, on a check or a suite. Below that a run has
+not finished before the next is due, and it spends its whole allowance
+overlapping with itself.</p>
+<p>A check in a suite takes the suite&#39;s cadence; changing the suite&#39;s moves every
+member with it. Otherwise the number on the group would be a promise some of
+its checks did not keep.</p>
 <p>Runs are claimed before they start, so a slow run never gets a second copy
 started underneath it, and a redeploy mid-run costs you that run rather than the
 schedule — the next tick picks it up from the database.</p>
@@ -371,8 +375,14 @@ represent a €0.01 charge without rounding a real one to nothing.</p>
 wall: checks pause, and the check is fine — the month is not.</p>
 <h2 id="suites-and-running-them-after-a-deploy">Suites, and running them after a deploy<a class="anchor" href="#suites-and-running-them-after-a-deploy" aria-label="Link to this section">#</a></h2>
 <p>A flat list stops being readable somewhere around twenty checks. Group them
-into a <strong>suite</strong> — everything that has to work for checkout, or for signup —
-and you can run the whole group at once and get a single result:</p>
+into a <strong>suite</strong> — everything that has to work for checkout, or for signup.</p>
+<p><strong>The schedule belongs to the suite.</strong> Every check in it runs on the suite&#39;s
+cadence, and moving a check into one adopts that cadence. A group of checks
+that belong together almost always wants a single frequency, and saying it once
+on the group is the version somebody can read — &quot;Checkout, every 15 minutes,
+seven checks&quot; answers what runs when in one line. A check outside any suite
+keeps its own, because it has no group to inherit from.</p>
+<p>Then you can run the whole group at once and get a single result:</p>
 <div class="code-block"><div class="code-bar"><span></span><button class="copy" type="button" data-code="Checkout · 6 passed · 1 failed of 7 · 86%
   ✓ Basket accepts a product
   ✓ Basket shows the right total

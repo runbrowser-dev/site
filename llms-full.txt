@@ -1974,8 +1974,13 @@ client half of a session and the server can still expire it.
 
 ## Scheduling
 
-`intervalMinutes` is floored at 5. Below that a run has not finished before the
-next is due, and the check spends its whole allowance overlapping with itself.
+`intervalMinutes` is floored at 5, on a check or a suite. Below that a run has
+not finished before the next is due, and it spends its whole allowance
+overlapping with itself.
+
+A check in a suite takes the suite's cadence; changing the suite's moves every
+member with it. Otherwise the number on the group would be a promise some of
+its checks did not keep.
 
 Runs are claimed before they start, so a slow run never gets a second copy
 started underneath it, and a redeploy mid-run costs you that run rather than the
@@ -2039,8 +2044,16 @@ wall: checks pause, and the check is fine — the month is not.
 ## Suites, and running them after a deploy
 
 A flat list stops being readable somewhere around twenty checks. Group them
-into a **suite** — everything that has to work for checkout, or for signup —
-and you can run the whole group at once and get a single result:
+into a **suite** — everything that has to work for checkout, or for signup.
+
+**The schedule belongs to the suite.** Every check in it runs on the suite's
+cadence, and moving a check into one adopts that cadence. A group of checks
+that belong together almost always wants a single frequency, and saying it once
+on the group is the version somebody can read — "Checkout, every 15 minutes,
+seven checks" answers what runs when in one line. A check outside any suite
+keeps its own, because it has no group to inherit from.
+
+Then you can run the whole group at once and get a single result:
 
 ```
 Checkout · 6 passed · 1 failed of 7 · 86%
