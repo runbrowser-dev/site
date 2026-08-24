@@ -37,6 +37,7 @@ const NAV = [
   ['recipes', 'Recipes'],
   ['guide-autopilot', 'Autopilot'],
   ['guide-checks', 'Checks'],
+  ['guide-azure-devops', 'Azure DevOps'],
   ['guide-sessions', 'Sessions & stable sessions'],
   ['guide-viewer', 'The live viewer'],
   ['guide-extract', 'Structured extraction'],
@@ -56,6 +57,7 @@ const NAV = [
 const GUIDES = [
   ['guide-autopilot', 'Autopilot'],
   ['guide-checks', 'Checks'],
+  ['guide-azure-devops', 'Azure DevOps'],
   ['guide-sessions', 'Sessions & stable sessions'],
   ['guide-viewer', 'The live viewer'],
   ['guide-extract', 'Structured extraction'],
@@ -584,6 +586,7 @@ const BLURB = {
   errors: 'Every status code and error code the API returns, with cause, fix, and whether it is worth retrying.',
   mcp: 'The hosted MCP server: browser tools for Claude, Cursor and other MCP clients.',
   'guide-autopilot': 'Describe a task in plain language: what comes back, how to turn it into a pass/fail check, and where it struggles.',
+  'guide-azure-devops': 'Run checks from an Azure pipeline, and turn existing Test Plans into checks — including what cannot be automated and why.',
   'guide-checks': 'Scheduled browser journeys that heal themselves when a site is rebuilt and report when it actually breaks.',
 }
 

@@ -26,6 +26,7 @@ const PAGES = [
   '/docs/concepts',
   '/docs/guide-autopilot',
   '/docs/guide-checks',
+  '/docs/guide-azure-devops',
   '/docs/api-reference',
   '/docs/errors',
   '/docs/mcp',

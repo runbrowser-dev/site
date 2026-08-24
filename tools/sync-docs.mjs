@@ -18,6 +18,7 @@ const PUBLIC_DOCS = [
   'concepts.md',
   'guide-autopilot.md',
   'guide-checks.md',
+  'guide-azure-devops.md',
   'recipes.md',
   'guide-sessions.md',
   'guide-viewer.md',

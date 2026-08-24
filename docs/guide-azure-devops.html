@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Device profiles — runbrowser docs</title>
-<meta name="description" content="Every browser we hand you presents as a real, consistent device — a user agent, platform, GPU, fonts, timezone and hardware signals that all agree with eac">
+<title>Azure DevOps — runbrowser docs</title>
+<meta name="description" content="Two halves, useful separately: run your checks from a pipeline, and turn the test plans you already have into checks.">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -43,14 +43,14 @@
     <div class="nav-links">
         <a class="nav-link " href="/docs/guide-autopilot">Autopilot</a>
         <a class="nav-link " href="/docs/guide-checks">Checks</a>
-        <a class="nav-link " href="/docs/guide-azure-devops">Azure DevOps</a>
+        <a class="nav-link active" href="/docs/guide-azure-devops">Azure DevOps</a>
         <a class="nav-link " href="/docs/guide-sessions">Sessions &amp; stable sessions</a>
         <a class="nav-link " href="/docs/guide-viewer">The live viewer</a>
         <a class="nav-link " href="/docs/guide-extract">Structured extraction</a>
         <a class="nav-link " href="/docs/guide-crawling">Crawling a site</a>
         <a class="nav-link " href="/docs/guide-capture">Screenshots &amp; PDFs</a>
         <a class="nav-link " href="/docs/guide-proxies">Proxies &amp; geo-targeting</a>
-        <a class="nav-link active" href="/docs/guide-device-profile">Device profiles</a>
+        <a class="nav-link " href="/docs/guide-device-profile">Device profiles</a>
         <a class="nav-link " href="/docs/guide-unblocking">Getting through walls</a>
     </div>
 
@@ -150,100 +150,112 @@
     </div>
   </nav>
   <main class="prose">
-    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Device profiles</span></div>
-<h1 id="device-profiles">Device profiles</h1>
-<p>Every browser we hand you presents as a real, consistent device — a user
-agent, platform, GPU, fonts, timezone and hardware signals that all agree with
-each other, the way a genuine machine does. There&#39;s nothing to switch on; it&#39;s
-the default.</p>
-<p>This matters for one practical reason. Legitimate automation gets misclassified
-when its browser looks like a bare headless server in a datacenter: your uptime
-monitor, your integration tests, your price checks, your own site&#39;s
-accessibility crawl all get wrongly blocked or quietly served degraded content.
-A coherent profile is about your work not being mistaken for something it isn&#39;t
-— reliability, not disguise.</p>
-<h2 id="why-a-profile-has-to-be-coherent-not-just-present">Why a profile has to be <em>coherent</em>, not just present<a class="anchor" href="#why-a-profile-has-to-be-coherent-not-just-present" aria-label="Link to this section">#</a></h2>
-<p>Most setups change the user agent and stop there. The trouble is that a modern
-site doesn&#39;t read one value — it cross-checks several, and inconsistency between
-any two is the cheapest possible signal that something is off. A browser
-claiming one operating system in its user agent while its platform, GPU string
-and HTTP headers say another isn&#39;t a better disguise than a plain headless
-browser; it&#39;s a worse one, because now it looks like a machine actively
-misrepresenting itself.</p>
-<p>So the whole profile agrees with itself, in the places that are easy to forget:</p>
+    <div class="breadcrumbs"><a href="/docs/">Docs</a><span>/</span><span>Azure DevOps</span></div>
+<h1 id="azure-devops">Azure DevOps</h1>
+<p>Two halves, useful separately: run your checks from a pipeline, and turn the
+test plans you already have into checks.</p>
+<h2 id="run-checks-from-a-pipeline">Run checks from a pipeline<a class="anchor" href="#run-checks-from-a-pipeline" aria-label="Link to this section">#</a></h2>
+<div class="code-block"><div class="code-bar"><span class="code-lang">yaml</span><button class="copy" type="button" data-code="- task: RunBrowserChecks@0
+  inputs:
+    suiteId: '00000000-0000-0000-0000-000000000000'
+    apiKey: '$(RUNBROWSER_API_KEY)'   # a secret variable, never inline">Copy</button></div><pre class="language-yaml"><code>- task: RunBrowserChecks@0
+  inputs:
+    suiteId: '00000000-0000-0000-0000-000000000000'
+    apiKey: '$(RUNBROWSER_API_KEY)'   # a secret variable, never inline</code></pre></div><p>The step runs every check in the suite against the deployed site and fails the
+build if one does not hold. It is synchronous, so it takes as long as the
+slowest few checks and there is nothing to poll — a step that returned
+immediately and passed would be a step that can never fail.</p>
+<p>Every check runs even after one fails. Stopping at the first would report one
+problem when there were four, and how bad it is is what you decide a rollback
+on.</p>
+<h2 id="import-test-plans">Import test plans<a class="anchor" href="#import-test-plans" aria-label="Link to this section">#</a></h2>
+<p>Connect a project under <strong>Settings → Azure DevOps</strong> with a personal access
+token carrying <strong>Test Management (read &amp; write)</strong> and <strong>Work Items (read)</strong>.
+The token is checked when you save it, so a typo is caught then rather than by
+a scheduled import failing quietly at 3am.</p>
+<p>A manual test case is already the shape a check takes:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Azure DevOps</th>
+<th>Here</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Test Suite</td>
+<td>Suite</td>
+</tr>
+<tr>
+<td>Test Case</td>
+<td>Check</td>
+</tr>
+<tr>
+<td>Step actions, in order</td>
+<td>the task</td>
+</tr>
+<tr>
+<td>Step <em>Expected Result</em></td>
+<td>one entry on the checklist</td>
+</tr>
+<tr>
+<td>Suite run</td>
+<td>Test Run, posted back</td>
+</tr>
+</tbody></table>
+</div><p>That checklist is better than what a check normally gets. Left alone, a check
+pins whatever the first run could verify on the page. An imported case states
+what a person decided ought to be true — the difference between &quot;the page still
+says this&quot; and &quot;the page says the right thing&quot;.</p>
+<p>Results are posted back as a Test Run, so outcomes land on the plan your team
+already looks at rather than in a second tool.</p>
+<h3 id="what-gets-skipped-and-why">What gets skipped, and why<a class="anchor" href="#what-gets-skipped-and-why" aria-label="Link to this section">#</a></h3>
+<p>Not every manual case can be a browser check, and pretending otherwise produces
+a green that proves nothing. These are skipped, and each one is named:</p>
 <ul>
-<li><strong>Across HTTP and JavaScript.</strong> The client-hint request headers
-(<code>sec-ch-ua</code>, <code>sec-ch-ua-platform</code>) are corrected at the network layer, so
-what the server sees in the headers matches what a script reads from
-<code>navigator</code>. These headers are emitted below the page — no amount of
-in-page JavaScript reaches them — so a profile that only patches <code>navigator</code>
-disagrees with its own request headers.</li>
-<li><strong>Inside Web Workers.</strong> A single <code>new Worker()</code> opens a fresh realm that
-page-level patches never touch, and a worker&#39;s <code>navigator</code> and <code>OffscreenCanvas</code>
-report the raw host. It&#39;s the most common place a profile leaks — and the
-profile is carried into worker realms so it doesn&#39;t.</li>
-<li><strong>In the GPU string, the fonts, the screen, the media devices.</strong> A window
-larger than its screen, or a desktop with no audio device, is a contradiction
-on its own. Each of those is made consistent.</li>
+<li><strong>A step needing something outside a browser</strong> — reading an inbox, checking a
+database row, phoning someone.</li>
+<li><strong>No expected results anywhere</strong> — there would be nothing to check.</li>
+<li><strong>No steps at all</strong> — a title is not a test case.</li>
 </ul>
-<h2 id="stable-per-session-unique-per-customer">Stable per session, unique per customer<a class="anchor" href="#stable-per-session-unique-per-customer" aria-label="Link to this section">#</a></h2>
-<p>Two properties that are easy to get backwards, and that we get right:</p>
-<p><strong>Stable, not shimmering.</strong> A real machine produces the <em>same</em> canvas and audio
-fingerprint every time you read it. A profile that randomises on every read is,
-paradoxically, easier to flag — nothing real changes between two reads a
-millisecond apart. Ours is fixed for the life of a session, so it reads as one
-consistent device.</p>
-<p><strong>Unique per session.</strong> That fixed identity is seeded per browser, so no two of
-our customers share a fingerprint. This is a fairness and reliability property
-as much as anything: your sessions aren&#39;t clustered with a stranger&#39;s, and one
-account behaving badly can&#39;t get an identity <em>you</em> depend on flagged. It&#39;s the
-fingerprint equivalent of not sharing an IP.</p>
-<h2 id="locale-that-matches-the-exit">Locale that matches the exit<a class="anchor" href="#locale-that-matches-the-exit" aria-label="Link to this section">#</a></h2>
-<p>When you select a <a href="/docs/guide-proxies">proxy country</a>, the browser&#39;s timezone
-and <code>Accept-Language</code> follow the exit IP. A connection leaving Germany while the
-clock says New York is exactly the kind of internal contradiction the rest of
-the profile works to avoid, so the locale moves with the address automatically.</p>
-<h2 id="where-the-honesty-lives">Where the honesty lives<a class="anchor" href="#where-the-honesty-lives" aria-label="Link to this section">#</a></h2>
-<p>A coherent profile makes a real browser look like a real browser. It is not,
-and we don&#39;t market it as, a way around the things that are meant to stop you:</p>
+<p>A skipped case is reported as skipped. It is never imported and quietly passed.</p>
+<p>A case we ran but could not carry out comes back to Azure as <strong>NotApplicable</strong>,
+not Failed. It did not find a bug, and one red case for something your software
+did correctly is enough for a team to stop believing the rest of the run.</p>
+<h3 id="things-worth-knowing">Things worth knowing<a class="anchor" href="#things-worth-knowing" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><strong>A CAPTCHA still needs solving.</strong> A challenge you&#39;re explicitly asked to
-complete is a different problem from looking like a genuine browser. Solving
-is bring-your-own solver key — see <a href="/docs/concepts#captchas">CAPTCHAs</a>.</li>
-<li><strong>IP reputation is separate.</strong> Many sites decide at the edge, on the address,
-before any page script runs. That&#39;s a <a href="/docs/guide-proxies">proxy</a> question,
-not a profile one.</li>
-<li><strong>A site&#39;s terms still apply.</strong> We provide per-session attribution and an
-operator kill switch precisely so the platform stays a good citizen; respect
-<code>robots.txt</code> and the terms of the sites you visit.</li>
+<li>Manual cases rarely carry a URL — the tester knew the environment — so a
+<strong>base URL</strong> on the connection is prepended to every imported task.</li>
+<li>A case that depends on state left by an earlier case will not work alone.</li>
+<li>Parameterised cases import as one check against the first iteration.
+Data-driven expansion is not done yet.</li>
+<li>Re-importing a suite <strong>updates</strong> rather than duplicates, and re-derives the
+steps: a case whose wording changed is a case whose journey may have.</li>
 </ul>
-<p>And we don&#39;t hand you a bot wall dressed up as content. <code>/v1/fetch</code> and
-<code>/smart-scrape</code> tell you when a page is a challenge rather than the data you
-asked for, so you can react instead of parsing an interstitial as if it were
-real:</p>
-<div class="code-block"><div class="code-bar"><span class="code-lang">JSON</span><button class="copy" type="button" data-code="{ &quot;status&quot;: 403, &quot;blocked&quot;: true, &quot;blockProvider&quot;: &quot;cloudflare&quot;, &quot;body&quot;: &quot;…&quot; }">Copy</button></div><pre class="language-json"><code><span class="token punctuation">{</span> <span class="token property">"status"</span><span class="token operator">:</span> <span class="token number">403</span><span class="token punctuation">,</span> <span class="token property">"blocked"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property">"blockProvider"</span><span class="token operator">:</span> <span class="token string">"cloudflare"</span><span class="token punctuation">,</span> <span class="token property">"body"</span><span class="token operator">:</span> <span class="token string">"…"</span> <span class="token punctuation">}</span></code></pre></div><p>That&#39;s the point of the whole thing: a browser that behaves like a real one, and
-tells you the truth when a site pushes back.</p>
-<p>See also: <a href="/docs/guide-proxies">Proxies &amp; geo-targeting</a> for the address half of
-the problem, which is usually the half that actually decides access.</p>
+<h2 id="buying-through-azure">Buying through Azure<a class="anchor" href="#buying-through-azure" aria-label="Link to this section">#</a></h2>
+<p>The offer can be bought through Azure Marketplace, which for most enterprises
+matters more than it sounds: marketplace-billed SaaS is MACC-eligible, so the
+purchase draws down an Azure commitment your organisation has already made
+rather than needing a new supplier and a new budget line.</p>
 
     <nav class="pager">
-      <a class="prev" href="/docs/guide-proxies"><span>Previous</span>Proxies &amp; geo-targeting</a>
-      <a class="next" href="/docs/guide-unblocking"><span>Next</span>Getting through walls</a>
+      <a class="prev" href="/docs/guide-checks"><span>Previous</span>Checks</a>
+      <a class="next" href="/docs/guide-sessions"><span>Next</span>Sessions &amp; stable sessions</a>
     </nav>
     <hr>
     <p class="foot">
       Something wrong, missing, or just annoying here?
-      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Device%20profiles">Tell us</a> —
+      <a href="mailto:hi@runbrowser.dev?subject=Docs%20feedback%3A%20Azure%20DevOps">Tell us</a> —
       we'd rather fix it than have you work around it.
     </p>
-    <p class="updated">Last updated 2026-08-15</p>
+    <p class="updated">Last updated 2026-08-24</p>
   </main>
   <aside class="toc">
     <span class="toc-title">On this page</span>
-    <a class="toc-2" href="#why-a-profile-has-to-be-coherent-not-just-present">Why a profile has to be coherent, not just present</a>
-    <a class="toc-2" href="#stable-per-session-unique-per-customer">Stable per session, unique per customer</a>
-    <a class="toc-2" href="#locale-that-matches-the-exit">Locale that matches the exit</a>
-    <a class="toc-2" href="#where-the-honesty-lives">Where the honesty lives</a>
+    <a class="toc-2" href="#run-checks-from-a-pipeline">Run checks from a pipeline</a>
+    <a class="toc-2" href="#import-test-plans">Import test plans</a>
+    <a class="toc-3" href="#what-gets-skipped-and-why">What gets skipped, and why</a>
+    <a class="toc-3" href="#things-worth-knowing">Things worth knowing</a>
+    <a class="toc-2" href="#buying-through-azure">Buying through Azure</a>
   </aside>
 </div>
 <script src="/assets/docs.js" defer></script>

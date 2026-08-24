@@ -14,6 +14,7 @@
 - [Recipes](https://runbrowser.dev/docs/recipes.md): Recipes
 - [Autopilot](https://runbrowser.dev/docs/guide-autopilot.md): Describe a task in plain language: what comes back, how to turn it into a pass/fail check, and where it struggles.
 - [Checks](https://runbrowser.dev/docs/guide-checks.md): Scheduled browser journeys that heal themselves when a site is rebuilt and report when it actually breaks.
+- [Azure DevOps](https://runbrowser.dev/docs/guide-azure-devops.md): Run checks from an Azure pipeline, and turn existing Test Plans into checks — including what cannot be automated and why.
 - [Sessions & stable sessions](https://runbrowser.dev/docs/guide-sessions.md): Sessions & stable sessions
 - [The live viewer](https://runbrowser.dev/docs/guide-viewer.md): The live viewer
 - [Structured extraction](https://runbrowser.dev/docs/guide-extract.md): Structured extraction
