@@ -245,16 +245,19 @@ Operational&quot;</em> pins the words that were actually there — <code>All Sys
 pins the price. This is a regression check: the question is not &quot;is this value
 correct&quot; but &quot;does the page still say what it said when this passed&quot;.</p>
 <p>Two consequences worth knowing.</p>
-<p><strong>It watches the value where it found it.</strong> A value is pinned together with
-the words it sat beside, and every run looks for it <em>there</em> rather than
-anywhere on the page. On a status page listing a dozen services, a check on one
-of them is anchored to that row — so it fails when that row changes and stays
-quiet when a different one does.</p>
-<p>This matters more than it sounds. Without it, a check watching one service for
-&quot;Operational&quot; is satisfied by any <em>other</em> service being operational, and goes on
-passing straight through the outage it was set up to catch. <strong>Check</strong> → <strong>What
-it watches</strong> shows what each value is anchored to, so you can see what a check
-is really looking at before you trust it.</p>
+<p><strong>It watches the element, not the words.</strong> A value is tied to the element it
+was read from — the status beside the row labelled <em>Claude Code</em>, say — and
+every run finds that element again in the page&#39;s accessibility structure and
+reads what it says now. A failure tells you exactly that: <em>span &quot;Claude Code&quot;
+now reads &quot;Major Outage&quot; instead of &quot;Operational&quot;</em>.</p>
+<p>This matters more than it sounds. A check that merely searched the page for
+&quot;Operational&quot; would be satisfied by any <em>other</em> service being operational, and
+would pass straight through the outage it was set up to catch. Reading the
+element cannot be fooled that way: the same word appearing eighteen times
+elsewhere on the page changes nothing about what this element says. <strong>Check</strong> →
+<strong>What it watches</strong> shows the element each value is tied to. Where a page&#39;s
+structure offers no usable element, the check falls back to watching the words
+in place, and says so.</p>
 <p><strong>Nothing is kept unless it can fail.</strong> Before a value is pinned, the page is
 rewritten with that value removed and the assertion is run against it. If it
 still holds, it is satisfied by a page where the fact is <em>false</em> — so it is not

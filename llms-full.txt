@@ -2022,17 +2022,20 @@ correct" but "does the page still say what it said when this passed".
 
 Two consequences worth knowing.
 
-**It watches the value where it found it.** A value is pinned together with
-the words it sat beside, and every run looks for it *there* rather than
-anywhere on the page. On a status page listing a dozen services, a check on one
-of them is anchored to that row — so it fails when that row changes and stays
-quiet when a different one does.
+**It watches the element, not the words.** A value is tied to the element it
+was read from — the status beside the row labelled *Claude Code*, say — and
+every run finds that element again in the page's accessibility structure and
+reads what it says now. A failure tells you exactly that: *span "Claude Code"
+now reads "Major Outage" instead of "Operational"*.
 
-This matters more than it sounds. Without it, a check watching one service for
-"Operational" is satisfied by any *other* service being operational, and goes on
-passing straight through the outage it was set up to catch. **Check** → **What
-it watches** shows what each value is anchored to, so you can see what a check
-is really looking at before you trust it.
+This matters more than it sounds. A check that merely searched the page for
+"Operational" would be satisfied by any *other* service being operational, and
+would pass straight through the outage it was set up to catch. Reading the
+element cannot be fooled that way: the same word appearing eighteen times
+elsewhere on the page changes nothing about what this element says. **Check** →
+**What it watches** shows the element each value is tied to. Where a page's
+structure offers no usable element, the check falls back to watching the words
+in place, and says so.
 
 **Nothing is kept unless it can fail.** Before a value is pinned, the page is
 rewritten with that value removed and the assertion is run against it. If it
