@@ -2034,11 +2034,19 @@ passing straight through the outage it was set up to catch. **Check** → **What
 it watches** shows what each value is anchored to, so you can see what a check
 is really looking at before you trust it.
 
-**Pin something stable.** If the run pins a value that changes on its own — an
-uptime percentage, a timestamp, a "3 minutes ago" — the next run fails, and it
-was your check that changed rather than the site. Reword the task to name the
-thing you actually care about. The failure says exactly which value moved, so
-this takes one look to spot.
+**Nothing is kept unless it can fail.** Before a value is pinned, the page is
+rewritten with that value removed and the assertion is run against it. If it
+still holds, it is satisfied by a page where the fact is *false* — so it is not
+an assertion at all, and it is thrown away rather than shipped as a check that
+reports green forever.
+
+**And nothing is kept unless it holds.** The first run learns the steps and
+then immediately repeats them. Values that read differently seconds apart — an
+uptime figure, an incident banner, a relative time — are dropped, and the check
+tells you which. If nothing survives, it is an error rather than a check.
+
+Between them: a check that exists can fail, and a check that exists passes on a
+page nobody changed. Neither costs a language model; both cost seconds.
 
 **A run that verifies nothing is an error, not a pass.** If the steps work but
 nothing it reported could be found on any page it read, the check is reported
