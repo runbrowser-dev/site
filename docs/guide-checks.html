@@ -245,6 +245,16 @@ Operational&quot;</em> pins the words that were actually there — <code>All Sys
 pins the price. This is a regression check: the question is not &quot;is this value
 correct&quot; but &quot;does the page still say what it said when this passed&quot;.</p>
 <p>Two consequences worth knowing.</p>
+<p><strong>It watches the value where it found it.</strong> A value is pinned together with
+the words it sat beside, and every run looks for it <em>there</em> rather than
+anywhere on the page. On a status page listing a dozen services, a check on one
+of them is anchored to that row — so it fails when that row changes and stays
+quiet when a different one does.</p>
+<p>This matters more than it sounds. Without it, a check watching one service for
+&quot;Operational&quot; is satisfied by any <em>other</em> service being operational, and goes on
+passing straight through the outage it was set up to catch. <strong>Check</strong> → <strong>What
+it watches</strong> shows what each value is anchored to, so you can see what a check
+is really looking at before you trust it.</p>
 <p><strong>Pin something stable.</strong> If the run pins a value that changes on its own — an
 uptime percentage, a timestamp, a &quot;3 minutes ago&quot; — the next run fails, and it
 was your check that changed rather than the site. Reword the task to name the

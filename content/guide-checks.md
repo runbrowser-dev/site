@@ -90,6 +90,18 @@ correct" but "does the page still say what it said when this passed".
 
 Two consequences worth knowing.
 
+**It watches the value where it found it.** A value is pinned together with
+the words it sat beside, and every run looks for it *there* rather than
+anywhere on the page. On a status page listing a dozen services, a check on one
+of them is anchored to that row — so it fails when that row changes and stays
+quiet when a different one does.
+
+This matters more than it sounds. Without it, a check watching one service for
+"Operational" is satisfied by any *other* service being operational, and goes on
+passing straight through the outage it was set up to catch. **Check** → **What
+it watches** shows what each value is anchored to, so you can see what a check
+is really looking at before you trust it.
+
 **Pin something stable.** If the run pins a value that changes on its own — an
 uptime percentage, a timestamp, a "3 minutes ago" — the next run fails, and it
 was your check that changed rather than the site. Reword the task to name the
